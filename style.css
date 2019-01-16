@@ -1,0 +1,25 @@
+canvas {
+	border: 2px solid black;
+ 	width: 400px;
+ 	height: 400px;
+ 	position: absolute;
+}
+
+#game_field {
+	/*background-color: #F5F2C6;*/
+}
+
+.hidden_screen {
+	display: none;
+}
+.pause {
+	display: block;
+	
+}
+button {
+	margin: 10px;
+}
+
+h1 {
+	text-align: center;
+}
