@@ -4,7 +4,7 @@ class Python {
 
 		//
 		this.PYTHON_MOVED = "python:draw";
-		// this.PYTHON_GET_POINT = "python:python get point";
+		this.PYTHON_GET_POINT = "python:python get point";
 
 		//
 		this.inputController = inputController;
@@ -66,15 +66,9 @@ class Python {
 
 				scope.checkBonusEats();
 
-				var new_cell = {x: scope.python_body[0].x + scope.python_direction.x, y: scope.python_body[0].y + scope.python_direction.y};
 				if ( scope.python_length == scope.python_body.length ) scope.python_body.pop();
+				var new_cell = {x: scope.python_body[0].x + scope.python_direction.x, y: scope.python_body[0].y + scope.python_direction.y};
 				scope.python_body.unshift( new_cell );
-				// if (scope.python_length > scope.python_body.length) var cell_of_body = scope.python_body[scope.python_body.length - 1]
-				// else var cell_of_body = scope.python_body.pop();
-
-				// cell_of_body.x = scope.python_body[0].x + scope.python_direction.x;
-				// cell_of_body.y = scope.python_body[0].y + scope.python_direction.y;
-				// scope.python_body.unshift(cell_of_body);
 
 				var event = new CustomEvent( scope.PYTHON_MOVED );
   			window.dispatchEvent(event);
@@ -107,14 +101,20 @@ class Python {
 	}
 
 	checkBonusEats() {
-		var x = this.python_body[0].x;
-		var y = this.python_body[0].y;
-
+		var x = this.python_body[0].x + this.python_direction.x;	
+		var y = this.python_body[0].y + this.python_direction.y;	
 		if ( x == this.bonus.x && y == this.bonus.y ) {
 			this.python_length += 1;
 			this.points += this.bonus.point;
 			this.setBonusCoordinates();
+
+			var event = new CustomEvent( this.PYTHON_MOVED );
+			window.dispatchEvent(event);
 		}
+	}
+
+	checkGameOver() {
+
 	}
 	
 }

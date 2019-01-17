@@ -71,9 +71,12 @@ class Visualizer {
 	}
 
 	drawGameCharacters( snake_length ) {
-		var x = this.CELL_WIDTH * this.python.python_head_x;
-		var y = this.CELL_HEIGHT * this.python.python_head_y;
-
+		// BONUS
+		var x = this.python.bonus.x;
+		var y = this.python.bonus.y;
+		this.game_char_context.fillStyle = this.BONUS_COLOR;
+		this.game_char_context.fillRect(this.CELL_WIDTH * x, this.CELL_HEIGHT * y, this.CELL_WIDTH, this.CELL_HEIGHT);
+		//PYTHON	
 		var length = this.python.python_length;
 		this.game_char_context.fillStyle = this.PYTHON_COLOR;
 
@@ -82,12 +85,6 @@ class Visualizer {
 			var y = python.python_body[i].y * this.CELL_HEIGHT;
 			this.game_char_context.fillRect(x, y, this.CELL_WIDTH, this.CELL_HEIGHT);
 		}
-
-		var x = this.python.bonus.x;
-		var y = this.python.bonus.y;
-		this.game_char_context.fillStyle = this.BONUS_COLOR;
-
-		this.game_char_context.fillRect(this.CELL_WIDTH * x, this.CELL_HEIGHT * y, this.CELL_WIDTH, this.CELL_HEIGHT);
 	}
 
 	initMoveAction(data) {
