@@ -28,10 +28,13 @@ class Visualizer {
 
 			this.initGameField();
 			this.drawGameCharacters();
-			// this.drawBonus();
 		};
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
+			this.initMoveAction();
+		}.bind(this));
+
+		window.addEventListener(python.PYTHON_GET_POINT, function() {
 			this.initMoveAction();
 		}.bind(this));
 	}
@@ -80,8 +83,8 @@ class Visualizer {
 			this.game_char_context.fillRect(x, y, this.CELL_WIDTH, this.CELL_HEIGHT);
 		}
 
-		var x = this.python.point_position_x;
-		var y = this.python.point_position_y;
+		var x = this.python.bonus.x;
+		var y = this.python.bonus.y;
 		this.game_char_context.fillStyle = this.BONUS_COLOR;
 
 		this.game_char_context.fillRect(this.CELL_WIDTH * x, this.CELL_HEIGHT * y, this.CELL_WIDTH, this.CELL_HEIGHT);
