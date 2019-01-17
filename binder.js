@@ -2,8 +2,8 @@ var $game_container = $('.game_container');
 
 var config = {
 	
-	cells_w: 20,
-	cells_h: 20,
+	cells_horizontal: 20,
+	cells_vertical: 20,
 	
 	field_width: 400,
 	field_height: 400,

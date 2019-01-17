@@ -168,7 +168,6 @@ class InputController {
   	if( !this.onKeyDown ){
 		  this.onKeyDown = function(event){
 		  	var key_code = event.keyCode;
-		  	console.log(key_code);
 		  	var action = this.actions_by_keycode[key_code];
 		  	this._setActionActive(action, true);
 		  	this._changeKeyPress(key_code, true);

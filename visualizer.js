@@ -15,7 +15,9 @@ class Visualizer {
 		this.python = python;
 
 		//
-		this.PYTHON_COLOR = '#0E0099';
+		this.PYTHON_BODY_COLOR = 'green';
+		this.PYTHON_HEAD_COLOR = 'red';
+
 		this.BONUS_COLOR = '#FDD308';
 		this.CELLS_COLOR = '#E6E6E6';
 
@@ -27,16 +29,13 @@ class Visualizer {
 			this.initGameCharctersCanvas();
 
 			this.initGameField();
-			this.drawGameCharacters();
+			// this.drawGameCharacters();
 		};
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
-			this.initMoveAction();
+			this.MoveAction();
 		}.bind(this));
 
-		window.addEventListener(python.PYTHON_GET_POINT, function() {
-			this.initMoveAction();
-		}.bind(this));
 	}
 
 	initGameCharctersCanvas() {
@@ -76,18 +75,25 @@ class Visualizer {
 		var y = this.python.bonus.y;
 		this.game_char_context.fillStyle = this.BONUS_COLOR;
 		this.game_char_context.fillRect(this.CELL_WIDTH * x, this.CELL_HEIGHT * y, this.CELL_WIDTH, this.CELL_HEIGHT);
+
 		//PYTHON	
 		var length = this.python.python_length;
-		this.game_char_context.fillStyle = this.PYTHON_COLOR;
 
-		for ( var i = 0; i < python.python_body.length; i++ ) {
+		this.game_char_context.fillStyle = this.PYTHON_HEAD_COLOR;
+		var x = python.python_body[0].x * this.CELL_WIDTH;
+		var y = python.python_body[0].y * this.CELL_HEIGHT;
+		this.game_char_context.fillRect(x, y, this.CELL_WIDTH, this.CELL_HEIGHT);
+
+		this.game_char_context.fillStyle = this.PYTHON_BODY_COLOR;
+
+		for ( var i = 1; i < python.python_body.length; i++ ) {
 			var x = python.python_body[i].x * this.CELL_WIDTH;
 			var y = python.python_body[i].y * this.CELL_HEIGHT;
 			this.game_char_context.fillRect(x, y, this.CELL_WIDTH, this.CELL_HEIGHT);
 		}
 	}
 
-	initMoveAction(data) {
+	MoveAction(data) {
 		this.game_char_context.clearRect(0, 0, this.game_characters.width, this.game_characters.height);
 		this.drawGameCharacters();
 	}

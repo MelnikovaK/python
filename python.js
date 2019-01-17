@@ -1,22 +1,21 @@
 class Python {
 
-	constructor(inputController, config, start_pos_x, start_pos_y) {
+	constructor(inputController, config, python_start_x, python_start_y) {
 
 		//
 		this.PYTHON_MOVED = "python:draw";
 		this.PYTHON_GET_POINT = "python:python get point";
+		this.GAME_OVER = "python: game over";
 
 		//
 		this.inputController = inputController;
+		inputController.enabled = false;
 
 		//
 		this.FIELD_WIDTH = config.field_width;
 		this.FIELD_HEIGHT = config.field_height;
 		this.CELL_WIDTH = config.cell_width;
 		this.CELL_HEIGHT = config.cell_height;
-
-		//
-		this.python_body = [];
 		
 		//SNAKE DIRECTIONS
 		this.RIGHT = 'right';
@@ -30,97 +29,164 @@ class Python {
 		this.directions[this.UP] = {x:0,y:-1};
 		this.directions[this.DOWN] = {x:0,y:1};
 
+
+		//
+		this.bonus = {};
+
+		//
+		this.cells_horizontal = config.cells_horizontal || 20;
+		this.cells_vertical = config.cells_vertical || 20;
+		this.max_python_length = config.max_python_length || 3;
+		this.python_body = [];
+		this.python_start_x = python_start_x || 4;
+		this.python_start_y = python_start_y || 3;
+
 		//
 		
-		//GAME PARAMETERS
-		this.points = 0;
-		this.python_length = 3;
-		this.python_direction = this.directions[this.RIGHT];
-
-		if (config) {
-			this.setPythonBody( start_pos_x, start_pos_y );
-			this.setBonusCoordinates();
-		}
-
+		//
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
 		  var dir = this.directions[e.detail];
-		  if( dir ) this.python_direction = dir;
-		  // console.log('dir: ', dir );
+		  if( dir ) {
+		  	var difference_x = this.directions[e.detail].x - this.python_direction.x;
+		  	var difference_y = this.directions[e.detail].y - this.python_direction.y;
+		  	if ( difference_x == 0 || difference_y == 0 ) return;
+		  	this.python_direction = dir;
+		  }
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
 		  this.startGame();
 		}.bind(this));
+
+		window.addEventListener( "screens: game pause" , function () {
+			console.log('pause');
+		  // clearTimeout(this.game_timeout);
+		}.bind(this));
 	}
 
 	startGame(){
+
 		console.log('#START GAME');
 			
 		var scope = this;
 
 		if(!this.gameStep){
 
-			this.gameStep = function(){
-				if ( scope.GameIsOver() ) return;
-				
-				setTimeout( scope.gameStep, 500);
+			this.gameStep = function(){				
 
-				
+				// schedule the next game step
+				scope.game_timeout = setTimeout( scope.gameStep, 500);
 
-				scope.checkBonusEats();
 
-				if ( scope.python_length == scope.python_body.length ) scope.python_body.pop();
-				var new_cell = {x: scope.python_body[0].x + scope.python_direction.x, y: scope.python_body[0].y + scope.python_direction.y};
-				scope.python_body.unshift( new_cell );
+				// move python
+				scope.movePython();
 
+				// check game end
+				if ( scope.isGameOver() ) {
+					scope.gameOver();
+					return;
+				}
+
+				// redraw
 				var event = new CustomEvent( scope.PYTHON_MOVED );
   			window.dispatchEvent(event);
 			};
 		}
 
+		this.points = 0;
+		this.python_direction = this.directions[this.RIGHT];
+		this.resetPyhon();
+		this.generateNewBonus();
+
+		this.inputController.enabled = true;
+
+		if ( this.game_timeout ) clearTimeout(this.game_timeout);
 		this.gameStep();
 	}
 
 
-	setPythonBody( current_pos_x, current_pos_y ) {
-		var position_x = current_pos_x || 4;
-		var position_y = current_pos_y || 3;
+	movePython() {
+		
+		var next_head_position = {
+			x: this.python_body[0].x + this.python_direction.x,
+		  y: this.python_body[0].y + this.python_direction.y
+		};
 
-		for ( var i = 0; i < this.python_length; i++ ) {
-			var coordinates = { x: position_x - i, y: position_y }
-			this.python_body[i] = coordinates;
-		}
-	}
+		this.python_body.unshift( next_head_position );
 
-	setBonusCoordinates() {
-		var min = 1;
-		var max_x = this.FIELD_WIDTH / this.CELL_WIDTH;
-		var max_y = this.FIELD_HEIGHT / this.CELL_HEIGHT;
-		this.bonus = {
-			x: parseInt( Math.random() * (max_x - min) + min ),
-			y: parseInt( Math.random() * (max_y - min) + min ),
-			point : 1
-		}
-	}
-
-	checkBonusEats() {
-		var x = this.python_body[0].x + this.python_direction.x;	
-		var y = this.python_body[0].y + this.python_direction.y;	
-		if ( x == this.bonus.x && y == this.bonus.y ) {
-			this.python_length += 1;
+		// check if bonus is eaten
+		if ( next_head_position.x == this.bonus.x && next_head_position.y == this.bonus.y ) {
 			this.points += this.bonus.point;
-			this.setBonusCoordinates();
+			this.generateNewBonus();
 
-			$(window).trigger(this.PYTHON_GET_POINT);
-			// var event = new CustomEvent( this.PYTHON_MOVED );
-			// window.dispatchEvent(event);
+			var event = new CustomEvent( this.PYTHON_GET_POINT );
+			window.dispatchEvent(event);
+		
+		}else{ // if not
+			
+			this.python_body.pop();
+
+		}
+
+	}
+
+
+	resetPyhon() {
+		var position_x = this.python_start_x;
+		var position_y = this.python_start_y;
+
+		this.python_body.length = 0;
+		for ( var i = 0; i < this.max_python_length; i++ ) {
+			this.python_body[i] = { x: position_x - i, y: position_y };
 		}
 	}
 
-	GameIsOver() {
-		if (this.python_body[0].x == 0 || this.python_body[0].y == 0) return true;
+	generateNewBonus() {
+		var point = 1;
+		var offset = 1;
+		// var max_x = this.FIELD_WIDTH / this.CELL_WIDTH - 1;
+		// var max_y = this.FIELD_HEIGHT / this.CELL_HEIGHT - 1;
+		this.bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
+		this.bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
+		this.bonus.point = 1
+		
+		if ( !this.checkBonusCoordinatesCorrect(this.bonus.x, this.bonus.y) ) this.generateNewBonus();
+		
+	}
+
+	checkBonusCoordinatesCorrect( x, y ) {
+		for (var i = 0; i < this.python_body.length; i++ ) {
+
+			var less_than_x = this.python_body[i].x - 1;
+			var less_than_y = this.python_body[i].y - 1;
+			var bigger_than_x = this.python_body[i].x + 1;
+			var bigger_than_y = this.python_body[i].y + 1; 
+
+			if (less_than_x <= x && less_than_y <= y || bigger_than_x >= x && bigger_than_y >= y)  return false;
+		}
+		return true;
+	}
+
+
+	isGameOver() {
+
+		var python_head = this.python_body[0];
+
+		if( python_head.x < 0 || python_head.x >= this.cells_horizontal || python_head.y < 0 || python_head.y >= this.cells_vertical ) return true;
 		for ( var i = 1; i < this.python_body.length; i++) {
-			if ( this.python_body[0].x == this.python_body[i].x && this.python_body[0].y == this.python_body[i].y ) return true;
+			if ( python_head.x == this.python_body[i].x && python_head.y == this.python_body[i].y ) return true;
 		}
+
 	}
+
+	gameOver(){
+
+		clearTimeout( this.game_timeout );
+		this.inputController.enabled = false;
+
+		var event = new CustomEvent( this.GAME_OVER );
+		window.dispatchEvent(event);
+
+	}
+	
 }
