@@ -130,7 +130,6 @@ class Python {
 
 	}
 
-
 	resetPyhon() {
 		var position_x = this.python_start_x;
 		var position_y = this.python_start_y;
@@ -144,8 +143,6 @@ class Python {
 	generateNewBonus() {
 		var point = 1;
 		var offset = 1;
-		// var max_x = this.FIELD_WIDTH / this.CELL_WIDTH - 1;
-		// var max_y = this.FIELD_HEIGHT / this.CELL_HEIGHT - 1;
 		this.bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
 		this.bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
 		this.bonus.point = 1

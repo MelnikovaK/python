@@ -5,6 +5,8 @@ class Screens {
 		//
 		this.START_GAME = "screens: start game";
 		this.PAUSE = "screens: game pause";
+		this.PLAY = "screens: game play";
+
 
 		//
 		this.$container = $container;
@@ -20,17 +22,7 @@ class Screens {
 
 			this.showScreen('start-screen');
 		}
-
-		// $(window).on('show-screen', function(e,data){
-		// 	this.showScreen( data );
-		// });
-
-		// $(window).on( this.python.PYTHON_GET_POINT, function(){
-		// 	console.log('eaat');
-		// 	var $points = $('.game-screen__points', this.$container);
-		// 	$points.text(this.python.points);s
-		// });
-
+		
 		window.addEventListener( this.python.PYTHON_GET_POINT, function() {
 			var $points = $('.game-screen__points', this.$container);
 			$points.text(this.python.points);
@@ -83,6 +75,12 @@ class Screens {
 		var $screen = this.addScreenTemplate( 'game-screen',
 		`
 			<div class="screen  game-screen">
+				<div class="game-screen__modal-form">
+					<h1> PAUSE </h1>
+					<div>Score: <span class="modal-form__score"></span></div>
+		      <button class="modal-form__button button">Continue</button>
+				</div>
+				<div class="overlay"></div>
 				<div>Points: <span class="game-screen__points">0</span></div>
 				<button class="game-screen__pause button">Pause</button>
 			</div>
@@ -96,8 +94,27 @@ class Screens {
 		this.$game_screen = $('.game-screen');
 
 		var $pause = $('.game-screen__pause', this.$game_screen );
+		var $continue = $('.modal-form__button', this.$game_screen);
+
+		$continue.on('click', function() {
+			$('.game-screen__modal-form').animate({opacity: 0, top: '0%'}, 200,
+				function(){ 
+					$(this).css('display', 'none');
+					$('.overlay').fadeOut(400); 
+				}
+			);
+			var event = new CustomEvent( this.PLAY );
+			window.dispatchEvent(event);
+		});
 
 		$pause.on('click', function() {
+			$('.overlay').fadeIn(400, function(){
+				$('.game-screen__modal-form') 
+					.css('display', 'block')
+					.animate({opacity: 1, top: '10%'}, 200);
+			});
+			$('.modal-form__score', this.$game_screen).text(this.python.points);
+
 			var event = new CustomEvent( this.PAUSE );
 			window.dispatchEvent(event);
 		}.bind(this))
