@@ -9,9 +9,12 @@ canvas {
 	/*background-color: #F5F2C6;*/
 }
 
-.hidden_screen {
-	display: none;
+.screen{
+	position: absolute;
+	top: 0;
+	left: 0;
 }
+
 .pause {
 	display: block;
 	

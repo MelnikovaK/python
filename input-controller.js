@@ -172,7 +172,6 @@ class InputController {
 		  	var action = this.actions_by_keycode[key_code];
 		  	this._setActionActive(action, true);
 		  	this._changeKeyPress(key_code, true);
-  			console.log( key_code );
 		  }.bind(this);
 
 		  this.onKeyUp = function(event){

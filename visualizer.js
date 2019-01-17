@@ -30,14 +30,14 @@ class Visualizer {
 			this.drawBonus();
 		};
 
-		$(window).on( python.PYTHON_MOVED, function(){
+		window.addEventListener(python.PYTHON_MOVED, function() {
 			this.initMoveAction();
 		}.bind(this));
 	}
 
 	initCellSize() {
-		this.CELL_WIDTH = (this.FIELD_WIDTH / 100) * 5;
-    this.CELL_HEIGHT = (this.FIELD_HEIGHT / 100) * 5;
+		this.CELL_WIDTH = ( this.FIELD_WIDTH / 100 ) * 5;
+    this.CELL_HEIGHT = ( this.FIELD_HEIGHT / 100 ) * 5;
 	}
 
 	initGameCharctersCanvas() {
@@ -91,7 +91,7 @@ class Visualizer {
 
 	initMoveAction(data) {
 		this.game_char_context.clearRect(0, 0, this.game_characters.width, this.game_characters.height);
+		this.drawSnake();
 	}
-
 }
 

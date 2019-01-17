@@ -1,18 +1,17 @@
 class Python {
+
 	constructor(inputController, start_pos_x, start_pos_y) {
 
 		//
-		this.PYTHON_MOVED = "python:python moved";
-		this.PYTHON_CHANGE_DIRECTION = "python:python change direstion";
+		this.PYTHON_MOVED = "python:draw";
 		this.PYTHON_GET_POINT = "python:python get point";
 
 		//
 		this.inputController = inputController;
 
 		//
-		this.POINT_X = 0;
-		this.POINT_Y = 0;
-
+		this.point_position_x = 0;
+		this.point_position_y = 0;
 		//
 		this.python_head_x = start_pos_x || 3;
 		this.python_head_y = start_pos_y || 3;
@@ -23,67 +22,61 @@ class Python {
 		this.UP = 'up';
 		this.DOWN = 'down';
 
+		this.directions = {};
+		this.directions[this.RIGHT] = {x:1,y:0};
+		this.directions[this.LEFT] = {x:-1,y:0};
+		this.directions[this.UP] = {x:0,y:-1};
+		this.directions[this.DOWN] = {x:0,y:1};
+
 		//GAME PARAMETERS
 		this.points = 0;
 		this.python_length = 3;
-		this.python_direction = this.RIGHT;
-		this.moveSnake();
+		this.python_direction = this.directions[this.RIGHT];
+		// this.gameStep();
 
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
-		  switch( e.detail ){
-		  	case "left": 
-		  		this.python_direction = this.LEFT
-		  		break;
-		  	case "right":
-		  		this.python_direction = this.RIGHT
-		  		break;
-		  	case "up":
-		  		this.python_direction = this.UP
-		  		break;
-		  	case "down": 
-		  		this.python_direction = this.DOWN
-		  		break;
-	  	}
+		  var dir = this.directions[e.detail];
+		  if( dir ) this.python_direction = dir;
+		  console.log('dir: ', dir );
 		}.bind(this));
 	}
 
-	moveSnake() {
-		setTimeout(function() {
-			this.emitPythonMove();
-	  	this.moveSnake();
-		}.bind(this), 500);
+	startGame(){
+		console.log('#START GAME');
+			
+		var scope = this;
+
+		if(!this.gameStep){
+
+			this.gameStep = function(){
+				// console.log('gameStep: ', scope );
+				
+				setTimeout( scope.gameStep, 500);
+				
+				scope.python_head_x += scope.python_direction.x;
+				scope.python_head_y += scope.python_direction.y;
+
+				var event = new CustomEvent( scope.PYTHON_MOVED );
+  			window.dispatchEvent(event);
+
+			};
+		}
+
+		this.gameStep();
 	}
 
-	emitPythonMove() {
-		switch (this.python_direction) {
-		  case this.RIGHT:
-		    this.python_head_x += 1
-		    break;
-		  case this.LEFT:
-		    this.python_head_x -= 1
-		    break;
-		  case this.UP:
-				this.python_head_y -= 1
-		    break;
-		  case this.DOWN:
-				this.python_head_y += 1
-		    break;
-		};
-		var event = new CustomEvent( this.PYTHON_MOVED );
-  	window.dispatchEvent(event);
-	}
 
 	getBonusX(field_width, cell_width) {
 		var min = 1;
 		var max_x = field_width / cell_width;
-		this.POINT_X = parseInt( Math.random() * (max_x - min) + min );
-		return this.POINT_X;
+		this.point_position_x = parseInt( Math.random() * (max_x - min) + min );
+		return this.point_position_x;
 	}
 
 	getBonusY(field_height, cell_height) {
 		var min = 1;
 		var max_y = field_height / cell_height;
-		this.POINT_Y = parseInt( Math.random() * (max_y - min) + min );
-		return this.POINT_X;
+		this.point_position_y = parseInt( Math.random() * (max_y - min) + min );
+		return this.point_position_y;
 	}
 }
