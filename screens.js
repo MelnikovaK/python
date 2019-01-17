@@ -3,6 +3,9 @@ class Screens {
 	constructor($container, python) {
 
 		//
+		this.START_GAME = "screens: start game";
+
+		//
 		this.$container = $container;
 		this.screens = {};
 
@@ -56,7 +59,6 @@ class Screens {
 		var $start_game_button = $('.start-screen__btn-start-game')
 		$start_game_button.on( 'click', function() {
 			this.showScreen( 'game-screen' );
-			// this.python.moveSnake();
 		}.bind(this) );
 	}
 
@@ -73,8 +75,8 @@ class Screens {
 
 		`,
 			function(){
-				// $(window).trigger('start-game');
-				this.python.startGame();
+				var event = new CustomEvent( this.START_GAME );
+				window.dispatchEvent(event);
 			}.bind(this)
 		);
 		this.$game_screen = $('.game-screen');

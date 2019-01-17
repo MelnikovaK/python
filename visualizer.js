@@ -1,10 +1,12 @@
 class Visualizer {
 
-	constructor($container, python, field_width, field_height) {
+	constructor($container, python, config) {
 
 		//FIELD SIZE
-		this.FIELD_WIDTH = field_width || 400;
-		this.FIELD_HEIGHT = field_height || 400;
+		this.FIELD_WIDTH = config.field_width;
+		this.FIELD_HEIGHT = config.field_height;
+		this.CELL_WIDTH = config.cell_width;
+		this.CELL_HEIGHT = config.cell_height;
 
 		//
 		this.$container = $container;
@@ -20,24 +22,18 @@ class Visualizer {
 		if ( $container ) {
 
 			//
-			this.initCellSize();
 
 			this.addCanvas();
 			this.initGameCharctersCanvas();
 
 			this.initGameField();
-			this.drawSnake();
-			this.drawBonus();
+			this.drawGameCharacters();
+			// this.drawBonus();
 		};
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
 			this.initMoveAction();
 		}.bind(this));
-	}
-
-	initCellSize() {
-		this.CELL_WIDTH = ( this.FIELD_WIDTH / 100 ) * 5;
-    this.CELL_HEIGHT = ( this.FIELD_HEIGHT / 100 ) * 5;
 	}
 
 	initGameCharctersCanvas() {
@@ -71,19 +67,21 @@ class Visualizer {
     for (var y = 1; y < canvas.height; y += this.CELL_HEIGHT) context.strokeRect(0, y, canvas.width, 0.1);
 	}
 
-	drawSnake( snake_length ) {
+	drawGameCharacters( snake_length ) {
 		var x = this.CELL_WIDTH * this.python.python_head_x;
 		var y = this.CELL_HEIGHT * this.python.python_head_y;
 
 		var length = this.python.python_length;
 		this.game_char_context.fillStyle = this.PYTHON_COLOR;
 
-		this.game_char_context.fillRect(x, y, this.CELL_WIDTH * length, this.CELL_HEIGHT);
-	}
+		for ( var i = 0; i < python.python_body.length; i++ ) {
+			var x = python.python_body[i].x * this.CELL_WIDTH;
+			var y = python.python_body[i].y * this.CELL_HEIGHT;
+			this.game_char_context.fillRect(x, y, this.CELL_WIDTH, this.CELL_HEIGHT);
+		}
 
-	drawBonus() {
-		var x = this.python.getBonusX( this.FIELD_WIDTH, this.CELL_WIDTH );
-		var y = this.python.getBonusY( this.FIELD_HEIGHT, this.CELL_HEIGHT);
+		var x = this.python.point_position_x;
+		var y = this.python.point_position_y;
 		this.game_char_context.fillStyle = this.BONUS_COLOR;
 
 		this.game_char_context.fillRect(this.CELL_WIDTH * x, this.CELL_HEIGHT * y, this.CELL_WIDTH, this.CELL_HEIGHT);
@@ -91,7 +89,7 @@ class Visualizer {
 
 	initMoveAction(data) {
 		this.game_char_context.clearRect(0, 0, this.game_characters.width, this.game_characters.height);
-		this.drawSnake();
+		this.drawGameCharacters();
 	}
 }
 

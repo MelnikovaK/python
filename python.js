@@ -1,6 +1,6 @@
 class Python {
 
-	constructor(inputController, start_pos_x, start_pos_y) {
+	constructor(inputController, config, start_pos_x, start_pos_y) {
 
 		//
 		this.PYTHON_MOVED = "python:draw";
@@ -10,11 +10,17 @@ class Python {
 		this.inputController = inputController;
 
 		//
+		this.FIELD_WIDTH = config.field_width;
+		this.FIELD_HEIGHT = config.field_height;
+		this.CELL_WIDTH = config.cell_width;
+		this.CELL_HEIGHT = config.cell_height;
+
+		//
 		this.point_position_x = 0;
 		this.point_position_y = 0;
+
 		//
-		this.python_head_x = start_pos_x || 3;
-		this.python_head_y = start_pos_y || 3;
+		this.python_body = [];
 		
 		//SNAKE DIRECTIONS
 		this.RIGHT = 'right';
@@ -28,16 +34,29 @@ class Python {
 		this.directions[this.UP] = {x:0,y:-1};
 		this.directions[this.DOWN] = {x:0,y:1};
 
+		//
+		
 		//GAME PARAMETERS
 		this.points = 0;
 		this.python_length = 3;
 		this.python_direction = this.directions[this.RIGHT];
 		// this.gameStep();
 
+		if (config) {
+
+			this.setPythonBody( start_pos_x, start_pos_y );
+			this.setBonusX();
+			this.setBonusY();
+		}
+
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
 		  var dir = this.directions[e.detail];
 		  if( dir ) this.python_direction = dir;
 		  console.log('dir: ', dir );
+		}.bind(this));
+
+		window.addEventListener( "screens: start game" , function () {
+		  this.startGame();
 		}.bind(this));
 	}
 
@@ -49,34 +68,46 @@ class Python {
 		if(!this.gameStep){
 
 			this.gameStep = function(){
-				// console.log('gameStep: ', scope );
 				
 				setTimeout( scope.gameStep, 500);
-				
-				scope.python_head_x += scope.python_direction.x;
-				scope.python_head_y += scope.python_direction.y;
+
+				var changed_cell_of_body = scope.python_body.pop();
+				changed_cell_of_body.x = scope.python_body[0].x + scope.python_direction.x;
+				changed_cell_of_body.y = scope.python_body[0].y + scope.python_direction.y;
+				scope.python_body.unshift(changed_cell_of_body);
 
 				var event = new CustomEvent( scope.PYTHON_MOVED );
   			window.dispatchEvent(event);
 
 			};
+
 		}
 
 		this.gameStep();
 	}
 
 
-	getBonusX(field_width, cell_width) {
-		var min = 1;
-		var max_x = field_width / cell_width;
-		this.point_position_x = parseInt( Math.random() * (max_x - min) + min );
-		return this.point_position_x;
+	setPythonBody( current_pos_x, current_pos_y ) {
+		var position_x = current_pos_x || 4;
+		var position_y = current_pos_y || 3;
+
+		for ( var i = 0; i < this.python_length; i++ ) {
+			var coordinates = { x: position_x - i, y: position_y }
+			console.log(coordinates.x)
+			this.python_body[i] = coordinates;
+		}
 	}
 
-	getBonusY(field_height, cell_height) {
+	setBonusX() {
 		var min = 1;
-		var max_y = field_height / cell_height;
-		this.point_position_y = parseInt( Math.random() * (max_y - min) + min );
-		return this.point_position_y;
+		var max_x = this.FIELD_WIDTH / this.CELL_WIDTH;
+		this.point_position_x = parseInt( Math.random() * (max_x - min) + min );
 	}
+
+	setBonusY() {
+		var min = 1;
+		var max_y = this.FIELD_HEIGHT / this.CELL_HEIGHT;
+		this.point_position_y = parseInt( Math.random() * (max_y - min) + min );
+	}
+	
 }

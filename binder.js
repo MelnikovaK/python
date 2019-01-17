@@ -2,12 +2,15 @@ var $game_container = $('.game_container');
 
 var config = {
 	
-	field_width: 400,
-	field_height: 400,
 	cells_w: 20,
 	cells_h: 20,
+	
+	field_width: 400,
+	field_height: 400,
 	cell_width: 400/20,
 	cell_height: 400/20,
+	field_offset_x: 0,
+	field_offset_y: 0,
 
 	input: {
 		keyboard_enabled: true,
@@ -23,7 +26,7 @@ var config = {
 				enabled: true // отключенная активность по умолчанию
 			},
 			"right": {
-				keys: [100,68],
+				keys: [39,68],
 			},
 			"up": {
 				keys: [87, 38],
@@ -53,6 +56,6 @@ let inputController = new InputController( config.input, $game_container[0] );
 
 let python = new Python( inputController, config );
 
-let screens = new Screens($game_container, python);
+let screens = new Screens( $game_container, python );
 
 let visualizer = new Visualizer($game_container, python, config );
