@@ -61,8 +61,11 @@ class Python {
 		if(!this.gameStep){
 
 			this.gameStep = function(){
+				if ( scope.GameIsOver() ) return;
 				
 				setTimeout( scope.gameStep, 500);
+
+				
 
 				scope.checkBonusEats();
 
@@ -108,13 +111,16 @@ class Python {
 			this.points += this.bonus.point;
 			this.setBonusCoordinates();
 
-			var event = new CustomEvent( this.PYTHON_MOVED );
-			window.dispatchEvent(event);
+			$(window).trigger(this.PYTHON_GET_POINT);
+			// var event = new CustomEvent( this.PYTHON_MOVED );
+			// window.dispatchEvent(event);
 		}
 	}
 
-	checkGameOver() {
-
+	GameIsOver() {
+		if (this.python_body[0].x == 0 || this.python_body[0].y == 0) return true;
+		for ( var i = 1; i < this.python_body.length; i++) {
+			if ( this.python_body[0].x == this.python_body[i].x && this.python_body[0].y == this.python_body[i].y ) return true;
+		}
 	}
-	
 }

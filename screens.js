@@ -23,8 +23,9 @@ class Screens {
 		$(window).on('show-screen', function(e,data){
 			this.showScreen( data );
 		});
-		$(window).on( this.python.PYTHON_GET_POINT, function(){
-			console.log('eaat')
+		
+		$(window).on( this.PYTHON_GET_POINT, function(){
+			console.log('eaat');
 			var $points = $('.game-screen__points', this.$game_screen);
 			$points.text(this.python.points);
 		});
