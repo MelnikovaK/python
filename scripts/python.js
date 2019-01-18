@@ -6,6 +6,8 @@ class Python {
 		this.PYTHON_MOVED = "python:draw";
 		this.PYTHON_GET_POINT = "python:python get point";
 		this.GAME_OVER = "python: game over";
+		this.PAUSE = "python: pause active";
+		this.PLAY = "python: pause inactive";
 
 		//
 		this.inputController = inputController;
@@ -24,11 +26,15 @@ class Python {
 		this.DOWN = 'down';
 
 		this.directions = {};
-		this.directions[this.RIGHT] = {x:1,y:0};
-		this.directions[this.LEFT] = {x:-1,y:0};
-		this.directions[this.UP] = {x:0,y:-1};
-		this.directions[this.DOWN] = {x:0,y:1};
+		this.directions[this.RIGHT] = this.directions['swipe-right'] = {x:1,y:0};
+		this.directions[this.LEFT] = this.directions['swipe-left'] = {x:-1,y:0};
+		this.directions[this.UP] = this.directions['swipe-up'] = {x:0,y:-1};
+		this.directions[this.DOWN] = this.directions['swipe-down'] = {x:0,y:1};
 
+		this.inputController_direction = '';
+
+
+		this.pause = false;
 
 		//
 		this.bonus = {};
@@ -41,29 +47,76 @@ class Python {
 		this.python_start_x = python_start_x || 4;
 		this.python_start_y = python_start_y || 3;
 
+
 		//
-		
+		this.checkSizeOfFieldElements();
 		//
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
-		  var dir = this.directions[e.detail];
-		  if( dir ) {
-		  	var difference_x = this.directions[e.detail].x - this.python_direction.x;
-		  	var difference_y = this.directions[e.detail].y - this.python_direction.y;
-		  	if ( difference_x == 0 || difference_y == 0 ) return;
-		  	this.python_direction = dir;
-		  }
+			
+			if ( !this.pause ) {
+				var dir = this.directions[e.detail];
+			  if( dir ) {
+			  	var difference_x = this.directions[e.detail].x - this.python_direction.x;
+			  	var difference_y = this.directions[e.detail].y - this.python_direction.y;
+			  	if ( difference_x == 0 || difference_y == 0 ) return;
+					this.inputController_direction = dir;
+
+			  }
+			}
+
+			switch( e.detail ){
+				case "play":
+					this.setPause( false );
+					break;
+
+				case "pause":
+					this.setPause( true );
+					break;
+			}
+
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
 		  this.startGame();
 		}.bind(this));
 
-		window.addEventListener( "screens: game pause" , function () {
-			console.log('pause');
-		  // clearTimeout(this.game_timeout);
+		window.addEventListener( "screens: game paused" , function () {
+		  this.setPause( true );
 		}.bind(this));
+
+		window.addEventListener( "screens: game playing" , function () {
+		  this.setPause( false );
+		}.bind(this));
+
 	}
 
+	//
+	checkSizeOfFieldElements() {
+
+		if (!this.FIELD_WIDTH) {
+			if (!this.CELL_WIDTH) this.CELL_WIDTH = 20;
+			else this.FIELD_WIDTH = this.FIELD_WIDTH = this.cells_horizontal * this.CELL_WIDTH;
+		}
+
+		if (!this.FIELD_HEIGHT) {
+			if (!this.CELL_HEIGHT) this.CELL_HEIGHT = 20;
+			else this.FIELD_HEIGHT = this.FIELD_HEIGHT = this.cells_vertical * this.CELL_HEIGHT;
+		}
+
+		if (!this.CELL_WIDTH) this.CELL_WIDTH = this.FIELD_WIDTH / this.cells_horizontal;
+		if (!this.CELL_HEIGHT) this.CELL_HEIGHT = this.FIELD_HEIGHT / this.cells_vertical;
+
+		if (this.cells_horizontal != this.FIELD_WIDTH / this.CELL_WIDTH) this.cells_horizontal = this.FIELD_WIDTH / this.CELL_WIDTH;
+		if (this.cells_vertical != this.FIELD_HEIGHT / this.CELL_HEIGHT) this.cells_vertical = this.FIELD_HEIGHT / this.CELL_HEIGHT;
+	}
+
+	//
+	setPause( _paused ){
+		this.pause = _paused;
+		Utils.triggerCustomEvent( window, _paused ? this.PAUSE : this.PLAY );
+	}
+
+	//
 	startGame(){
 
 		console.log('#START GAME');
@@ -76,8 +129,8 @@ class Python {
 
 				// schedule the next game step
 				scope.game_timeout = setTimeout( scope.gameStep, 500);
-
-
+				if ( scope.pause ) return;
+				if (scope.inputController_direction) scope.python_direction = scope.inputController_direction;
 				// move python
 				scope.movePython();
 
@@ -88,13 +141,14 @@ class Python {
 				}
 
 				// redraw
-				var event = new CustomEvent( scope.PYTHON_MOVED );
-  			window.dispatchEvent(event);
+
+				Utils.triggerCustomEvent( window,scope.PYTHON_MOVED );
 			};
 		}
 
 		this.points = 0;
 		this.python_direction = this.directions[this.RIGHT];
+
 		this.resetPyhon();
 		this.generateNewBonus();
 
@@ -119,8 +173,7 @@ class Python {
 			this.points += this.bonus.point;
 			this.generateNewBonus();
 
-			var event = new CustomEvent( this.PYTHON_GET_POINT );
-			window.dispatchEvent(event);
+			Utils.triggerCustomEvent( window, this.PYTHON_GET_POINT );
 		
 		}else{ // if not
 			
@@ -169,9 +222,15 @@ class Python {
 
 		var python_head = this.python_body[0];
 
+		// check bounds
 		if( python_head.x < 0 || python_head.x >= this.cells_horizontal || python_head.y < 0 || python_head.y >= this.cells_vertical ) return true;
+
+		//
 		for ( var i = 1; i < this.python_body.length; i++) {
-			if ( python_head.x == this.python_body[i].x && python_head.y == this.python_body[i].y ) return true;
+			var part = this.python_body[i];
+			if ( python_head.x == part.x && python_head.y == part.y ) {
+				return true;
+			}
 		}
 
 	}
@@ -181,9 +240,7 @@ class Python {
 		clearTimeout( this.game_timeout );
 		this.inputController.enabled = false;
 
-		var event = new CustomEvent( this.GAME_OVER );
-		window.dispatchEvent(event);
-
+		Utils.triggerCustomEvent( window, this.GAME_OVER );
 	}
 	
 }

@@ -21,9 +21,13 @@ class Visualizer {
 		this.BONUS_COLOR = '#FDD308';
 		this.CELLS_COLOR = '#E6E6E6';
 
+		this.cells_horizontal = config.cells_horizontal || 20;
+		this.cells_vertical = config.cells_vertical || 20;
+
 		if ( $container ) {
 
 			//
+			this.checkSizeOfFieldElements();
 
 			this.addCanvas();
 			this.initGameCharctersCanvas();
@@ -36,6 +40,25 @@ class Visualizer {
 			this.MoveAction();
 		}.bind(this));
 
+	}
+
+	checkSizeOfFieldElements() {
+
+		if (!this.FIELD_WIDTH) {
+			if (!this.CELL_WIDTH) this.CELL_WIDTH = 20;
+			else this.FIELD_WIDTH = this.FIELD_WIDTH = this.cells_horizontal * this.CELL_WIDTH;
+		}
+
+		if (!this.FIELD_HEIGHT) {
+			if (!this.CELL_HEIGHT) this.CELL_HEIGHT = 20;
+			else this.FIELD_HEIGHT = this.FIELD_HEIGHT = this.cells_vertical * this.CELL_HEIGHT;
+		}
+
+		if (!this.CELL_WIDTH) this.CELL_WIDTH = this.FIELD_WIDTH / this.cells_horizontal;
+		if (!this.CELL_HEIGHT) this.CELL_HEIGHT = this.FIELD_HEIGHT / this.cells_vertical;
+
+		if (this.cells_horizontal != this.FIELD_WIDTH / this.CELL_WIDTH) this.cells_horizontal = this.FIELD_WIDTH / this.CELL_WIDTH;
+		if (this.cells_vertical != this.FIELD_HEIGHT / this.CELL_HEIGHT) this.cells_vertical = this.FIELD_HEIGHT / this.CELL_HEIGHT;
 	}
 
 	initGameCharctersCanvas() {

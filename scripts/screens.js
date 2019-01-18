@@ -4,8 +4,8 @@ class Screens {
 
 		//
 		this.START_GAME = "screens: start game";
-		this.PAUSE = "screens: game pause";
-		this.PLAY = "screens: game play";
+		this.PAUSE = "screens: game paused";
+		this.PLAY = "screens: game playing";
 
 
 		//
@@ -20,9 +20,11 @@ class Screens {
 			this.initGameScreen();
 			this.initFinishScreen();
 
+			this.initPauseModalWindow();
+
 			this.showScreen('start-screen');
 		}
-		
+
 		window.addEventListener( this.python.PYTHON_GET_POINT, function() {
 			var $points = $('.game-screen__points', this.$container);
 			$points.text(this.python.points);
@@ -32,6 +34,14 @@ class Screens {
 			this.showScreen( 'finish-screen' );
 			var $score = $('.finish-screen__score', this.$container);
 			$score.text(this.python.points);
+		}.bind(this));
+
+		window.addEventListener( this.python.PAUSE, function() {
+			this.gamePaused();
+		}.bind(this))
+
+		window.addEventListener( this.python.PLAY, function() {
+			this.gamePlaying();
 		}.bind(this))
 	}
 
@@ -44,6 +54,21 @@ class Screens {
 ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝╚══════╝
 */
 
+	//
+	gamePaused() {
+		var $modal_window = $('.game-screen__modal-form');
+		var $overlay = $('.overlay');
+		this.showModalWindow( $modal_window, $overlay );
+		$('.modal-form__score').text(this.python.points);
+	}
+
+	gamePlaying() {
+		var $modal_window = $('.game-screen__modal-form');
+		var $overlay = $('.overlay');
+		this.hideModalWindow( $modal_window, $overlay );
+	}
+
+	// 
 	addScreenTemplate( id, template, onScreenShow ){
 		var $el = $(template).appendTo(this.$container);
 		$el.hide();
@@ -54,6 +79,12 @@ class Screens {
 		return $el;
 	}
 
+	addModalTemplate( target, template ) {
+		var $modal = $(template).appendTo(target);
+	}
+
+
+	//
 	initStartScreen() {
 		var $screen = this.addScreenTemplate( 'start-screen',
 		`
@@ -68,56 +99,28 @@ class Screens {
 		this.$start_screen = $( '.start_screen', this.$container );
 	}
 
-
 	//
 	initGameScreen() {
 
 		var $screen = this.addScreenTemplate( 'game-screen',
 		`
 			<div class="screen  game-screen">
-				<div class="game-screen__modal-form">
-					<h1> PAUSE </h1>
-					<div>Score: <span class="modal-form__score"></span></div>
-		      <button class="modal-form__button button">Continue</button>
-				</div>
-				<div class="overlay"></div>
 				<div>Points: <span class="game-screen__points">0</span></div>
-				<button class="game-screen__pause button">Pause</button>
+				<button class="game-screen_pause-btn button">Pause</button>
 			</div>
 
 		`,
 			function(){
-				var event = new CustomEvent( this.START_GAME );
-				window.dispatchEvent(event);
+				Utils.triggerCustomEvent( window, this.START_GAME );
 			}.bind(this)
 		);
 		this.$game_screen = $('.game-screen');
 
-		var $pause = $('.game-screen__pause', this.$game_screen );
-		var $continue = $('.modal-form__button', this.$game_screen);
+		var $pause_button = $('.game-screen_pause-btn', this.$game_screen);
 
-		$continue.on('click', function() {
-			$('.game-screen__modal-form').animate({opacity: 0, top: '0%'}, 200,
-				function(){ 
-					$(this).css('display', 'none');
-					$('.overlay').fadeOut(400); 
-				}
-			);
-			var event = new CustomEvent( this.PLAY );
-			window.dispatchEvent(event);
-		});
-
-		$pause.on('click', function() {
-			$('.overlay').fadeIn(400, function(){
-				$('.game-screen__modal-form') 
-					.css('display', 'block')
-					.animate({opacity: 1, top: '10%'}, 200);
-			});
-			$('.modal-form__score', this.$game_screen).text(this.python.points);
-
-			var event = new CustomEvent( this.PAUSE );
-			window.dispatchEvent(event);
-		}.bind(this))
+		$pause_button.on('click', function() {
+			Utils.triggerCustomEvent( window, this.PAUSE );		
+		}.bind(this));
 
 	}
 
@@ -129,7 +132,6 @@ class Screens {
 			<div class="screen  finish-screen">
 				<h1> Game over </h1>
 				<div>Score: <span class="finish-screen__score"></span></div>
-				<button class="finish-screen__play-again button">Play again</button>
 				<button class="start-game button">Start new game</button>
 			</div>
 
@@ -141,6 +143,44 @@ class Screens {
 		$start_game_button.on( 'click', function() {
 			this.showScreen( 'game-screen' );
 		}.bind(this) );
+	}
+
+
+	//
+	initPauseModalWindow() {
+		var $modal_window = this.addScreenTemplate( this.$game_screen, 
+		`
+			<div class="game-screen__modal-form">
+				<h1> PAUSE </h1>
+				<div>Score: <span class="modal-form__score"></span></div>
+				<button class="modal-form__continue-btn button">Continue</button>
+			</div>
+			<div class="overlay"></div>
+		`
+		);
+
+		var $continue_button = $('.modal-form__continue-btn');
+
+		$continue_button.on('click', function() {
+			Utils.triggerCustomEvent( window, this.PLAY );		
+		}.bind(this));
+	}
+
+	showModalWindow( $modal_window, $overlay ) {
+		$overlay.fadeIn(400, function(){
+			$modal_window 
+				.css('display', 'block')
+				.animate({opacity: 1, top: '10%'}, 200);
+		});
+	}
+
+	hideModalWindow( $modal_window, $overlay ) {
+		$modal_window.animate({opacity: 0, top: '0%'}, 200,
+			function(){ 
+				$(this).css('display', 'none');
+				$overlay.fadeOut(400); 
+			}
+		);
 	}
 
 	//

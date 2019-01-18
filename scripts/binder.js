@@ -34,17 +34,23 @@ var config = {
 			"down": {
 				keys: [83, 40],
 			},
+			"pause": {
+				keys: [32],
+			},
+			"play": {
+				keys: [27],
+			},
 
-			"move-left": { // название активности
+			"swipe-left": { // название активности
 				gesture: ['swipe-left'],
 			},
-			"move-right": {
+			"swipe-right": {
 				gesture: ['swipe-right'],
 			},
-			"move-up": {
+			"swipe-up": {
 				gesture: ['swipe-up'],
 			},
-			"move-down": {
+			"swipe-down": {
 				gesture: ['swipe-down'],
 			},
 		}

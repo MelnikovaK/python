@@ -111,7 +111,6 @@ class InputController {
 	  			this.actions_by_gesture[gesture_name] = action;
 	  		}.bind(this));
 	  	}
-	  	
   	}
   }
 
@@ -225,6 +224,7 @@ class InputController {
 		  	var gesture_name = this.computeGestureName( start_X, start_Y, event.clientX, event.clientY, false );
 		  	if( gesture_name ){
 		  		this.emitMouseActionEvent(this.actions_by_gesture[gesture_name]);
+
 		  	}
 		  	this.removeMouseMoveListeners(target);
 		  }.bind(this);
