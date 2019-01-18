@@ -47,7 +47,6 @@ class Python {
 		this.python_start_x = python_start_x || 4;
 		this.python_start_y = python_start_y || 3;
 
-
 		//
 		this.checkSizeOfFieldElements();
 		//
@@ -89,6 +88,8 @@ class Python {
 		}.bind(this));
 
 	}
+
+	
 
 	//
 	checkSizeOfFieldElements() {

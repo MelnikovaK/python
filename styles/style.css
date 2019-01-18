@@ -50,3 +50,19 @@ h1 {
 	left:0;
 	display:none;
 }
+
+.progressbar_container {
+	height: 22px;
+	border: 1px solid grey;
+	text-align: center;
+	width: 150px;
+	position: absolute;
+}
+.progressbar {
+	position: relative;
+	height: 22px;
+	width: 0px;
+	max-width: 150px;
+	border: 1px solid grey;
+	background: green;
+}

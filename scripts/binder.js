@@ -64,4 +64,4 @@ let python = new Python( inputController, config );
 
 let screens = new Screens( $game_container, python );
 
-let visualizer = new Visualizer($game_container, python, config );
+let visualizer = new PixiVisualizer($game_container, python, config, screens );

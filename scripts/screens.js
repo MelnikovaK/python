@@ -43,6 +43,13 @@ class Screens {
 		window.addEventListener( this.python.PLAY, function() {
 			this.gamePlaying();
 		}.bind(this))
+
+		window.addEventListener( "pixi-visualizer:progressbar_loading", function(e) {
+			var $progressbar = $('.progressbar');
+
+			$progressbar.css('width', ~~(e.detail) + '%');
+
+		}.bind(this))
 	}
 
 	/*
@@ -91,6 +98,9 @@ class Screens {
 			<div class="screen start-screen">
 				<h1> Python </h1>
 				<button class="start-game button">New game</button>
+				<div class="progressbar_container">
+				<div class="progressbar"></div>
+				</div>
 			</div>
 
 		`
