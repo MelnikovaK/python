@@ -6,3 +6,8 @@ window.Utils = new class{
 	}
 
 }
+
+window.Utils.PI2 = Math.PI*2;
+window.Utils.PI_HALF = Math.PI/2;
+window.Utils.DEG2RAD = Math.PI/180;
+window.Utils.RAD2DEG = 180/Math.PI;

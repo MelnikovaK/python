@@ -1,15 +1,8 @@
 {
 	"frames": {
 
-		"snake-head":
-		{
-			"frame": {"x":192,"y":0,"w":64,"h":64},
-			"rotated": false,
-			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-			"sourceSize": {"w":64,"h":64},
-			"pivot": {"x":0.5,"y":0.5}
-		},
+		"head": [3,0,64,64],
+		"tail": [4,3,64,64],
 
 	}
 	

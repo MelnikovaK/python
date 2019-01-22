@@ -26,10 +26,13 @@ class Python {
 		this.DOWN = 'down';
 
 		this.directions = {};
-		this.directions[this.RIGHT] = this.directions['swipe-right'] = {x:1,y:0};
-		this.directions[this.LEFT] = this.directions['swipe-left'] = {x:-1,y:0};
-		this.directions[this.UP] = this.directions['swipe-up'] = {x:0,y:-1};
-		this.directions[this.DOWN] = this.directions['swipe-down'] = {x:0,y:1};
+		this.directions[this.RIGHT] = this.directions['swipe-right'] = {x:1, y:0, rotation: 90 * window.Utils.DEG2RAD};
+		this.directions[this.LEFT] = this.directions['swipe-left'] = {x:-1, y:0, rotation: 270 * window.Utils.DEG2RAD};
+		this.directions[this.UP] = this.directions['swipe-up'] = {x:0, y:-1, rotation: 0};
+		this.directions[this.DOWN] = this.directions['swipe-down'] = {x:0, y:1, rotation: 180 * window.Utils.DEG2RAD};
+
+
+		
 
 		this.inputController_direction = '';
 
@@ -148,10 +151,11 @@ class Python {
 		}
 
 		this.points = 0;
+		this.generateNewBonus();
+
 		this.python_direction = this.directions[this.RIGHT];
 
 		this.resetPyhon();
-		this.generateNewBonus();
 
 		this.inputController.enabled = true;
 
@@ -166,6 +170,7 @@ class Python {
 			x: this.python_body[0].x + this.python_direction.x,
 		  y: this.python_body[0].y + this.python_direction.y
 		};
+
 
 		this.python_body.unshift( next_head_position );
 
@@ -224,10 +229,10 @@ class Python {
 		var python_head = this.python_body[0];
 
 		// check bounds
-		if( python_head.x < 0 || python_head.x >= this.cells_horizontal || python_head.y < 0 || python_head.y >= this.cells_vertical ) return true;
+		if( python_head.x < 1 || python_head.x >= this.cells_horizontal || python_head.y < 1 || python_head.y >= this.cells_vertical ) return true;
 
 		//
-		for ( var i = 1; i < this.python_body.length; i++) {
+		for ( var i = 1; i < this.python_body.length - 1; i++) {
 			var part = this.python_body[i];
 			if ( python_head.x == part.x && python_head.y == part.y ) {
 				return true;
