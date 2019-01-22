@@ -16,13 +16,34 @@ class PixiVisualizer {
 		//
 		this.python = python;
 
+		//
+		this.python_body = [];
 
+		//
+		this.rotation = {}
+		this.rotation[66] = {name: 'straight', turn: 0};
+		this.rotation[24] = {name: 'straight', turn: 1.55};
+		this.rotation[10] = {name: 'curved', turn: 3.15};
+		this.rotation[18] = {name: 'curved', turn: 4.75};
+		this.rotation[72] = {name: 'curved', turn: 1.55};
+		this.rotation[80] = {name: 'curved', turn: 0};
+
+		//
 		this.initPixiApplication();
 		this.loadAssets();
 
-
+		
 		window.addEventListener(python.PYTHON_MOVED, function() {
 			this.moveAction();
+		}.bind(this));
+
+		window.addEventListener( "screens: start game" , function () {
+			this.setBonus();
+		}.bind(this));
+
+		window.addEventListener( python.PYTHON_GET_POINT , function () {
+			this.setBonus();
+			this.pythonGrow();
 		}.bind(this));
 	}
 
@@ -34,15 +55,17 @@ class PixiVisualizer {
 	}
 
 	moveAction() {
-		var head = python.python_body[0];
-		this.head_sprite.x = head.x * this.CELL_WIDTH;
-		this.head_sprite.y = head.y * this.CELL_HEIGHT;
+		var python_body = python.python_body;
+		
+		for ( var i = 0; i < python_body.length; i++ ) {
+			this.python_body[i].x = python_body[i].x * this.CELL_WIDTH;
+			this.python_body[i].y = python_body[i].y * this.CELL_HEIGHT;
+		}
 	}
 
 	loadAssets() {
 		PIXI.loader
 			.add([
-		    // "assets/game.json",
 		    "assets/Ground.png",
 		    "assets/snake-graphics.png",
 		    "assets/Wall.png",
@@ -56,18 +79,12 @@ class PixiVisualizer {
 
 	loadProgressHandler(loader, resource) {
 		Utils.triggerCustomEvent( window, this.PROGRESSBAR_LOADING, loader.progress );
-
-	  console.log("loading: " + resource.url); 
-	  console.log("progress: " + loader.progress + "%");
 	}
 
 
 	setup() {
 		this.createGameField();
- 		this.createSnake();
- 		
-
-		console.log("All files loaded");
+ 		this.createGameCharacters();
 	}
 
 	getSprite( sprite_name, x, y, width, height ){
@@ -76,6 +93,8 @@ class PixiVisualizer {
 		let sprite = new PIXI.Sprite( texture );
 		sprite.width = this.CELL_WIDTH;
 		sprite.height = this.CELL_HEIGHT;
+		sprite.pivot.set(32, 32);
+		sprite.rotation = 1.55;
 		return sprite;
 	}
 
@@ -96,29 +115,39 @@ class PixiVisualizer {
 		}
 	}
 
-	createSnake() {
+	createGameCharacters() {
 		// SNAKE
  		var head = this.head_sprite = this.getSprite( "assets/snake-graphics.png", 3, 0, 64, 64 );
  		this.app.stage.addChild( head );
+ 		this.python_body.push(head);
+
 
  		var straight_body = this.straight_body_sprite = this.getSprite( "assets/snake-graphics.png", 2, 1, 64, 64 );
  		this.app.stage.addChild( straight_body );
+ 		this.python_body.push(straight_body);
 
  		var curved_body = this.curved_body_sprite = this.getSprite( "assets/snake-graphics.png", 0, 0, 64, 64 );
- 		this.app.stage.addChild( curved_body );
 
  		var tail = this.tail_sprite = this.getSprite( "assets/snake-graphics.png", 3, 2, 64, 64 );
  		this.app.stage.addChild( tail );
+ 		this.python_body.push(tail);
+
 
  		//BONUS
- 		var x = this.python.bonus.x;
-		var y = this.python.bonus.y;
-		// console.log(x)
-
-
  		var bonus = this.bonus_sprite = this.getSprite( "assets/snake-graphics.png", 0, 3, 64, 64 );
  		this.app.stage.addChild( bonus );
- 		bonus.x = this.CELL_WIDTH * 2;
+	}
+
+	setBonus() {
+		this.bonus_sprite.x = this.CELL_WIDTH * this.python.bonus.x;
+		this.bonus_sprite.y = this.CELL_HEIGHT * this.python.bonus.y;
+	}
+
+	pythonGrow() {
+		var last_element = this.python_body.pop();
+		this.python_body.push(this.straight_body_sprite, last_element);
+		this.app.stage.addChild( this.straight_body_sprite );
+		console.log(this.app.stage);
 	}
 
 }
