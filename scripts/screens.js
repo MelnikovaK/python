@@ -133,7 +133,7 @@ class Screens {
 		`
 			<div class="screen start-screen">
 				<h1> Python </h1>
-				<button class="start-game button">New game</button>
+				<button class="start-game button" data-show-screen="game-screen">New game</button>
 				</div>
 			</div>
 
@@ -183,10 +183,18 @@ class Screens {
 		);
 		this.$finish_screen = $('.finish-screen');
 		var $start_game_button = $('.start-game', this.$container);
+		
+		this.createEventShowScreen();
+	}
 
-		$start_game_button.on( 'click', function() {
-			this.showScreen( 'game-screen' );
-		}.bind(this) );
+	createEventShowScreen() {
+		var scope = this;
+		var elems_array = $('*[data-show-screen]');
+		elems_array.each(function (index, value) { 
+		  $(this).on('click', function() {
+		  	scope.showScreen($(this).attr('data-show-screen'));
+		  })
+		});
 	}
 
 
