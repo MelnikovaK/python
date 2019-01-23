@@ -113,7 +113,12 @@ class PixiVisualizer {
 			if (i == python_body.length - 1) var next_part = 0;
 			else var next_part = this.getDiffString(python_body[i], python_body[i + 1]);
 
-			this.updateSnakePart(prev_part, next_part, i);
+			var parts = this.getSnakePart(prev_part, next_part);
+
+			var x = parts.coordinates[0];
+			var y = parts.coordinates[1];
+
+			this.setSpriteCoordinates(this.ASSETS_PATH+"snake-graphics.png", this.python_body[i].sprite, x, y);
 		}
 
 	}
@@ -124,18 +129,21 @@ class PixiVisualizer {
 		return diff_x.toString() + diff_y.toString();
 	}
 
-	updateSnakePart(prev_part, next_part, index) {
+	getSnakePart(prev_part, next_part) {
 		var prev = this.parts_indexes[prev_part] || 0;
 		var next = this.parts_indexes[next_part] || 0;
-		console.log(prev, next)
 
+		return this.snake_parts[this.parts_indexes[prev_part] + next];
 
-		var x = this.snake_parts[this.parts_indexes[prev_part] + next].coordinates[0];
-		var y = this.snake_parts[this.parts_indexes[prev_part] + next].coordinates[1];
-
-		this.setSpriteCoordinates(this.ASSETS_PATH+"snake-graphics.png", this.python_body[index].sprite, x, y);
+		// var x = this.snake_parts[this.parts_indexes[prev_part] + next].coordinates[0];
+		// var y = this.snake_parts[this.parts_indexes[prev_part] + next].coordinates[1];
+		// if ( update ) this.setSpriteCoordinates(this.ASSETS_PATH+"snake-graphics.png", this.python_body[index].sprite, x, y);
+		// else {
+		// 	var body_part =  this.getSprite( this.ASSETS_PATH+"snake-graphics.png", x*this.SPRITE_WIDTH, y*this.SPRITE_HEIGHT, 64, 64 );
+ 	// 		this.app.stage.addChild(body_part);
+ 	// 		return body_part;
+		// }
 	}
-
 
 	loadAssets() {
 
@@ -166,10 +174,7 @@ class PixiVisualizer {
 		 		scope.visualizeParticles();
 		 		Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE );
 			}
-
 	}
-
-	
 
 	getSprite( sprite_name, x, y, width, height ){
 		let texture = PIXI.loader.resources[ sprite_name ].texture.clone();
@@ -236,12 +241,23 @@ class PixiVisualizer {
 
 
 	growPython() {
+		var python_body = this.python.python_body;
+		var last_index = python_body.length - 1;
 
-		var body_part = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 2, 1, 64, 64 );
- 		this.app.stage.addChild( body_part );
+		var prev_part = this.getDiffString(python_body[last_index - 1], python_body[last_index]);
+		var next_part = this.getDiffString(python_body[last_index - 1], python_body[last_index - 2]);
 
-		var last_element = this.python_body.pop();
-		this.python_body.push(body_part, last_element);
+
+		var part = this.getSnakePart(prev_part, next_part);
+		var x = part.coordinates[0];
+		var y = part.coordinates[1];
+
+		var new_part = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", x, y, 64, 64 );
+ 		this.app.stage.addChild( new_part );
+		
+
+		this.python_body.splice(last_index - 1, 0, {sprite: new_part, name: part.name});
+		console.log(this.python_body)
 	}
 
 	createSnakeParts( sum ) {
