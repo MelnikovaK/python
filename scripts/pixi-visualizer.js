@@ -54,19 +54,19 @@ class PixiVisualizer {
 
 		window.addEventListener( "screens: start game" , function () {
 			this.playSound(this.ASSETS_PATH+"music.mp3");
-			this.setBonus();
+			this.moveAction();
+			this.setSpritePosition( this.bonus_sprite, this.python.bonus.x, this.python.bonus.y );
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
 			this.playSound(this.ASSETS_PATH+"bonus.mp3");
-			this.setBonus();
+			this.setSpritePosition( this.bonus_sprite, this.python.bonus.x, this.python.bonus.y );
 			this.growPython();
 		}.bind(this));
 
 		window.addEventListener( python.GAME_OVER , function () {
 			this.playSound(this.ASSETS_PATH+"game over.mp3");
 			this.stopSound(this.ASSETS_PATH+"music.mp3");
-			this.setBonus();
 		}.bind(this));
 		
 	}
@@ -94,8 +94,7 @@ class PixiVisualizer {
 		this.updateBody();
 
 		for ( var i = 0; i < python_body.length ; i++ ) {
-			this.python_body[i].x = python_body[i].x * this.CELL_WIDTH;
-			this.python_body[i].y = python_body[i].y * this.CELL_HEIGHT;
+			this.setSpritePosition( this.python_body[i], python_body[i].x, python_body[i].y );
 		}
 	}
 
@@ -185,8 +184,8 @@ class PixiVisualizer {
 		var bg_container = this.bg_container = new PIXI.Container();
 		this.app.stage.addChild( bg_container );
 
-		for ( var i = 0; i < this.cells_horizontal + 1; i++) {
-			for ( var j = 0; j < this.cells_vertical + 1; j++) {
+		for ( var i = 0; i < this.cells_horizontal; i++) {
+			for ( var j = 0; j < this.cells_vertical; j++) {
 
 				if ( i == 0 || j == 0 || i == this.cells_horizontal - 1 || j == this.cells_vertical - 1)  var pic_name = this.ASSETS_PATH+"Wall.png";
 				else var pic_name = this.ASSETS_PATH+"Ground.png"
@@ -221,10 +220,11 @@ class PixiVisualizer {
  		this.app.stage.addChild( bonus );
 	}
 
-	setBonus() {
-		this.bonus_sprite.x = this.CELL_WIDTH * this.python.bonus.x;
-		this.bonus_sprite.y = this.CELL_HEIGHT * this.python.bonus.y;
-	}
+	setSpritePosition(sprite, x, y) {
+		sprite.x = x * this.CELL_WIDTH;
+		sprite.y = y * this.CELL_HEIGHT;
+	} 
+
 
 	growPython() {
 		var body_part = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 2, 1, 64, 64 );
@@ -262,4 +262,5 @@ class PixiVisualizer {
 			renderer.render(stage);
 		};
 	}
+
 }
