@@ -2,6 +2,7 @@ class Screens {
 
 	constructor($container, python) {
 
+		var scope = this;
 		//
 		this.START_GAME = "screens: start game";
 		this.PAUSE = "screens: game paused";
@@ -17,7 +18,51 @@ class Screens {
 
 		if ( !$container || !$container.length ) return;
 		
-		// EVENT HANDLERS
+		this.initEventHandlers();
+
+
+		// INIT SCREENS		
+		this.initPreloadScreen();
+		this.initStartScreen();
+		this.initGameScreen();
+		this.initFinishScreen();
+
+		// INIT MODALS
+		this.initPauseModalWindow();
+
+
+		// init buttons by data-attribute
+		this.initButtonsByDataAttribute('show-screen', function( screen_name ){
+			scope.showScreen( screen_name );
+		});
+
+		this.initButtonsByDataAttribute('show-modal', function( modal_name ){
+			scope.showModalWindow( modal_name );
+		});
+
+		this.initButtonsByDataAttribute('emit-event', function( event_name, data ){
+			Utils.triggerCustomEvent( window, event_name, data );
+		});
+
+		// START
+		this.showScreen('preload-screen');
+		
+	}
+
+
+
+/*
+███████╗██╗   ██╗███████╗███╗   ██╗████████╗███████╗
+██╔════╝██║   ██║██╔════╝████╗  ██║╚══██╔══╝██╔════╝
+█████╗  ██║   ██║█████╗  ██╔██╗ ██║   ██║   ███████╗
+██╔══╝  ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║   ╚════██║
+███████╗ ╚████╔╝ ███████╗██║ ╚████║   ██║   ███████║
+╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝
+*/
+	// >>> EVENT HANDLERS >>>
+
+	initEventHandlers(){
+			// EVENT HANDLERS
 		window.addEventListener( this.python.PYTHON_GET_POINT, function() {
 			var $points = $('.game-screen__points', this.$container);
 			$points.text(this.python.points);
@@ -38,33 +83,16 @@ class Screens {
 		}.bind(this))
 
 		window.addEventListener( "pixi-visualizer:preload_progress", function(e) {
+
 			var $progressbar = $('.progressbar');
-
 			$progressbar.css('width', ~~(e.detail) + '%');
-
 		}.bind(this))
 
 		window.addEventListener( "pixi-visualizer:preload_complete", function(e) {
 			this.showScreen('start-screen');
-
 		}.bind(this))
-
-
-		// INIT SCREENS		
-		this.initPreloadScreen();
-		this.initStartScreen();
-		this.initGameScreen();
-		this.initFinishScreen();
-
-		// INIT MODALS
-		this.initPauseModalWindow();
-
-		// START
-		this.showScreen('preload-screen');
-		
 	}
 
-	// >>> EVENT HANDLERS >>>
 	onGamePlaying() {
 		var $modal_window = $('.game-screen__modal-form');
 		var $overlay = $('.overlay');
@@ -83,6 +111,39 @@ class Screens {
 	// >>> MODALS >>>
 
 
+	
+
+/*
+██╗   ██╗████████╗██╗██╗     ███████╗
+██║   ██║╚══██╔══╝██║██║     ██╔════╝
+██║   ██║   ██║   ██║██║     ███████╗
+██║   ██║   ██║   ██║██║     ╚════██║
+╚██████╔╝   ██║   ██║███████╗███████║
+ ╚═════╝    ╚═╝   ╚═╝╚══════╝╚══════╝
+*/
+	// UTILS
+	initButtonsByDataAttribute( attr_name, onClick ) {
+		/*
+		var scope = this;
+		var $elems_array = $('[data-show-screen]');
+		
+		$elems_array.each(function (index, value) { 
+		  $(this).on('click', function() {
+		  	scope.showScreen($(this).attr('data-show-screen'));
+		  })
+		});
+		*/
+
+		var scope = this;
+		var $elems_array = $('[data-'+attr_name+']');
+		$elems_array.click(function(){
+			onClick( $(this).data(attr_name) );
+		});
+
+	}
+	//
+
+
 /*
 ███████╗ ██████╗██████╗ ███████╗███████╗███╗   ██╗███████╗
 ██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝████╗  ██║██╔════╝
@@ -93,9 +154,8 @@ class Screens {
 */
 
 	// >>> SCREENS >>>
-	
 
-	// UTILS
+	//
 	addScreenTemplate( id, template, onScreenShow ){
 		var $el = $(template).appendTo(this.$container);
 		$el.hide();
@@ -106,10 +166,26 @@ class Screens {
 		return $el;
 	}
 
-	addModalTemplate( target, template ) {
-		var $modal = $(template).appendTo(target);
-	}
 	//
+	showScreen( screen_id ){
+
+		this.hideScreen();
+
+		var current_screen_object = this.current_screen_object = this.screens[screen_id];
+		current_screen_object.$element.fadeIn( 200, function(){
+			if( current_screen_object.onScreenShow ) current_screen_object.onScreenShow();
+		});
+
+	}
+
+	hideScreen(){
+		
+		if( !this.current_screen_object ) return;
+
+		this.current_screen_object.$element.fadeOut(200);
+		this.current_screen_object = undefined;
+	}
+
 
 	// PRELOAD SCREEN
 	initPreloadScreen() {
@@ -150,7 +226,7 @@ class Screens {
 		`
 			<div class="screen  game-screen">
 				<div>Points: <span class="game-screen__points">0</span></div>
-				<button class="game-screen_pause-btn button">Pause</button>
+				<button class="game-screen_pause-btn button" data-emit-event="${this.PAUSE}">Pause</button>
 			</div>
 
 		`,
@@ -159,12 +235,6 @@ class Screens {
 			}.bind(this)
 		);
 		this.$game_screen = $('.game-screen');
-
-		var $pause_button = $('.game-screen_pause-btn', this.$game_screen);
-
-		$pause_button.on('click', function() {
-			Utils.triggerCustomEvent( window, this.PAUSE );		
-		}.bind(this));
 
 	}
 
@@ -183,41 +253,27 @@ class Screens {
 		);
 		this.$finish_screen = $('.finish-screen');
 		var $start_game_button = $('.start-game', this.$container);
-		
-		this.createEventShowScreen();
+
 	}
 
-	createEventShowScreen() {
-		var scope = this;
-		var elems_array = $('*[data-show-screen]');
-		elems_array.each(function (index, value) { 
-		  $(this).on('click', function() {
-		  	scope.showScreen($(this).attr('data-show-screen'));
-		  })
-		});
-	}
 
+
+
+/*
+███╗   ███╗ ██████╗ ██████╗  █████╗ ██╗     
+████╗ ████║██╔═══██╗██╔══██╗██╔══██╗██║     
+██╔████╔██║██║   ██║██║  ██║███████║██║     
+██║╚██╔╝██║██║   ██║██║  ██║██╔══██║██║     
+██║ ╚═╝ ██║╚██████╔╝██████╔╝██║  ██║███████╗
+╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
+*/
+	// >>> MODAL >>>
+	//
+	addModalTemplate( target, template ) {
+		var $modal = $(template).appendTo(target);
+	}
 
 	//
-	initPauseModalWindow() {
-		var $modal_window = this.addModalTemplate( this.$game_screen, 
-		`
-			<div class="game-screen__modal-form">
-				<h1> PAUSE </h1>
-				<div>Score: <span class="modal-form__score"></span></div>
-				<button class="modal-form__continue-btn button">Continue</button>
-			</div>
-			<div class="overlay"></div>
-		`
-		);
-
-		var $continue_button = $('.modal-form__continue-btn');
-
-		$continue_button.on('click', function() {
-			Utils.triggerCustomEvent( window, this.PLAY );		
-		}.bind(this));
-	}
-
 	showModalWindow( $modal_window, $overlay ) {
 		$overlay.fadeIn(400, function(){
 			$modal_window 
@@ -235,24 +291,21 @@ class Screens {
 		);
 	}
 
-	//
-	showScreen( screen_id ){
 
-		this.hideScreen();
-
-		var current_screen_object = this.current_screen_object = this.screens[screen_id];
-		current_screen_object.$element.fadeIn( 200, function(){
-			if( current_screen_object.onScreenShow ) current_screen_object.onScreenShow();
-		});
+	// PAUSE MODAL
+	initPauseModalWindow() {
+		var $modal_window = this.addModalTemplate( this.$game_screen, 
+		`
+			<div class="game-screen__modal-form">
+				<h1> PAUSE </h1>
+				<div>Score: <span class="modal-form__score"></span></div>
+				<button class="modal-form__continue-btn button" data-emit-event="${this.PLAY}">Continue</button>
+			</div>
+			<div class="overlay"></div>
+		`
+		);
 
 	}
-
-	hideScreen(){
-		
-		if( !this.current_screen_object ) return;
-
-		this.current_screen_object.$element.fadeOut(200);
-		this.current_screen_object = undefined;
-	}
+	// <<< MODAL <<<
 
 }
