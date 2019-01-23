@@ -2,8 +2,9 @@ class PixiVisualizer {
 	
 	constructor($container, python, config, screens) {
 
-		//ACTIONS NAMES
-		this.PROGRESSBAR_LOADING = "pixi-visualizer:progressbar_loading";
+		//EVENT NAMES
+		this.PRELOAD_PROGRESS = "pixi-visualizer:preload_progress";
+		this.PRELOAD_COMPLETE = "pixi-visualizer:preload_complete";
 
 		//FIELD ELEMENTS SIZE
 		this.FIELD_WIDTH = config.field_width;
@@ -13,6 +14,7 @@ class PixiVisualizer {
 		this.cells_horizontal = config.cells_horizontal || 20;
 		this.cells_vertical = config.cells_vertical || 20;
 
+		this.ASSETS_PATH = 'assets/';
 
 		//
 		this.python = python;
@@ -41,30 +43,29 @@ class PixiVisualizer {
 		this.snake_parts[4] = [3,3];//tail left
 		this.snake_parts[8] = [3,2];//tail up
 
+
 		//
 		this.initPixiApplication();
 		this.loadAssets();
-
-
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
 			this.moveAction();
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
-			this.playSound("assets/music.mp3");
+			this.playSound(this.ASSETS_PATH+"music.mp3");
 			this.setBonus();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
-			this.playSound("assets/bonus.mp3");
+			this.playSound(this.ASSETS_PATH+"bonus.mp3");
 			this.setBonus();
 			this.growPython();
 		}.bind(this));
 
 		window.addEventListener( python.GAME_OVER , function () {
-			this.playSound("assets/game over.mp3");
-			this.stopSound("assets/music.mp3");
+			this.playSound(this.ASSETS_PATH+"game over.mp3");
+			this.stopSound(this.ASSETS_PATH+"music.mp3");
 			this.setBonus();
 		}.bind(this));
 		
@@ -90,7 +91,7 @@ class PixiVisualizer {
 		var python_body = python.python_body;
 		this.python_body[0].rotation = this.python.python_direction.rotation;
 
-		this.changeRotation();
+		this.updateBody();
 
 		for ( var i = 0; i < python_body.length ; i++ ) {
 			this.python_body[i].x = python_body[i].x * this.CELL_WIDTH;
@@ -98,15 +99,14 @@ class PixiVisualizer {
 		}
 	}
 
-	changeRotation() {
+	updateBody() {
 		var python_body = python.python_body;
-		var last_index = this.python_body.length - 1;
 
 		//BODY
 		for ( var i = 1; i < python_body.length - 1; i++ ) {
 			var prev_part = this.getDiffString(python_body[i], python_body[i - 1]);
 			var next_part = this.getDiffString(python_body[i], python_body[i + 1]);
-			var body_part = this.initSnakeParts(this.parts_indexes[prev_part] + this.parts_indexes[next_part]);
+			var body_part = this.createSnakeParts(this.parts_indexes[prev_part] + this.parts_indexes[next_part]);
 
 			if ( body_part ) {
 				this.changePythonParts(body_part, this.python_body[i], i, false)
@@ -114,8 +114,9 @@ class PixiVisualizer {
 		}
 
 		//TAIL
+		var last_index = this.python_body.length - 1;
 		var tail_diff = this.getDiffString(python_body[last_index], python_body[last_index - 1]);
-		var tail = this.initSnakeParts(this.parts_indexes[tail_diff]);
+		var tail = this.createSnakeParts(this.parts_indexes[tail_diff]);
 		this.changePythonParts(tail, this.python_body[last_index], last_index, true);
 	}
 
@@ -126,8 +127,8 @@ class PixiVisualizer {
 	}
 
 	changePythonParts(adding_elem, deleting_elem, index, tail_checking) {
-		this.app.stage.removeChild(deleting_elem);
-		this.app.stage.addChild( adding_elem );
+		this.bg_container.removeChild(deleting_elem);
+		this.bg_container.addChild( adding_elem );
 		var first_array_part = this.python_body.slice(0, index);
 		if( tail_checking ) var sec_array_part = [];
 		var sec_array_part = this.python_body.slice( index + 1 );
@@ -135,31 +136,38 @@ class PixiVisualizer {
 	}
 
 	loadAssets() {
+
+		var scope = this;
+
 		PIXI.loader
 			.add([
-				"assets/game-over.json",
-		    "assets/Ground.png",
-		    "assets/bg.png",
-		    "assets/CartoonSmoke.png",
-		    "assets/snake-graphics.png",
-		    "assets/Wall.png",
-		    "assets/bonus.mp3",
-		    "assets/game over.mp3",
-		    "assets/music.mp3"
+				this.ASSETS_PATH+"game-over.json",
+		    this.ASSETS_PATH+"Ground.png",
+		    this.ASSETS_PATH+"bg.png",
+		    this.ASSETS_PATH+"CartoonSmoke.png",
+		    this.ASSETS_PATH+"snake-graphics.png",
+		    this.ASSETS_PATH+"Wall.png",
+		    this.ASSETS_PATH+"bonus.mp3",
+		    this.ASSETS_PATH+"game over.mp3",
+		    this.ASSETS_PATH+"music.mp3"
 		  ])
-		  .on("progress", this.loadProgressHandler.bind(this))
-		  .load(this.setup.bind(this));
+		  .on("progress", _loadProgressHandler )
+		  .load( _setup );
+
+		  function _loadProgressHandler(loader, resource) {
+				Utils.triggerCustomEvent( window, scope.PRELOAD_PROGRESS, loader.progress );
+			}
+
+			function _setup() {
+				scope.createGameField();
+		 		scope.createGameCharacters();
+		 		scope.visualizeParticles();
+		 		Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE );
+			}
+
 	}
 
-	loadProgressHandler(loader, resource) {
-		Utils.triggerCustomEvent( window, this.PROGRESSBAR_LOADING, loader.progress );
-	}
-
-	setup() {
-		this.createGameField();
- 		this.createGameCharacters();
-		// this.initSnakeParts();
-	}
+	
 
 	getSprite( sprite_name, x, y, width, height ){
 		let texture = PIXI.loader.resources[ sprite_name ].texture.clone();
@@ -173,38 +181,43 @@ class PixiVisualizer {
 	}
 
 	createGameField() {
+
+		var bg_container = this.bg_container = new PIXI.Container();
+		this.app.stage.addChild( bg_container );
+
 		for ( var i = 0; i < this.cells_horizontal + 1; i++) {
 			for ( var j = 0; j < this.cells_vertical + 1; j++) {
 
-				if ( i == 0 || j == 0 || i == this.cells_horizontal - 1 || j == this.cells_vertical - 1)  var pic_name = "assets/Wall.png";
-				else var pic_name = "assets/Ground.png"
+				if ( i == 0 || j == 0 || i == this.cells_horizontal - 1 || j == this.cells_vertical - 1)  var pic_name = this.ASSETS_PATH+"Wall.png";
+				else var pic_name = this.ASSETS_PATH+"Ground.png"
 
-				let ground_cell = new PIXI.Sprite(PIXI.loader.resources[pic_name].texture);
+				let ground_cell = new PIXI.Sprite( PIXI.loader.resources[pic_name].texture );
 				ground_cell.x = i * this.CELL_WIDTH;
 				ground_cell.y = j * this.CELL_HEIGHT;
 				ground_cell.width = this.CELL_WIDTH;
 				ground_cell.height = this.CELL_HEIGHT;
-				this.app.stage.addChild(ground_cell);
+				bg_container.addChild(ground_cell);
 			}
 		}
+
 	}
 
 	createGameCharacters() {
 		// SNAKE
- 		var head = this.head_sprite = this.getSprite( "assets/snake-graphics.png", 3, 0, 64, 64 );
+ 		var head = this.head_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 3, 0, 64, 64 );
  		this.app.stage.addChild(head);
 
- 		var straight_body = this.straight_body_sprite = this.getSprite( "assets/snake-graphics.png", 2, 1, 64, 64 );
+ 		var straight_body = this.straight_body_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 2, 1, 64, 64 );
  		this.app.stage.addChild( straight_body );
 
- 		var tail = this.tail_sprite = this.getSprite( "assets/snake-graphics.png", 3, 2, 64, 64 );
+ 		var tail = this.tail_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 3, 2, 64, 64 );
  		this.app.stage.addChild( tail );
 
  		this.python_body.push(head, straight_body, tail);
 
 
  		//BONUS
- 		var bonus = this.bonus_sprite = this.getSprite( "assets/snake-graphics.png", 0, 3, 64, 64 );
+ 		var bonus = this.bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 3, 64, 64 );
  		this.app.stage.addChild( bonus );
 	}
 
@@ -214,48 +227,39 @@ class PixiVisualizer {
 	}
 
 	growPython() {
-		var body_part = this.getSprite( "assets/snake-graphics.png", 2, 1, 64, 64 );
+		var body_part = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 2, 1, 64, 64 );
  		this.app.stage.addChild( body_part );
 
 		var last_element = this.python_body.pop();
 		this.python_body.push(body_part, last_element);
 	}
 
-	initSnakeParts( sum ) {
+	createSnakeParts( sum ) {
 		var x = this.snake_parts[sum][0];
 		var y = this.snake_parts[sum][1];
 
-		return this.getSprite( "assets/snake-graphics.png", x, y, 64, 64 );
+		return this.getSprite( this.ASSETS_PATH+"snake-graphics.png", x, y, 64, 64 );
 	}
 
-	visualizeParticles() {
-	// 	var urls, makeTextures = false;
-	// 	if(imagePaths.spritesheet)
-	// 		urls = [imagePaths.spritesheet];
-	// 	else if(imagePaths.textures)
-	// 		urls = imagePaths.textures.slice();
-	// 	else
-	// 	{
-	// 		urls = imagePaths.slice();
-	// 		makeTextures = true;
-	// 	}
-	// 	urls.push("images/bg.png");
+	visualizeParticles(imagePaths, config) {
+		var stage = new PIXI.Container(),
+			emitter = null,
+			renderer = PIXI.autoDetectRenderer(this.FIELD_WIDTH, this.FIELD_HEIGHT),
+			bg = null;
 
 
-	// 	var bg = new PIXI.Sprite(PIXI.Texture.fromImage("assets/CartoonSmoke.png"));
-	// 	bg.scale.x = canvas.width;
-	// 	bg.scale.y = canvas.height;
-	// 	bg.tint = 0x000000;
-	// 	this.app.stage.addChild(bg);
-	// 	var art;
-	// 		if(makeTextures)
-	// 		{
-	// 			art = [];
-	// 			for(var i = 0; i < imagePaths.length; ++i)
-	// 				art.push(PIXI.Texture.fromImage(imagePaths[i]));
-	// 		}
-	// 		else
-	// 			art = imagePaths.art;
+		var update = function(){
+
+			updateId = requestAnimationFrame(update);
+
+			var now = Date.now();
+			if (emitter)
+				emitter.update((now - elapsed) * 0.001);
+
+			elapsed = now;
+
+			// render the stage
+			renderer.render(stage);
+		};
 	}
-
 }

@@ -15,16 +15,9 @@ class Screens {
 		this.python = python;
 
 
-		if ( $container ) {
-			this.initStartScreen();
-			this.initGameScreen();
-			this.initFinishScreen();
-
-			this.initPauseModalWindow();
-
-			this.showScreen('start-screen');
-		}
-
+		if ( !$container || !$container.length ) return;
+		
+		// EVENT HANDLERS
 		window.addEventListener( this.python.PYTHON_GET_POINT, function() {
 			var $points = $('.game-screen__points', this.$container);
 			$points.text(this.python.points);
@@ -41,18 +34,56 @@ class Screens {
 		}.bind(this))
 
 		window.addEventListener( this.python.PLAY, function() {
-			this.gamePlaying();
+			this.onGamePlaying();
 		}.bind(this))
 
-		window.addEventListener( "pixi-visualizer:progressbar_loading", function(e) {
+		window.addEventListener( "pixi-visualizer:preload_progress", function(e) {
 			var $progressbar = $('.progressbar');
 
 			$progressbar.css('width', ~~(e.detail) + '%');
 
 		}.bind(this))
+
+		window.addEventListener( "pixi-visualizer:preload_complete", function(e) {
+			this.showScreen('start-screen');
+
+		}.bind(this))
+
+
+		// INIT SCREENS		
+		this.initPreloadScreen();
+		this.initStartScreen();
+		this.initGameScreen();
+		this.initFinishScreen();
+
+		// INIT MODALS
+		this.initPauseModalWindow();
+
+		// START
+		this.showScreen('preload-screen');
+		
 	}
 
-	/*
+	// >>> EVENT HANDLERS >>>
+	onGamePlaying() {
+		var $modal_window = $('.game-screen__modal-form');
+		var $overlay = $('.overlay');
+		this.hideModalWindow( $modal_window, $overlay );
+	}
+	// <<< EVENT HANDLERS <<<
+	
+
+	// >>> MODALS >>>
+	gamePaused() {
+		var $modal_window = $('.game-screen__modal-form');
+		var $overlay = $('.overlay');
+		this.showModalWindow( $modal_window, $overlay );
+		$('.modal-form__score').text(this.python.points);
+	}
+	// >>> MODALS >>>
+
+
+/*
 ███████╗ ██████╗██████╗ ███████╗███████╗███╗   ██╗███████╗
 ██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝████╗  ██║██╔════╝
 ███████╗██║     ██████╔╝█████╗  █████╗  ██╔██╗ ██║███████╗
@@ -61,21 +92,10 @@ class Screens {
 ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝╚══════╝
 */
 
-	//
-	gamePaused() {
-		var $modal_window = $('.game-screen__modal-form');
-		var $overlay = $('.overlay');
-		this.showModalWindow( $modal_window, $overlay );
-		$('.modal-form__score').text(this.python.points);
-	}
+	// >>> SCREENS >>>
+	
 
-	gamePlaying() {
-		var $modal_window = $('.game-screen__modal-form');
-		var $overlay = $('.overlay');
-		this.hideModalWindow( $modal_window, $overlay );
-	}
-
-	// 
+	// UTILS
 	addScreenTemplate( id, template, onScreenShow ){
 		var $el = $(template).appendTo(this.$container);
 		$el.hide();
@@ -89,17 +109,31 @@ class Screens {
 	addModalTemplate( target, template ) {
 		var $modal = $(template).appendTo(target);
 	}
-
-
 	//
+
+	// PRELOAD SCREEN
+	initPreloadScreen() {
+		var $screen = this.addScreenTemplate( 'preload-screen',
+		`
+			<div class="screen preload-screen">
+				<h1>LOADING...<h1>
+				<div class="progressbar_container">
+				<div class="progressbar"></div>
+				</div>
+			</div>
+		`
+		);
+
+		this.$preload_screen = $( '.preload_screen', this.$container );
+	}
+
+	// START SCREEN
 	initStartScreen() {
 		var $screen = this.addScreenTemplate( 'start-screen',
 		`
 			<div class="screen start-screen">
 				<h1> Python </h1>
 				<button class="start-game button">New game</button>
-				<div class="progressbar_container">
-				<div class="progressbar"></div>
 				</div>
 			</div>
 
@@ -142,7 +176,7 @@ class Screens {
 			<div class="screen  finish-screen">
 				<h1> Game over </h1>
 				<div>Score: <span class="finish-screen__score"></span></div>
-				<button class="start-game button">Start new game</button>
+				<button class="start-game button" data-show-screen="game-screen">Start new game</button>
 			</div>
 
 		`
@@ -158,7 +192,7 @@ class Screens {
 
 	//
 	initPauseModalWindow() {
-		var $modal_window = this.addScreenTemplate( this.$game_screen, 
+		var $modal_window = this.addModalTemplate( this.$game_screen, 
 		`
 			<div class="game-screen__modal-form">
 				<h1> PAUSE </h1>
