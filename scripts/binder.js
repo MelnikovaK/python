@@ -1,6 +1,10 @@
 var $game_container = $('.game_container');
 
+var ASSETS_PATH = 'assets/';
+
 var config = {
+	
+	ASSETS_PATH: ASSETS_PATH,
 	
 	cells_horizontal: 20,
 	cells_vertical: 20,
@@ -54,7 +58,13 @@ var config = {
 				gesture: ['swipe-down'],
 			},
 		}
-	}
+	},
+
+	preload_list: [
+		ASSETS_PATH+"bonus.mp3",
+	    ASSETS_PATH+"game over.mp3",
+	    ASSETS_PATH+"music.mp3"
+	]
 }
 
 
@@ -64,4 +74,4 @@ let python = new Python( inputController, config );
 
 let screens = new Screens( $game_container, python );
 
-let visualizer = new PixiVisualizer($game_container, python, config, screens );
+let visualizer = new PixiVisualizer($game_container, python, config );

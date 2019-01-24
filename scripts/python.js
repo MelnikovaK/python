@@ -232,7 +232,7 @@ class Python {
 		if( python_head.x < 1 || python_head.x >= this.cells_horizontal || python_head.y < 1 || python_head.y >= this.cells_vertical ) return true;
 
 		//
-		for ( var i = 1; i < this.python_body.length - 1; i++) {
+		for ( var i = 1; i < this.python_body.length; i++) {
 			var part = this.python_body[i];
 			if ( python_head.x == part.x && python_head.y == part.y ) {
 				return true;

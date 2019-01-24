@@ -1,6 +1,6 @@
 class PixiVisualizer {
 	
-	constructor($container, python, config, screens) {
+	constructor($container, python, config) {
 
 		//EVENT NAMES
 		this.PRELOAD_PROGRESS = "pixi-visualizer:preload_progress";
@@ -14,7 +14,7 @@ class PixiVisualizer {
 		this.cells_horizontal = config.cells_horizontal || 20;
 		this.cells_vertical = config.cells_vertical || 20;
 
-		this.ASSETS_PATH = 'assets/';
+		this.ASSETS_PATH = config.ASSETS_PATH || 'assets/';
 
 		//
 		this.python = python;
@@ -52,7 +52,7 @@ class PixiVisualizer {
 
 		//
 		this.initPixiApplication();
-		this.loadAssets();
+		this.loadAssets( config );
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
 			this.moveAction();
@@ -102,40 +102,45 @@ class PixiVisualizer {
 
 		//BODY
 		for ( var i = 0; i < python_body.length; i++ ) {
+			//python parts move
+			this.setSpritePosition( this.python_body[i].sprite, python_body[i].x, python_body[i].y );
+
 
 			var curr_sprite = this.python_body[i].sprite;
 
-			var prev_part = python_body[i-1];
-			var curr_part = python_body[i];
-			var next_part =  python_body[i+1];
+			var prev_part_id = this.getPrevPartID(python_body[i-1], python_body[i]); // "-10"
+			var next_part_id = this.getNextPartID(python_body[i+1], python_body[i]);// "-10"
 
-			var prev_part_id = prev_part && this.parts_indexes[ this.getDiffString( curr_part, prev_part ) ]; // "-10"
-			var next_part_id = next_part && this.parts_indexes[ this.getDiffString( curr_part, next_part ) ]; // "-10"
 			var part_oriented_data;
 
-			if( !prev_part ){ // head part
+			if( !python_body[i-1] ){ // head part
 				part_oriented_data = this.snake_parts[ next_part_id ];
 				curr_sprite.rotation = part_oriented_data.angle;
 
-			}else if( !next_part ) { // tail part
+			}else if( !python_body[i+1] ) { // tail part
 				part_oriented_data = this.snake_parts[ prev_part_id ];
 				curr_sprite.rotation = part_oriented_data.angle;
 
 			}else{ // body part
 				part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
-				
+
+				if ( part_oriented_data.frame_name == this.python_body[i].frame_name ) continue;
 				curr_sprite.texture.frame = new PIXI.Rectangle(
 					part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
 					part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
 					this.SPRITE_WIDTH, this.SPRITE_HEIGHT
 				);
-
 			}
-
-			this.setSpritePosition( this.python_body[i].sprite, python_body[i].x, python_body[i].y );
-
+			this.python_body[i].frame_name = part_oriented_data.frame_name;
 		}
 
+	}
+
+	getPrevPartID(prev_part, curr_part) {
+		return prev_part && this.parts_indexes[ this.getDiffString( curr_part, prev_part ) ]; // "-10"
+	}
+	getNextPartID(next_part, curr_part) {
+		return next_part && this.parts_indexes[ this.getDiffString( curr_part, next_part ) ]; // "-10"
 	}
 
 
@@ -177,13 +182,13 @@ class PixiVisualizer {
 	createGameCharacters() {
 		// SNAKE
  		var head = this.head_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 4, 1, 64, 64 );
- 		this.app.stage.addChild(head);
+ 		this.bg_container.addChild(head);
 
  		var straight_body = this.straight_body_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 1, 0, 64, 64 );
- 		this.app.stage.addChild( straight_body );
+ 		this.bg_container.addChild( straight_body );
 
  		var tail = this.tail_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 3, 2, 64, 64 );
- 		this.app.stage.addChild( tail );
+ 		this.bg_container.addChild( tail );
 
  		this.python_body.push( { sprite: head, frame_name:'head-right'}, {sprite: straight_body, frame_name:'-'}, {sprite: tail, frame_name: 'tail-right'});
 
@@ -199,13 +204,16 @@ class PixiVisualizer {
 	growPython() {
 		var python_body = this.python.python_body;
 		var last_index = python_body.length - 1;
-		
-		// var part = this.getSnakePart(python_body[last_index], python_body[last_index - 1], python_body[last_index -2 ]);
 
-		var new_part = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 0, 64, 64 );
+		var prev_part_id = this.getPrevPartID(python_body[last_index], python_body[last_index - 1]); // "-10"
+		var next_part_id = this.getNextPartID(python_body[last_index - 2], python_body[last_index - 1]);
+
+		var part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
+
+		var new_part = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", part_oriented_data.frame_position[0], part_oriented_data.frame_position[1], 64, 64 );
  		this.bg_container.addChild( new_part );
 
-		this.python_body.splice(last_index - 1, 0, {sprite: new_part });
+		this.python_body.splice(last_index - 1, 0, {sprite: new_part, frame_name: part_oriented_data.frame_name });
 	}
 
 	createSnakeParts( sum ) {
@@ -264,22 +272,20 @@ class PixiVisualizer {
 		game_screen.appendChild(this.app.view);
 	}
 
-	loadAssets() {
+	loadAssets( config ) {
 
 		var scope = this;
 
+		console.log('!', config);
 		PIXI.loader
-			.add([
+			.add( ( config.preload_list || [] ).concat([
 				this.ASSETS_PATH+"game-over.json",
 		    this.ASSETS_PATH+"Ground.png",
 		    this.ASSETS_PATH+"bg.png",
 		    this.ASSETS_PATH+"CartoonSmoke.png",
 		    this.ASSETS_PATH+"snake-graphics.png",
-		    this.ASSETS_PATH+"Wall.png",
-		    this.ASSETS_PATH+"bonus.mp3",
-		    this.ASSETS_PATH+"game over.mp3",
-		    this.ASSETS_PATH+"music.mp3"
-		  ])
+		    this.ASSETS_PATH+"Wall.png"
+		  ]) )
 		  .on("progress", _loadProgressHandler )
 		  .load( _setup );
 
