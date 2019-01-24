@@ -25,6 +25,9 @@ class PixiVisualizer {
 		this.python_body = [];
 
 		//
+		this.assets_array = [];
+
+		//
 		this.SPRITE_WIDTH = 64;
 		this.SPRITE_HEIGHT = 64;
 
@@ -39,10 +42,10 @@ class PixiVisualizer {
 		//
 		this.snake_parts = {};
 		
-		this.snake_parts[1] = { frame_position: [4,3], angle: 180 * window.Utils.DEG2RAD, frame_name: 'tail-down'};//tail down
-		this.snake_parts[2] = { frame_position: [4,2], angle: 90 * window.Utils.DEG2RAD, frame_name: 'tail-right'};//tail right
-		this.snake_parts[4] = { frame_position: [3,3], angle: 270 * window.Utils.DEG2RAD, frame_name: 'tail-left'};//tail left
-		this.snake_parts[8] = { frame_position: [3,2], angle: 0, frame_name: 'tail-up'};//tail up
+		this.snake_parts[1] = { frame_position: [4,3], angle: 180 * window.Utils.DEG2RAD, frame_name: 'down'};//tail down
+		this.snake_parts[2] = { frame_position: [4,2], angle: 90 * window.Utils.DEG2RAD, frame_name: 'right'};//tail right
+		this.snake_parts[4] = { frame_position: [3,3], angle: 270 * window.Utils.DEG2RAD, frame_name: 'left'};//tail left
+		this.snake_parts[8] = { frame_position: [3,2], angle: 0, frame_name: 'up'};//tail up
 
 		this.snake_parts[1+2] = { frame_position: [0,0], frame_name: '┘'};// UL  ┘
 		this.snake_parts[1+8] = { frame_position: [2,1], frame_name: '|'};// UD  |
@@ -61,14 +64,22 @@ class PixiVisualizer {
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
-			this.showSnakeBodyParts();
+			
+			// this.removeSnakeBodyPart();
+			this.addSnakeBodyParts();
 			this.updateBonusPosition();
+			this.updateRottenBonusPosition();
 			this.moveActionGame();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
 			this.updateBonusPosition();
 			this.growPython();
+		}.bind(this));
+
+		window.addEventListener( python.PYTHON_LOST_POINT , function () {
+			this.updateRottenBonusPosition();
+			this.removeSnakeBodyPart();
 		}.bind(this));
 
 		window.addEventListener( python.GAME_OVER , function () {
@@ -83,7 +94,6 @@ class PixiVisualizer {
 		var canvas = document.getElementsByTagName('canvas')[0];
 
 		var x = 0;
-		var y = 0;
 		var t = 0;
 		var amp = 10;
 
@@ -94,7 +104,6 @@ class PixiVisualizer {
 		  }
 		  t += .1;
 		  x = Math.sin(t)*amp;
-		  y = Math.cos(t/2)*amp;
 		  canvas.style.left = amp + x + "px"
 		  amp -= .05;
 		}, 5);
@@ -124,29 +133,41 @@ class PixiVisualizer {
 	}
 
 	createGameCharacters() {
-		// SNAKE
- 		var head = this.head_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 4, 1, 64, 64 );
- 		this.bg_container.addChild(head);
+		//SNAKE
+		var head = this.head_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 4, 1, 64, 64 );
 
  		var straight_body = this.straight_body_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 1, 0, 64, 64 );
- 		this.bg_container.addChild( straight_body );
 
  		var tail = this.tail_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 3, 2, 64, 64 );
- 		this.bg_container.addChild( tail );
 
  		this.python_body.push( { sprite: head, frame_name:'head-right'}, {sprite: straight_body, frame_name:'-'}, {sprite: tail, frame_name: 'tail-right'});
 
- 		for ( var i = 0; i < this.python_body.length; i++ ){
- 			this.python_body[i].sprite.visible = false;
- 		}
-
  		//BONUS
  		var bonus = this.bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 3, 64, 64 );
+ 		var rotten_bonus = this.rotten_bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 1, 3, 64, 64 );
 
 	}
 
 	// <<< CREATING GAME FIELD AND CHARACTERS <<<
 
+	// DELETE
+	removeSnakeBodyPart() {
+
+
+		var last_index = this.python_body.length - 1;
+
+
+
+		this.python_body[last_index - 1] = this.python_body[last_index];
+
+
+		this.bg_container.removeChild(this.python_body[last_index].sptrite);
+		this.python_body.pop();
+
+		this.assets_array.push(this.python_body[last_index - 1]);
+
+		console.log(this.python_body);
+	}
 
 	// >>> MOVE PYTHON >>>
 	moveActionGame() {
@@ -158,6 +179,7 @@ class PixiVisualizer {
 	updateBody() {
 
 		var python_body = python.python_body;
+		console.log(this.python_body[0])
 
 		//BODY
 		for ( var i = 0; i < python_body.length; i++ ) {
@@ -219,10 +241,21 @@ class PixiVisualizer {
 
 		var part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
 
-		var new_part = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", part_oriented_data.frame_position[0], part_oriented_data.frame_position[1], 64, 64 );
- 		this.bg_container.addChild( new_part );
+		if ( this.assets_array.length ) {
+			var sprite = this.assets_array.pop(); 
+			sprite.texture.frame = new PIXI.Rectangle(
+					part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
+					part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
+					this.SPRITE_WIDTH, this.SPRITE_HEIGHT
+			);
+		}
+		else var sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 
+																				part_oriented_data.frame_position[0], 
+																				part_oriented_data.frame_position[1], 64, 64 );
 
-		this.python_body.splice(last_index - 1, 0, {sprite: new_part, frame_name: part_oriented_data.frame_name });
+ 		this.bg_container.addChild( sprite );
+
+		this.python_body.splice(last_index - 1, 0, {sprite: sprite, frame_name: part_oriented_data.frame_name });
 	}
 
 	// <<< MOVE PYTHON <<<
@@ -236,11 +269,18 @@ class PixiVisualizer {
 		this.bg_container.addChild( this.bonus_sprite );
 	}
 
-	showSnakeBodyParts() {
+	updateRottenBonusPosition() {
+		this.setSpritePosition( this.rotten_bonus_sprite, this.python.rotten_bonus.x, this.python.rotten_bonus.y );
+		this.bg_container.addChild( this.rotten_bonus_sprite );
+	}
+
+	addSnakeBodyParts() {
 		for ( var i = 0; i < this.python_body.length; i++ ){
- 			this.python_body[i].sprite.visible = true;
+ 			this.bg_container.addChild(this.python_body[i].sprite);
  		}
 	}
+
+	
 
 	// <<< BONUS UPDATE <<<
 
@@ -305,8 +345,7 @@ class PixiVisualizer {
 
 			function _setup() {
 				scope.createGameField();
-		 		scope.createGameCharacters();
-		 		scope.visualizeParticles();
+				scope.createGameCharacters();
 		 		Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE );
 			}
 	}

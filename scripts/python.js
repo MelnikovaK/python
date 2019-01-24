@@ -5,6 +5,7 @@ class Python {
 		//
 		this.PYTHON_MOVED = "python:draw";
 		this.PYTHON_GET_POINT = "python:python get point";
+		this.PYTHON_LOST_POINT = "python:python lost point";
 		this.GAME_OVER = "python: game over";
 		this.PAUSE = "python: pause active";
 		this.PLAY = "python: pause inactive";
@@ -44,6 +45,8 @@ class Python {
 
 		//
 		this.bonus = {};
+
+		this.rotten_bonus = {};
 
 		//
 		this.cells_horizontal = config.cells_horizontal || 20;
@@ -128,7 +131,7 @@ class Python {
 		this.pause = _paused;
 		Utils.triggerCustomEvent( window, _paused ? this.PAUSE : this.PLAY );
 		Utils.triggerCustomEvent( window, this.PAUSE_SOUND );
-		
+
 
 	}
 
@@ -138,6 +141,7 @@ class Python {
 		console.log('#START GAME');
 			
 		var scope = this;
+
 
 		if(!this.gameStep){
 
@@ -167,12 +171,14 @@ class Python {
 
 		this.points = 0;
 		this.generateNewBonus();
+		this.generateNewRottenBonus();
 
-		this.python_direction = this.directions[this.RIGHT];
 
 		this.resetPyhon();
 
 		this.inputController.enabled = true;
+
+		this.python_direction = this.directions[this.RIGHT];
 
 		if ( this.game_timeout ) clearTimeout(this.game_timeout);
 		this.gameStep();
@@ -190,6 +196,9 @@ class Python {
 		this.python_body.unshift( next_head_position );
 
 		// check if bonus is eaten
+
+		console.log(this.rotten_bonus.x, this.rotten_bonus.y)
+		console.log(next_head_position.x, next_head_position.y)
 		if ( next_head_position.x == this.bonus.x && next_head_position.y == this.bonus.y ) {
 			this.points += this.bonus.point;
 			this.generateNewBonus();
@@ -197,8 +206,20 @@ class Python {
 			Utils.triggerCustomEvent( window, this.PYTHON_GET_POINT );
 			Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "bonus", loop: false} );
 		
-		}else{ // if not
+		}else if (next_head_position.x == this.rotten_bonus.x && next_head_position.y == this.rotten_bonus.y){ 
+			var last_index = this.python_body.length - 1;
+
+			this.points -= this.rotten_bonus.point;
+			console.log('PYTHON: ', this.python_body);
+			this.python_body.splice(last_index - 1, 1);
+
+
+			this.generateNewRottenBonus();
+			Utils.triggerCustomEvent( window, this.PYTHON_LOST_POINT );
+			console.log('PYTHON: ', this.python_body);
 			
+
+		} else {// if not
 			this.python_body.pop();
 
 		}
@@ -223,6 +244,17 @@ class Python {
 		this.bonus.point = 1
 		
 		if ( !this.checkBonusCoordinatesCorrect(this.bonus.x, this.bonus.y) ) this.generateNewBonus();
+		
+	}
+
+	generateNewRottenBonus() {
+		var point = 1;
+		var offset = 1;
+		this.rotten_bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
+		this.rotten_bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
+		this.rotten_bonus.point = 1
+		
+		if ( !this.checkBonusCoordinatesCorrect(this.rotten_bonus.x, this.rotten_bonus.y) ) this.generateNewRottenBonus();
 		
 	}
 
