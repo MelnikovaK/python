@@ -54,18 +54,7 @@ class Python {
 		this.checkSizeOfFieldElements();
 		//
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
-			
-			if ( !this.pause ) {
-				var dir = this.directions[e.detail];
-			  if( dir ) {
-			  	var difference_x = this.directions[e.detail].x - this.python_direction.x;
-			  	var difference_y = this.directions[e.detail].y - this.python_direction.y;
-			  	if ( difference_x == 0 || difference_y == 0 ) return;
-					this.inputController_direction = dir;
-
-			  }
-			}
-
+			this.initInputControllerEvent(e.detail);
 			switch( e.detail ){
 				case "play":
 					this.setPause( false );
@@ -76,6 +65,10 @@ class Python {
 					break;
 			}
 
+		}.bind(this));
+
+		this.inputController.target.addEventListener( inputController.ACTION_TRIGGERED, function (e) {
+			this.initInputControllerEvent(e.detail);
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
@@ -90,6 +83,18 @@ class Python {
 		  this.setPause( false );
 		}.bind(this));
 
+	}
+
+	initInputControllerEvent(details) {
+		if ( !this.pause ) {
+			var dir = this.directions[details];
+		  if( dir ) {
+		  	var difference_x = this.directions[details].x - this.python_direction.x;
+		  	var difference_y = this.directions[details].y - this.python_direction.y;
+		  	if ( difference_x == 0 || difference_y == 0 ) return;
+				this.inputController_direction = dir;
+		  }
+		}
 	}
 
 	

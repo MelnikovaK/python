@@ -8,7 +8,7 @@ class PixiSoundManager {
 
 		this.sounds_turn_on = true;
 
-		this.initEventHandlers();
+		this.initEventHandlers(python);
 
 	}
 
@@ -26,9 +26,7 @@ class PixiSoundManager {
 	}
 
 
-
-
-	initEventHandlers() {
+	initEventHandlers(python) {
 		var scope = this;
 
 		window.addEventListener( "screens: start game" , function () {

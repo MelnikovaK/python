@@ -77,3 +77,5 @@ let screens = new Screens( $game_container, python );
 let sound_manager = new PixiSoundManager(config, python);
 
 let visualizer = new PixiVisualizer($game_container, python, config );
+
+let particles_manager = new PixiParticlesManager($game_container, config, python);

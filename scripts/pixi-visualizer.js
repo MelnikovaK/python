@@ -150,7 +150,6 @@ class PixiVisualizer {
 			//python parts move
 			this.setSpritePosition( this.python_body[i].sprite, python_body[i].x, python_body[i].y );
 
-
 			var curr_sprite = this.python_body[i].sprite;
 
 			var prev_part_id = this.getPrevPartID(python_body[i-1], python_body[i]); // "-10"
