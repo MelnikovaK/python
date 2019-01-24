@@ -41,7 +41,19 @@ h1 {
 	z-index: 5;
 }
 
-.overlay {
+.game-over__modal-form {
+	width: 280px;
+	height: 150px;
+	background: white;
+	border: 1px solid black;
+	display: none;
+	position: fixed; 
+	top: 100px; 
+	left: 10%;
+	z-index: 5;
+}
+
+.overlay, .game-over__overlay {
 	z-index:3; 
 	position:fixed;
 	background-color:#000; 

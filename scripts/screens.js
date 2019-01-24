@@ -7,8 +7,8 @@ class Screens {
 		this.START_GAME = "screens: start game";
 		this.PAUSE = "screens: game paused";
 		this.PLAY = "screens: game playing";
-		this.PLAY_SOUND = "screens: sound playing";
-		this.PAUSE_SOUND = "screens: sound paused";
+		this.TOGGLE_SOUND = "sound-manager:toggle_sound";
+		this.GAME_OVER = "screens:game-over"
 
 
 		//
@@ -31,6 +31,7 @@ class Screens {
 
 		// INIT MODALS
 		this.initPauseModalWindow();
+		this.initGameOverModalWindow();
 
 
 		// init buttons by data-attribute
@@ -38,12 +39,20 @@ class Screens {
 			scope.showScreen( screen_name );
 		});
 
-		this.initButtonsByDataAttribute('show-modal', function( modal_name ){
-			scope.showModalWindow( modal_name );
-		});
-
 		this.initButtonsByDataAttribute('emit-event', function( event_name, data ){
 			Utils.triggerCustomEvent( window, event_name, data );
+		});
+
+		this.initButtonsByDataAttribute('emit-sound-event', function( event_name, data ){
+			Utils.triggerCustomEvent( window, event_name, data );
+		});
+
+		this.initButtonsByDataAttribute('emit-game-over', function( event_name, data ){
+			scope.showScreen( 'finish-screen' );
+			var $score = $('.finish-screen__score', scope.$container);
+			$score.text(scope.python.points);
+
+			scope.hideModalWindow( $('.game-over__modal-form'), $('.game-over__overlay') )
 		});
 
 		// START
@@ -71,21 +80,16 @@ class Screens {
 			$points.text(scope.python.points);
 		});
 
-
-		window.addEventListener( "screens: show_finish_screen", function() {
-			setTimeout(function() {
-				scope.showScreen( 'finish-screen' );
-				var $score = $('.finish-screen__score', scope.$container);
-				$score.text(scope.python.points);
-			}, 300);
+		window.addEventListener( "screens: show_finish_modal" , function() {
+			scope.showModalWindowWithScore('.game-over__modal-form', '.game-over__overlay')
 		});
 
 		window.addEventListener( scope.python.PAUSE, function() {
-			scope.gamePaused();
+			scope.showModalWindowWithScore('.game-screen__modal-form', '.overlay')
 		});
 
 		window.addEventListener( scope.python.PLAY, function() {
-			scope.onGamePlaying();
+			scope.hideModalWindow( $('.game-screen__modal-form'), $('.overlay') );
 		});
 
 		window.addEventListener( "pixi-visualizer:preload_progress", function(e) {
@@ -98,19 +102,14 @@ class Screens {
 			scope.showScreen('start-screen');
 		});
 	}
-
-	onGamePlaying() {
-		var $modal_window = $('.game-screen__modal-form');
-		var $overlay = $('.overlay');
-		this.hideModalWindow( $modal_window, $overlay );
-	}
 	// <<< EVENT HANDLERS <<<
 	
 
 	// >>> MODALS >>>
-	gamePaused() {
-		var $modal_window = $('.game-screen__modal-form');
-		var $overlay = $('.overlay');
+
+	showModalWindowWithScore(modal_window, overlay) {
+		var $modal_window = $(modal_window);
+		var $overlay = $(overlay);
 		this.showModalWindow( $modal_window, $overlay );
 		$('.modal-form__score').text(this.python.points);
 	}
@@ -305,10 +304,23 @@ class Screens {
 				<h1> PAUSE </h1>
 				<div>Score: <span class="modal-form__score"></span></div>
 				<button class="modal-form__continue-btn button" data-emit-event="${this.PLAY}">Continue</button>
-				<button class="modal-form__soundon-btn button" data-emit-event="${this.PLAY_SOUND}">Sound on</button>
-				<button class="modal-form__soundoff-btn button" data-emit-event="${this.PAUSE_SOUND}">Sound off</button>
+				<button class="modal-form__soundon-btn button" data-emit-sound-event="${this.TOGGLE_SOUND}">Sound on/off</button>
 							</div>
 			<div class="overlay"></div>
+		`
+		);
+
+	}
+
+	initGameOverModalWindow() {
+		var $modal_window = this.addModalTemplate( this.$game_screen, 
+		`
+			<div class="game-over__modal-form">
+				<h1> Game over :( </h1>
+				<div>Score: <span class="modal-form__score"></span></div>
+				<button class="modal-form__continue-btn button" data-emit-game-over="${this.GAME_OVER}">Ok</button>
+			</div>
+			<div class="game-over__overlay"></div>
 		`
 		);
 

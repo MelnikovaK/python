@@ -64,8 +64,16 @@ var config = {
 		ASSETS_PATH+"bonus.mp3",
 	    ASSETS_PATH+"game over.mp3",
 	    ASSETS_PATH+"music.mp3"
-	]
+	],
+
+	sounds: {
+		"bonus": ASSETS_PATH+"bonus.mp3",
+		"game over": ASSETS_PATH+"game over.mp3",
+		"music": ASSETS_PATH+"music.mp3",
+	}
 }
+
+// config.sounds = config.preload_list;
 
 
 let inputController = new InputController( config.input, $game_container[0] );

@@ -6,7 +6,7 @@ class PixiVisualizer {
 		//EVENT NAMES
 		this.PRELOAD_PROGRESS = "pixi-visualizer:preload_progress";
 		this.PRELOAD_COMPLETE = "pixi-visualizer:preload_complete";
-		this.SHOW_FINISH_SCREEN = "screens: show_finish_screen";
+		this.SHOW_FINISH_SCREEN = "screens: show_finish_modal";
 
 		//FIELD ELEMENTS SIZE
 		this.FIELD_WIDTH = config.field_width;
@@ -61,8 +61,9 @@ class PixiVisualizer {
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
-			this.moveActionGame();
+			this.showSnakeBodyParts();
 			this.updateBonusPosition();
+			this.moveActionGame();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
@@ -135,10 +136,12 @@ class PixiVisualizer {
 
  		this.python_body.push( { sprite: head, frame_name:'head-right'}, {sprite: straight_body, frame_name:'-'}, {sprite: tail, frame_name: 'tail-right'});
 
+ 		for ( var i = 0; i < this.python_body.length; i++ ){
+ 			this.python_body[i].sprite.visible = false;
+ 		}
 
  		//BONUS
  		var bonus = this.bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 3, 64, 64 );
- 		this.app.stage.addChild( bonus );
 
 	}
 
@@ -230,6 +233,13 @@ class PixiVisualizer {
 	// >>> BONUS UPDATE >>>
 	updateBonusPosition(){
 		this.setSpritePosition( this.bonus_sprite, this.python.bonus.x, this.python.bonus.y );
+		this.bg_container.addChild( this.bonus_sprite );
+	}
+
+	showSnakeBodyParts() {
+		for ( var i = 0; i < this.python_body.length; i++ ){
+ 			this.python_body[i].sprite.visible = true;
+ 		}
 	}
 
 	// <<< BONUS UPDATE <<<

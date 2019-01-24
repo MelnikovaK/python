@@ -8,6 +8,9 @@ class Python {
 		this.GAME_OVER = "python: game over";
 		this.PAUSE = "python: pause active";
 		this.PLAY = "python: pause inactive";
+		this.PLAY_SOUND = "sound-manager:play";
+		this.PAUSE_SOUND = "sound-manager:pause";
+
 
 		//
 		this.inputController = inputController;
@@ -124,6 +127,9 @@ class Python {
 		if ( this.pause == _paused) return;
 		this.pause = _paused;
 		Utils.triggerCustomEvent( window, _paused ? this.PAUSE : this.PLAY );
+		Utils.triggerCustomEvent( window, this.PAUSE_SOUND );
+		
+
 	}
 
 	//
@@ -156,6 +162,9 @@ class Python {
 			};
 		}
 
+		Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "music", loop: true} );
+
+
 		this.points = 0;
 		this.generateNewBonus();
 
@@ -186,6 +195,7 @@ class Python {
 			this.generateNewBonus();
 
 			Utils.triggerCustomEvent( window, this.PYTHON_GET_POINT );
+			Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "bonus", loop: false} );
 		
 		}else{ // if not
 			
@@ -253,6 +263,8 @@ class Python {
 		this.inputController.enabled = false;
 
 		Utils.triggerCustomEvent( window, this.GAME_OVER );
+		Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "game over", loop: false} );
+
 	}
 	
 }
