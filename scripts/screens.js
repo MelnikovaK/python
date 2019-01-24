@@ -7,6 +7,8 @@ class Screens {
 		this.START_GAME = "screens: start game";
 		this.PAUSE = "screens: game paused";
 		this.PLAY = "screens: game playing";
+		this.PLAY_SOUND = "screens: sound playing";
+		this.PAUSE_SOUND = "screens: sound paused";
 
 
 		//
@@ -62,35 +64,38 @@ class Screens {
 	// >>> EVENT HANDLERS >>>
 
 	initEventHandlers(){
+		var scope = this;
 			// EVENT HANDLERS
-		window.addEventListener( this.python.PYTHON_GET_POINT, function() {
-			var $points = $('.game-screen__points', this.$container);
-			$points.text(this.python.points);
-		}.bind(this))
+		window.addEventListener( scope.python.PYTHON_GET_POINT, function() {
+			var $points = $('.game-screen__points', scope.$container);
+			$points.text(scope.python.points);
+		});
 
-		window.addEventListener( this.python.GAME_OVER, function() {
-			this.showScreen( 'finish-screen' );
-			var $score = $('.finish-screen__score', this.$container);
-			$score.text(this.python.points);
-		}.bind(this));
+		window.addEventListener( scope.python.GAME_OVER, function() {
+			setTimeout(function() {
+				scope.showScreen( 'finish-screen' );
+				var $score = $('.finish-screen__score', scope.$container);
+				$score.text(scope.python.points);
+			}, 300);
+		});
 
-		window.addEventListener( this.python.PAUSE, function() {
-			this.gamePaused();
-		}.bind(this))
+		window.addEventListener( scope.python.PAUSE, function() {
+			scope.gamePaused();
+		});
 
-		window.addEventListener( this.python.PLAY, function() {
-			this.onGamePlaying();
-		}.bind(this))
+		window.addEventListener( scope.python.PLAY, function() {
+			scope.onGamePlaying();
+		});
 
 		window.addEventListener( "pixi-visualizer:preload_progress", function(e) {
 
 			var $progressbar = $('.progressbar');
 			$progressbar.css('width', ~~(e.detail) + '%');
-		}.bind(this))
+		});
 
 		window.addEventListener( "pixi-visualizer:preload_complete", function(e) {
-			this.showScreen('start-screen');
-		}.bind(this))
+			scope.showScreen('start-screen');
+		});
 	}
 
 	onGamePlaying() {
@@ -135,7 +140,7 @@ class Screens {
 		*/
 
 		var scope = this;
-		var $elems_array = $('[data-'+attr_name+']');
+		var $elems_array = $('[data-'+attr_name+']', this.$container );
 		$elems_array.click(function(){
 			onClick( $(this).data(attr_name) );
 		});
@@ -226,7 +231,7 @@ class Screens {
 		`
 			<div class="screen  game-screen">
 				<div>Points: <span class="game-screen__points">0</span></div>
-				<button class="game-screen_pause-btn button" data-emit-event="${this.PAUSE}">Pause</button>
+				<button class="game-screen_pause-btn button" data-emit-event="${this.PAUSE}"  data-click-sound="" >Pause</button>
 			</div>
 
 		`,
@@ -252,7 +257,6 @@ class Screens {
 		`
 		);
 		this.$finish_screen = $('.finish-screen');
-		var $start_game_button = $('.start-game', this.$container);
 
 	}
 
@@ -300,7 +304,9 @@ class Screens {
 				<h1> PAUSE </h1>
 				<div>Score: <span class="modal-form__score"></span></div>
 				<button class="modal-form__continue-btn button" data-emit-event="${this.PLAY}">Continue</button>
-			</div>
+				<button class="modal-form__soundon-btn button" data-emit-event="${this.PLAY_SOUND}">Sound on</button>
+				<button class="modal-form__soundoff-btn button" data-emit-event="${this.PAUSE_SOUND}">Sound off</button>
+							</div>
 			<div class="overlay"></div>
 		`
 		);

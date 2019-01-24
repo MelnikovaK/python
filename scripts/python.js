@@ -116,6 +116,7 @@ class Python {
 
 	//
 	setPause( _paused ){
+		if ( this.pause == _paused) return;
 		this.pause = _paused;
 		Utils.triggerCustomEvent( window, _paused ? this.PAUSE : this.PLAY );
 	}

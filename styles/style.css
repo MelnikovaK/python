@@ -3,6 +3,7 @@ canvas {
  	width: 400px;
  	height: 400px;
  	position: absolute;
+ 	margin: 10px;
 }
 
 #game_field {
@@ -28,7 +29,7 @@ h1 {
 }
 
 .game-screen__modal-form {
-	width: 200px;
+	width: 280px;
 	height: 150px;
 	background: white;
 	border: 1px solid black;
@@ -65,4 +66,8 @@ h1 {
 	max-width: 150px;
 	border: 1px solid grey;
 	background: green;
+}
+
+.game_container {
+	outline-offset: 5px;
 }

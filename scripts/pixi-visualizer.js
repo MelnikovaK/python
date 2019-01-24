@@ -1,6 +1,7 @@
 class PixiVisualizer {
 	
 	constructor($container, python, config) {
+		this.$container = $container;
 
 		//EVENT NAMES
 		this.PRELOAD_PROGRESS = "pixi-visualizer:preload_progress";
@@ -59,37 +60,81 @@ class PixiVisualizer {
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
-			// this.playSound(this.ASSETS_PATH+"music.mp3");
 			this.moveAction();
 			this.updateBonusPosition();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
-			// this.playSound(this.ASSETS_PATH+"bonus.mp3");
 			this.updateBonusPosition();
 			this.growPython();
 		}.bind(this));
 
 		window.addEventListener( python.GAME_OVER , function () {
-			// this.playSound(this.ASSETS_PATH+"game over.mp3");
-			// this.stopSound(this.ASSETS_PATH+"music.mp3");
+			this.shakeScreen();
 		}.bind(this));
 		
 	}
+
+	shakeScreen() {
+		var scope = this;
+		var margin = 20;
+		var canvas = document.getElementsByTagName('canvas')[0];
+		canvas.style.marginLeft = 17 + 'px';
+		var intervalId = setInterval(function() {
+			if (margin < 10) clearInterval(intervalId);
+			if (margin >=13) canvas.style.marginTop = margin + 'px';
+			else canvas.style.marginLeft = margin + 'px';
+			margin -= 7;
+		}, 100)
+	}
+
+		// >>> CREATING GAME FIELD AND CHARACTERS >>>
+	createGameField() {
+
+		var bg_container = this.bg_container = new PIXI.Container();
+		this.app.stage.addChild( bg_container );
+
+		for ( var i = 0; i < this.cells_horizontal; i++) {
+			for ( var j = 0; j < this.cells_vertical; j++) {
+
+				if ( i == 0 || j == 0 || i == this.cells_horizontal - 1 || j == this.cells_vertical - 1)  var pic_name = this.ASSETS_PATH+"Wall.png";
+				else var pic_name = this.ASSETS_PATH+"Ground.png"
+
+				let ground_cell = new PIXI.Sprite( PIXI.loader.resources[pic_name].texture );
+				ground_cell.x = i * this.CELL_WIDTH;
+				ground_cell.y = j * this.CELL_HEIGHT;
+				ground_cell.width = this.CELL_WIDTH;
+				ground_cell.height = this.CELL_HEIGHT;
+				bg_container.addChild(ground_cell);
+			}
+		}
+
+	}
+
+	createGameCharacters() {
+		// SNAKE
+ 		var head = this.head_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 4, 1, 64, 64 );
+ 		this.bg_container.addChild(head);
+
+ 		var straight_body = this.straight_body_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 1, 0, 64, 64 );
+ 		this.bg_container.addChild( straight_body );
+
+ 		var tail = this.tail_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 3, 2, 64, 64 );
+ 		this.bg_container.addChild( tail );
+
+ 		this.python_body.push( { sprite: head, frame_name:'head-right'}, {sprite: straight_body, frame_name:'-'}, {sprite: tail, frame_name: 'tail-right'});
+
+
+ 		//BONUS
+ 		var bonus = this.bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 3, 64, 64 );
+ 		this.app.stage.addChild( bonus );
+	}
+
+	// <<< CREATING GAME FIELD AND CHARACTERS <<<
+
+
+	// >>> MOVE PYTHON >>>
 	
-
-	// playSound( sound_name ){
-	// 	var sound = PIXI.sound.Sound.from( sound_name );
-	// 	sound.play();
-	// }
-
-	// stopSound(sound_name) {
-	// 	var sound = PIXI.sound.Sound.from( sound_name );
-	// 	sound.stop();
-	// }
-
-
-
 	moveAction() {
 
 		this.updateBody();
@@ -151,55 +196,6 @@ class PixiVisualizer {
 		return diff_x.toString() + diff_y.toString();
 	}
 
-	
-
-	
-
-	
-
-	createGameField() {
-
-		var bg_container = this.bg_container = new PIXI.Container();
-		this.app.stage.addChild( bg_container );
-
-		for ( var i = 0; i < this.cells_horizontal; i++) {
-			for ( var j = 0; j < this.cells_vertical; j++) {
-
-				if ( i == 0 || j == 0 || i == this.cells_horizontal - 1 || j == this.cells_vertical - 1)  var pic_name = this.ASSETS_PATH+"Wall.png";
-				else var pic_name = this.ASSETS_PATH+"Ground.png"
-
-				let ground_cell = new PIXI.Sprite( PIXI.loader.resources[pic_name].texture );
-				ground_cell.x = i * this.CELL_WIDTH;
-				ground_cell.y = j * this.CELL_HEIGHT;
-				ground_cell.width = this.CELL_WIDTH;
-				ground_cell.height = this.CELL_HEIGHT;
-				bg_container.addChild(ground_cell);
-			}
-		}
-
-	}
-
-	createGameCharacters() {
-		// SNAKE
- 		var head = this.head_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 4, 1, 64, 64 );
- 		this.bg_container.addChild(head);
-
- 		var straight_body = this.straight_body_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 1, 0, 64, 64 );
- 		this.bg_container.addChild( straight_body );
-
- 		var tail = this.tail_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 3, 2, 64, 64 );
- 		this.bg_container.addChild( tail );
-
- 		this.python_body.push( { sprite: head, frame_name:'head-right'}, {sprite: straight_body, frame_name:'-'}, {sprite: tail, frame_name: 'tail-right'});
-
-
- 		//BONUS
- 		var bonus = this.bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 3, 64, 64 );
- 		this.app.stage.addChild( bonus );
-	}
-
-	
-
 
 	growPython() {
 		var python_body = this.python.python_body;
@@ -216,22 +212,17 @@ class PixiVisualizer {
 		this.python_body.splice(last_index - 1, 0, {sprite: new_part, frame_name: part_oriented_data.frame_name });
 	}
 
-	createSnakeParts( sum ) {
-		var x = this.snake_parts[sum][0];
-		var y = this.snake_parts[sum][1];
-
-		return this.getSprite( this.ASSETS_PATH+"snake-graphics.png", x, y, 64, 64 );
-	}
+	// <<< MOVE PYTHON <<<
 
 	
 
 
+	// >>> BONUS UPDATE >>>
 	updateBonusPosition(){
 		this.setSpritePosition( this.bonus_sprite, this.python.bonus.x, this.python.bonus.y );
 	}
 
-
-
+	// <<< BONUS UPDATE <<<
 
 
 	// >>> PARTICLES >>>
@@ -276,7 +267,6 @@ class PixiVisualizer {
 
 		var scope = this;
 
-		console.log('!', config);
 		PIXI.loader
 			.add( ( config.preload_list || [] ).concat([
 				this.ASSETS_PATH+"game-over.json",
@@ -319,9 +309,14 @@ class PixiVisualizer {
 		sprite.y = y * this.CELL_HEIGHT;
 	} 
 
-	// <<< UTILS <<<
+	createSnakeParts( sum ) {
+		var x = this.snake_parts[sum][0];
+		var y = this.snake_parts[sum][1];
 
-	//>>> SOUNDS >>
+		return this.getSprite( this.ASSETS_PATH+"snake-graphics.png", x, y, 64, 64 );
+	}
+
+	// <<< UTILS <<<
 
 
 
