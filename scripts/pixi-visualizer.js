@@ -6,6 +6,7 @@ class PixiVisualizer {
 		//EVENT NAMES
 		this.PRELOAD_PROGRESS = "pixi-visualizer:preload_progress";
 		this.PRELOAD_COMPLETE = "pixi-visualizer:preload_complete";
+		this.SHOW_FINISH_SCREEN = "screens: show_finish_screen";
 
 		//FIELD ELEMENTS SIZE
 		this.FIELD_WIDTH = config.field_width;
@@ -56,11 +57,11 @@ class PixiVisualizer {
 		this.loadAssets( config );
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
-			this.moveAction();
+			this.moveActionGame();
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
-			this.moveAction();
+			this.moveActionGame();
 			this.updateBonusPosition();
 		}.bind(this));
 
@@ -77,15 +78,25 @@ class PixiVisualizer {
 
 	shakeScreen() {
 		var scope = this;
-		var margin = 20;
+
 		var canvas = document.getElementsByTagName('canvas')[0];
-		canvas.style.marginLeft = 17 + 'px';
-		var intervalId = setInterval(function() {
-			if (margin < 10) clearInterval(intervalId);
-			if (margin >=13) canvas.style.marginTop = margin + 'px';
-			else canvas.style.marginLeft = margin + 'px';
-			margin -= 7;
-		}, 100)
+
+		var x = 0;
+		var y = 0;
+		var t = 0;
+		var amp = 10;
+
+		var interval_id = setInterval(function(){
+		  if (amp < 1) {
+		  	Utils.triggerCustomEvent( window, scope.SHOW_FINISH_SCREEN );
+		  	clearInterval(interval_id);
+		  }
+		  t += .1;
+		  x = Math.sin(t)*amp;
+		  y = Math.cos(t/2)*amp;
+		  canvas.style.left = amp + x + "px"
+		  amp -= .05;
+		}, 5);
 	}
 
 		// >>> CREATING GAME FIELD AND CHARACTERS >>>
@@ -128,14 +139,14 @@ class PixiVisualizer {
  		//BONUS
  		var bonus = this.bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 3, 64, 64 );
  		this.app.stage.addChild( bonus );
+
 	}
 
 	// <<< CREATING GAME FIELD AND CHARACTERS <<<
 
 
 	// >>> MOVE PYTHON >>>
-	
-	moveAction() {
+	moveActionGame() {
 
 		this.updateBody();
 

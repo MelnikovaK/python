@@ -3,7 +3,8 @@ canvas {
  	width: 400px;
  	height: 400px;
  	position: absolute;
- 	margin: 10px;
+  top: 60px;
+  left: 0;
 }
 
 #game_field {

@@ -71,7 +71,8 @@ class Screens {
 			$points.text(scope.python.points);
 		});
 
-		window.addEventListener( scope.python.GAME_OVER, function() {
+
+		window.addEventListener( "screens: show_finish_screen", function() {
 			setTimeout(function() {
 				scope.showScreen( 'finish-screen' );
 				var $score = $('.finish-screen__score', scope.$container);
