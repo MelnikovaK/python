@@ -74,4 +74,6 @@ let python = new Python( inputController, config );
 
 let screens = new Screens( $game_container, python );
 
+let sound_manager = new PixiSoundManager(config, python);
+
 let visualizer = new PixiVisualizer($game_container, python, config );

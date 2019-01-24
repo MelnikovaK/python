@@ -59,34 +59,34 @@ class PixiVisualizer {
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
-			this.playSound(this.ASSETS_PATH+"music.mp3");
+			// this.playSound(this.ASSETS_PATH+"music.mp3");
 			this.moveAction();
 			this.updateBonusPosition();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
-			this.playSound(this.ASSETS_PATH+"bonus.mp3");
+			// this.playSound(this.ASSETS_PATH+"bonus.mp3");
 			this.updateBonusPosition();
 			this.growPython();
 		}.bind(this));
 
 		window.addEventListener( python.GAME_OVER , function () {
-			this.playSound(this.ASSETS_PATH+"game over.mp3");
-			this.stopSound(this.ASSETS_PATH+"music.mp3");
+			// this.playSound(this.ASSETS_PATH+"game over.mp3");
+			// this.stopSound(this.ASSETS_PATH+"music.mp3");
 		}.bind(this));
 		
 	}
 	
 
-	playSound( sound_name ){
-		var sound = PIXI.sound.Sound.from( sound_name );
-		sound.play();
-	}
+	// playSound( sound_name ){
+	// 	var sound = PIXI.sound.Sound.from( sound_name );
+	// 	sound.play();
+	// }
 
-	stopSound(sound_name) {
-		var sound = PIXI.sound.Sound.from( sound_name );
-		sound.stop();
-	}
+	// stopSound(sound_name) {
+	// 	var sound = PIXI.sound.Sound.from( sound_name );
+	// 	sound.stop();
+	// }
 
 
 
