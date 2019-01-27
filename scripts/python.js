@@ -42,6 +42,7 @@ class Python {
 
 
 		this.pause = false;
+		this.is_game_over = false;
 
 		//
 		this.bonus = {};
@@ -58,6 +59,7 @@ class Python {
 
 		//
 		this.checkSizeOfFieldElements();
+		this.resetPyhon();
 		//
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
 			this.initInputControllerEvent(e.detail);
@@ -148,14 +150,15 @@ class Python {
 			this.gameStep = function(){				
 
 				// schedule the next game step
-				scope.game_timeout = setTimeout( scope.gameStep, 500);
+				scope.game_timeout = setTimeout( scope.gameStep, 300);
 				if ( scope.pause ) return;
 				if (scope.inputController_direction) scope.python_direction = scope.inputController_direction;
 				// move python
 				scope.movePython();
 
 				// check game end
-				if ( scope.isGameOver() ) {
+				if ( scope.isGameOver() || scope.is_game_over) {
+
 					scope.gameOver();
 					return;
 				}
@@ -197,8 +200,6 @@ class Python {
 
 		// check if bonus is eaten
 
-		console.log(this.rotten_bonus.x, this.rotten_bonus.y)
-		console.log(next_head_position.x, next_head_position.y)
 		if ( next_head_position.x == this.bonus.x && next_head_position.y == this.bonus.y ) {
 			this.points += this.bonus.point;
 			this.generateNewBonus();
@@ -207,17 +208,22 @@ class Python {
 			Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "bonus", loop: false} );
 		
 		}else if (next_head_position.x == this.rotten_bonus.x && next_head_position.y == this.rotten_bonus.y){ 
+
 			var last_index = this.python_body.length - 1;
+			this.python_body[last_index] = this.python_body[last_index - 2];
+			this.generateNewRottenBonus();
+
+			if (this.points < 1) {
+				this.is_game_over = true;
+				return;	
+			}
+			
+			this.python_body.splice(last_index - 2, 2);
+
+
+			Utils.triggerCustomEvent( window, this.PYTHON_LOST_POINT );
 
 			this.points -= this.rotten_bonus.point;
-			console.log('PYTHON: ', this.python_body);
-			this.python_body.splice(last_index - 1, 1);
-
-
-			this.generateNewRottenBonus();
-			Utils.triggerCustomEvent( window, this.PYTHON_LOST_POINT );
-			console.log('PYTHON: ', this.python_body);
-			
 
 		} else {// if not
 			this.python_body.pop();
