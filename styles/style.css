@@ -11,6 +11,20 @@ canvas {
 	/*background-color: #F5F2C6;*/
 }
 
+.game-screen__game_over {
+	width: 300px;
+	height: 100px;
+	border: 1px solid yellow;
+	background:: yellow;
+	opacity: 0.5; 
+	position: absolute;
+	display: none;
+	font-size: 30px;
+	top:120px;
+	left: 50%;
+	z-index: 50;
+}
+
 .screen{
 	position: absolute;
 	top: 0;

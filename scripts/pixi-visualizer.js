@@ -68,6 +68,7 @@ class PixiVisualizer {
 			this.removeSnakeBodyPart(this.python_body.length - 3);
 			this.updateBonusPosition();
 			this.updateRottenBonusPosition();
+			this.updateBody();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
@@ -186,7 +187,7 @@ class PixiVisualizer {
 	updateBody() {
 
 		var python_body = python.python_body;
-		
+
 		//BODY
 		for ( var i = 0; i < python_body.length; i++ ) {
 			//python parts move
