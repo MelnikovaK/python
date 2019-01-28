@@ -158,7 +158,6 @@ class Python {
 
 				// check game end
 				if ( scope.isGameOver() || scope.is_game_over) {
-
 					scope.gameOver();
 					return;
 				}
@@ -171,6 +170,7 @@ class Python {
 
 		Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "music", loop: true} );
 
+		this.is_game_over = false;
 
 		this.points = 0;
 		this.generateNewBonus();
@@ -215,13 +215,15 @@ class Python {
 			this.python_body[last_index] = this.python_body[last_index - 2];
 			this.generateNewRottenBonus();
 
-			if (this.points < 1) {
+			if ( this.points < this.rotten_bonus.point ) {
 				this.is_game_over = true;
 				return;	
 			}
 			
 			this.python_body.splice(last_index - 2, 2);
+
 			this.points -= this.rotten_bonus.point;
+
 			Utils.triggerCustomEvent( window, this.PYTHON_LOST_POINT );
 
 
@@ -243,25 +245,25 @@ class Python {
 	}
 
 	generateNewBonus() {
-		var point = 1;
-		var offset = 1;
-		this.bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
-		this.bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
-		this.bonus.point = 1
+		this.calculateNewBonusCoordinates(this.bonus);
 		
 		if ( !this.checkBonusCoordinatesCorrect(this.bonus.x, this.bonus.y) ) this.generateNewBonus();
 		
 	}
 
 	generateNewRottenBonus() {
-		var point = 1;
-		var offset = 1;
-		this.rotten_bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
-		this.rotten_bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
-		this.rotten_bonus.point = 1;
-		
+		this.calculateNewBonusCoordinates(this.rotten_bonus);
+
 		if ( !this.checkRottenBonusCoordinatesCorrect(this.rotten_bonus.x, this.rotten_bonus.y) ) this.generateNewRottenBonus();
 		
+	}
+
+	calculateNewBonusCoordinates( bonus ) {
+		var point = 1;
+		var offset = 1;
+		bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
+		bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
+		bonus.point = 1;
 	}
 
 	checkBonusCoordinatesCorrect( x, y ) {
