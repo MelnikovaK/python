@@ -47,9 +47,6 @@ class Python {
 		this.bonuses = {};
 
 		//
-		this.bonus = {};
-
-		this.rotten_bonus = {};
 
 		//
 		this.cells_horizontal = config.cells_horizontal || 20;
@@ -208,17 +205,17 @@ class Python {
 		for ( var bonus_name in this.bonuses ) {
 			if ( next_head_position.x == this.bonuses[bonus_name].x && next_head_position.y == this.bonuses[bonus_name].y) {
 				flag = true;
+
 				this.points += this.bonuses[bonus_name].point;
+				this.generateNewBonus(bonus_name);
 
 				if ( this.points < 0 ) {
 					this.is_game_over = true;
 					return;
 				}
 
-				this.generateNewBonus(bonus_name);
-
-
 				if ( this.bonuses[bonus_name].action)  this.bonuses[bonus_name].action(this);
+
 				Utils.triggerCustomEvent(window, this.bonuses[bonus_name].trigger_action_name);
 				if( this.bonuses[bonus_name].sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, this.bonuses[bonus_name].sound );
 
@@ -254,6 +251,7 @@ class Python {
 			trigger_action_name: this.PYTHON_GET_POINT,
 			sound: {sound_id: "bonus", loop: false}
 		};
+
 		var rotten_apple = {
 			x: ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
 			y: ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
@@ -266,7 +264,6 @@ class Python {
 			'apple': apple,
 			'rotten_apple': rotten_apple
 		}
-		console.log(this.bonuses)
 	}
 
 	generateNewBonus( bonus_name ) {
@@ -301,7 +298,7 @@ class Python {
 		}
 		return true;
 	}
-	
+
 	isGameOver() {
 
 		var python_head = this.python_body[0];

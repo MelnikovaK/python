@@ -266,12 +266,8 @@ class InputController {
 		
 		var gesture_name = '';
 
-		console.log(start_X, start_Y, finish_X, finish_Y)
-
 		var horizontal_difference = start_X - finish_X;
-		console.log('HORIZONTAL: ', horizontal_difference)
 		var vertical_difference = start_Y - finish_Y;
-		console.log('VERTICAL: ',vertical_difference)
 		var horizontal_difference_abs = Math.abs(horizontal_difference);
 		var vertical_difference_abs = Math.abs(vertical_difference);
 

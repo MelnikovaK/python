@@ -21,6 +21,10 @@ class PixiVisualizer {
 		this.START_PYTHON_LENGTH = 3;
 
 		//
+		this.APPLE = 'apple';
+		this.ROTTEN_APPLE = 'rotten_apple';
+
+		//
 		this.python = python;
 
 		//
@@ -69,19 +73,18 @@ class PixiVisualizer {
 
 		window.addEventListener( "screens: start game" , function () {
 			this.removeSnakeBodyPart(this.python_body.length - this.START_PYTHON_LENGTH);
-			this.updateBonusPosition('apple');
-			this.updateBonusPosition('rotten_apple');
-			// this.updateRottenBonusPosition();
+			this.updateBonusPosition(this.APPLE);
+			this.updateBonusPosition(this.ROTTEN_APPLE);
 			this.updateBody();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
-			this.updateBonusPosition('apple');
+			this.updateBonusPosition(this.APPLE);
 			this.growPython();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_LOST_POINT , function () {
-			this.updateBonusPosition('rotten_apple');
+			this.updateBonusPosition(this.ROTTEN_APPLE);
 			this.removeSnakeBodyPart(1);
 		}.bind(this));
 
@@ -289,11 +292,6 @@ class PixiVisualizer {
 		this.bg_container.addChild( this.bonuses[bonus_name] );
 	}
 
-	// updateRottenBonusPosition() {
-	// 	this.setSpritePosition( this.rotten_bonus_sprite, this.python.rotten_bonus.x, this.python.rotten_bonus.y );
-	// 	this.bg_container.addChild( this.rotten_bonus_sprite );
-	// }	
-
 	// <<< BONUS UPDATE <<<
 
 
@@ -312,6 +310,8 @@ class PixiVisualizer {
 		PIXI.loader
 			.add( ( config.preload_list || [] ).concat([
 				this.ASSETS_PATH+"smoke.json",
+				this.ASSETS_PATH+"gold_anim.png",
+				this.ASSETS_PATH+"coin.png",
 		    this.ASSETS_PATH+"Ground.png",
 		    this.ASSETS_PATH+"bg.png",
 		    this.ASSETS_PATH+"CartoonSmoke.png",
