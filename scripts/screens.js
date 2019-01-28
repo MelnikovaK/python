@@ -17,6 +17,9 @@ class Screens {
 
 		this.python = python;
 
+		this.SOUND_ON = 'Sound on';
+		this.SOUND_OFF = 'Sound off';
+
 
 		if ( !$container || !$container.length ) return;
 		
@@ -304,11 +307,18 @@ class Screens {
 				<h1> PAUSE </h1>
 				<div>Score: <span class="modal-form__score"></span></div>
 				<button class="modal-form__continue-btn button" data-emit-event="${this.PLAY}">Continue</button>
-				<button class="modal-form__soundon-btn button" data-emit-sound-event="${this.TOGGLE_SOUND}">Sound on/off</button>
+				<button class="modal-form__soundon-btn button"">${this.SOUND_OFF}</button>
 							</div>
 			<div class="overlay"></div>
 		`
 		);
+		var $sound_button = $('.modal-form__soundon-btn', $modal_window);
+		var scope = this;
+		$sound_button.on('click', function() {
+			$(this).text($(this).text()==scope.SOUND_ON ? scope.SOUND_OFF : scope.SOUND_ON);
+			Utils.triggerCustomEvent( window, scope.TOGGLE_SOUND );
+
+		})
 
 	}
 
