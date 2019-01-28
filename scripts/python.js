@@ -209,49 +209,23 @@ class Python {
 			if ( next_head_position.x == this.bonuses[bonus_name].x && next_head_position.y == this.bonuses[bonus_name].y) {
 				flag = true;
 				this.points += this.bonuses[bonus_name].point;
+
+				if ( this.points < 0 ) {
+					this.is_game_over = true;
+					return;
+				}
+
 				this.generateNewBonus(bonus_name);
 
-				if ( this.bonuses[bonus_name].action)  this.bonuses[bonus_name].action(this);
 
+				if ( this.bonuses[bonus_name].action)  this.bonuses[bonus_name].action(this);
 				Utils.triggerCustomEvent(window, this.bonuses[bonus_name].trigger_action_name);
 				if( this.bonuses[bonus_name].sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, this.bonuses[bonus_name].sound );
 
-				if ( this.points < 0 ) this.is_game_over = true;
-
-				break
+				break;
 			}
 		}
 		if ( !flag ) this.python_body.pop();
-
-		// if ( next_head_position.x == this.bonus.x && next_head_position.y == this.bonus.y ) {
-		// 	this.points += this.bonus.point;
-		// 	this.generateNewBonus();
-
-		// 	Utils.triggerCustomEvent( window, this.PYTHON_GET_POINT );
-		// 	Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "bonus", loop: false} );
-
-		// }else if (next_head_position.x == this.rotten_bonus.x && next_head_position.y == this.rotten_bonus.y){ 
-
-		// 	var last_index = this.python_body.length - 1;
-		// 	this.python_body[last_index] = this.python_body[last_index - 2];
-		// 	this.generateNewRottenBonus();
-
-		// 	if ( this.points < this.rotten_bonus.point ) {
-		// 		this.is_game_over = true;
-		// 		return;	
-		// 	}
-			
-		// 	this.python_body.splice(last_index - 2, 2);
-
-		// 	this.points -= this.rotten_bonus.point;
-
-		// 	Utils.triggerCustomEvent( window, this.PYTHON_LOST_POINT );
-
-
-		// } else {// if not
-		// 	this.python_body.pop();
-
-		// }
 
 	}
 
@@ -321,6 +295,12 @@ class Python {
 
 	checkBonusCoordinatesCorrect( x, y, bonus_name ) {
 		for (var i = 0; i < this.python_body.length; i++ ) {
+			if ( i == 0 ) {
+				var head_x = this.python_body[i].x + 3 * this.python_direction.x;
+				var head_y = this.python_body[i].y + 3 * this.python_direction.y;
+
+				if ( x <= head_x && x >= this.python_body[i].x &&  y <= head_y && y >= this.python_body[i].y) return false;
+			}
 
 			var less_than_x = this.python_body[i].x - 1;
 			var less_than_y = this.python_body[i].y - 1;

@@ -71,6 +71,7 @@ class InputController {
   	this.attachKeyboard( target );
   	this.attachMouse( target );
   	this.attachTouch( target );
+  	this.attachTap( target );
   }
 
   detach() {
@@ -344,4 +345,28 @@ class InputController {
 	}
 
 	//<<< TOUCH <<<
+
+
+	//Tap
+
+	attachTap( target ){
+
+		if( !this.onTap ){
+			
+			var tap_X, tap_Y;
+		  this.onTap = function(event){
+		  	event.preventDefault();
+		  	if (event.which != 1) return;
+		  	tap_X = event.clientX;
+		  	tap_Y = event.clientY;
+		  	var gesture_name = this.computeGestureName( tap_X, tap_Y, event.clientX, event.clientY, false );
+		  	if( gesture_name ){
+		  		this.emitMouseActionEvent(this.actions_by_gesture[gesture_name]);
+		  	}
+		  }.bind(this);		 
+  	}
+
+		target.addEventListener('click', this.onTap );
+	}
+
 }

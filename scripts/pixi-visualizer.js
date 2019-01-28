@@ -197,6 +197,8 @@ class PixiVisualizer {
 	updateBody() {
 
 		var python_body = python.python_body;
+				console.log( python_body)
+
 
 		//BODY
 		for ( var i = 0; i < python_body.length; i++ ) {
