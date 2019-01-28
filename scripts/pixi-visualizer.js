@@ -26,6 +26,8 @@ class PixiVisualizer {
 		//
 		this.python_body = [];
 
+		this.bonuses = {};
+
 		//
 		this.assets_array = [];
 
@@ -66,20 +68,20 @@ class PixiVisualizer {
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
-			
 			this.removeSnakeBodyPart(this.python_body.length - this.START_PYTHON_LENGTH);
-			this.updateBonusPosition();
-			this.updateRottenBonusPosition();
+			this.updateBonusPosition('apple');
+			this.updateBonusPosition('rotten_apple');
+			// this.updateRottenBonusPosition();
 			this.updateBody();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
-			this.updateBonusPosition();
+			this.updateBonusPosition('apple');
 			this.growPython();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_LOST_POINT , function () {
-			this.updateRottenBonusPosition();
+			this.updateBonusPosition('rotten_apple');
 			this.removeSnakeBodyPart(1);
 		}.bind(this));
 
@@ -126,7 +128,6 @@ class PixiVisualizer {
 
 		for ( var i = 0; i < this.cells_horizontal; i++) {
 			for ( var j = 0; j < this.cells_vertical; j++) {
-
 				if ( i == 0 || j == 0 || i == this.cells_horizontal - 1 || j == this.cells_vertical - 1)  var pic_name = this.ASSETS_PATH+"Wall.png";
 				else  var pic_name = this.ASSETS_PATH+"Ground.png"
 
@@ -138,7 +139,6 @@ class PixiVisualizer {
 				bg_container.addChild(ground_cell);
 			}
 		}
-
 	}
 
 	createGameCharacters() {
@@ -162,7 +162,12 @@ class PixiVisualizer {
 
  		//BONUS
  		var bonus = this.bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 3, 64, 64 );
- 		var rotten_bonus = this.rotten_bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 1, 3, 64, 64 );
+ 		var rotten_bonus = this.rotten_bonus_sprite = this.rotten_bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 1, 3, 64, 64 );
+
+ 		this.bonuses = {
+ 			'apple': this.bonus_sprite,
+ 			'rotten_apple': this.rotten_bonus_sprite
+ 		}
 	}
 
 	// <<< CREATING GAME FIELD AND CHARACTERS <<<
@@ -278,44 +283,17 @@ class PixiVisualizer {
 
 
 	// >>> BONUS UPDATE >>>
-	updateBonusPosition(){
-		this.setSpritePosition( this.bonus_sprite, this.python.bonus.x, this.python.bonus.y );
-		this.bg_container.addChild( this.bonus_sprite );
+	updateBonusPosition(bonus_name){
+		this.setSpritePosition( this.bonuses[bonus_name], this.python.bonuses[bonus_name].x, this.python.bonuses[bonus_name].y );
+		this.bg_container.addChild( this.bonuses[bonus_name] );
 	}
 
-	updateRottenBonusPosition() {
-		this.setSpritePosition( this.rotten_bonus_sprite, this.python.rotten_bonus.x, this.python.rotten_bonus.y );
-		this.bg_container.addChild( this.rotten_bonus_sprite );
-	}	
+	// updateRottenBonusPosition() {
+	// 	this.setSpritePosition( this.rotten_bonus_sprite, this.python.rotten_bonus.x, this.python.rotten_bonus.y );
+	// 	this.bg_container.addChild( this.rotten_bonus_sprite );
+	// }	
 
 	// <<< BONUS UPDATE <<<
-
-
-	// >>> PARTICLES >>>
-	visualizeParticles(imagePaths, config) {
-		var stage = new PIXI.Container(),
-			emitter = null,
-			renderer = PIXI.autoDetectRenderer(this.FIELD_WIDTH, this.FIELD_HEIGHT),
-			bg = null;
-
-
-		var update = function(){
-
-			updateId = requestAnimationFrame(update);
-
-			var now = Date.now();
-			if (emitter)
-				emitter.update((now - elapsed) * 0.001);
-
-			elapsed = now;
-
-			// render the stage
-			renderer.render(stage);
-		};
-	}
-	// <<< PARTICLES <<<
-	
-
 
 
 	// >>> UTILS >>>

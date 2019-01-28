@@ -44,6 +44,8 @@ class Python {
 		this.pause = false;
 		this.is_game_over = false;
 
+		this.bonuses = {};
+
 		//
 		this.bonus = {};
 
@@ -59,6 +61,7 @@ class Python {
 
 		//
 		this.checkSizeOfFieldElements();
+		// this.initBonuses();
 		this.resetPyhon();
 		//
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
@@ -173,8 +176,7 @@ class Python {
 		this.is_game_over = false;
 
 		this.points = 0;
-		this.generateNewBonus();
-		this.generateNewRottenBonus();
+		this.initBonuses();
 
 
 		this.resetPyhon();
@@ -197,41 +199,66 @@ class Python {
 		  y: this.python_body[0].y + this.python_direction.y
 		};
 
+		var flag = false;
+
 
 		this.python_body.unshift( next_head_position );
 
 		// check if bonus is eaten
+		for ( var bonus_name in this.bonuses ) {
+			if ( next_head_position.x == this.bonuses[bonus_name].x && next_head_position.y == this.bonuses[bonus_name].y) {
+				flag = true;
+				this.points += this.bonuses[bonus_name].point;
+				this.generateNewBonus(bonus_name);
 
-		if ( next_head_position.x == this.bonus.x && next_head_position.y == this.bonus.y ) {
-			this.points += this.bonus.point;
-			this.generateNewBonus();
+				if ( this.bonuses[bonus_name].action)  this.bonuses[bonus_name].action(this);
 
-			Utils.triggerCustomEvent( window, this.PYTHON_GET_POINT );
-			Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "bonus", loop: false} );
-		
-		}else if (next_head_position.x == this.rotten_bonus.x && next_head_position.y == this.rotten_bonus.y){ 
+				Utils.triggerCustomEvent(window, this.bonuses[bonus_name].trigger_action_name);
+				if( this.bonuses[bonus_name].sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, this.bonuses[bonus_name].sound );
 
-			var last_index = this.python_body.length - 1;
-			this.python_body[last_index] = this.python_body[last_index - 2];
-			this.generateNewRottenBonus();
+				if ( this.points < 0 ) this.is_game_over = true;
 
-			if ( this.points < this.rotten_bonus.point ) {
-				this.is_game_over = true;
-				return;	
+				break
 			}
-			
-			this.python_body.splice(last_index - 2, 2);
-
-			this.points -= this.rotten_bonus.point;
-
-			Utils.triggerCustomEvent( window, this.PYTHON_LOST_POINT );
-
-
-		} else {// if not
-			this.python_body.pop();
-
 		}
+		if ( !flag ) this.python_body.pop();
 
+		// if ( next_head_position.x == this.bonus.x && next_head_position.y == this.bonus.y ) {
+		// 	this.points += this.bonus.point;
+		// 	this.generateNewBonus();
+
+		// 	Utils.triggerCustomEvent( window, this.PYTHON_GET_POINT );
+		// 	Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "bonus", loop: false} );
+
+		// }else if (next_head_position.x == this.rotten_bonus.x && next_head_position.y == this.rotten_bonus.y){ 
+
+		// 	var last_index = this.python_body.length - 1;
+		// 	this.python_body[last_index] = this.python_body[last_index - 2];
+		// 	this.generateNewRottenBonus();
+
+		// 	if ( this.points < this.rotten_bonus.point ) {
+		// 		this.is_game_over = true;
+		// 		return;	
+		// 	}
+			
+		// 	this.python_body.splice(last_index - 2, 2);
+
+		// 	this.points -= this.rotten_bonus.point;
+
+		// 	Utils.triggerCustomEvent( window, this.PYTHON_LOST_POINT );
+
+
+		// } else {// if not
+		// 	this.python_body.pop();
+
+		// }
+
+	}
+
+	removeSnakePart(scope) {
+		var last_index = scope.python_body.length - 1;
+		scope.python_body[last_index] = scope.python_body[last_index - 2];
+		scope.python_body.splice(last_index - 2, 2);
 	}
 
 	resetPyhon() {
@@ -244,29 +271,55 @@ class Python {
 		}
 	}
 
-	generateNewBonus() {
-		this.calculateNewBonusCoordinates(this.bonus);
-		
-		if ( !this.checkBonusCoordinatesCorrect(this.bonus.x, this.bonus.y) ) this.generateNewBonus();
-		
-	}
-
-	generateNewRottenBonus() {
-		this.calculateNewBonusCoordinates(this.rotten_bonus);
-
-		if ( !this.checkRottenBonusCoordinatesCorrect(this.rotten_bonus.x, this.rotten_bonus.y) ) this.generateNewRottenBonus();
-		
-	}
-
-	calculateNewBonusCoordinates( bonus ) {
-		var point = 1;
+	initBonuses() {
 		var offset = 1;
-		bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
-		bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
-		bonus.point = 1;
+		var apple = {
+			x: ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
+			y: ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
+			point: 1,
+			trigger_action_name: this.PYTHON_GET_POINT,
+			sound: {sound_id: "bonus", loop: false}
+		};
+		var rotten_apple = {
+			x: ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
+			y: ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
+			point: -1,
+			trigger_action_name: this.PYTHON_LOST_POINT,
+			action: this.removeSnakePart
+		}
+
+		this.bonuses = {
+			'apple': apple,
+			'rotten_apple': rotten_apple
+		}
+		console.log(this.bonuses)
 	}
 
-	checkBonusCoordinatesCorrect( x, y ) {
+	generateNewBonus( bonus_name ) {
+		var offset = 1;
+		this.bonuses[bonus_name].x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
+		this.bonuses[bonus_name].y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
+
+		if ( !this.checkBonusCoordinatesCorrect(this.bonuses[bonus_name].x, this.bonuses[bonus_name].y, bonus_name) ) this.generateNewBonus();
+		
+	}
+
+	// generateNewRottenBonus() {
+	// 	this.calculateNewBonusCoordinates(this.rotten_bonus);
+
+	// 	if ( !this.checkRottenBonusCoordinatesCorrect(this.rotten_bonus.x, this.rotten_bonus.y) ) this.generateNewRottenBonus();
+		
+	// }
+
+	// calculateNewBonusCoordinates( bonus ) {
+	// 	var point = 1;
+	// 	var offset = 1;
+	// 	bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
+	// 	bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
+	// 	bonus.point = 1;
+	// }
+
+	checkBonusCoordinatesCorrect( x, y, bonus_name ) {
 		for (var i = 0; i < this.python_body.length; i++ ) {
 
 			var less_than_x = this.python_body[i].x - 1;
@@ -276,14 +329,19 @@ class Python {
 
 			if (less_than_x <= x && less_than_y <= y && bigger_than_x >= x && bigger_than_y >= y) return false;
 		}
+
+		for ( var name in this.bonuses) {
+			if (name == bonus_name) continue;
+			if (x == this.bonuses[name].x && y == this.bonuses[name].y ) return false;
+		}
 		return true;
 	}
 
-	checkRottenBonusCoordinatesCorrect(x, y) {
-		if  ( !this.checkBonusCoordinatesCorrect(this.rotten_bonus.x, this.rotten_bonus.y) ) return false;
-		if ( this.rotten_bonus.x == this.bonus.x && this.rotten_bonus.y == this.bonus.y ) return false;
-		return true;
-	}
+	// checkRottenBonusCoordinatesCorrect(x, y) {
+	// 	if  ( !this.checkBonusCoordinatesCorrect(this.rotten_bonus.x, this.rotten_bonus.y) ) return false;
+	// 	if ( this.rotten_bonus.x == this.bonus.x && this.rotten_bonus.y == this.bonus.y ) return false;
+	// 	return true;
+	// }
 
 
 	isGameOver() {
