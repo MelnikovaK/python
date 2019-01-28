@@ -191,9 +191,6 @@ class Python {
 
 
 	movePython() {
-
-		console.log(this.python_direction)
-
 		
 		var next_head_position = {
 			x: this.python_body[0].x + this.python_direction.x,
@@ -224,11 +221,9 @@ class Python {
 			}
 			
 			this.python_body.splice(last_index - 2, 2);
-
-
+			this.points -= this.rotten_bonus.point;
 			Utils.triggerCustomEvent( window, this.PYTHON_LOST_POINT );
 
-			this.points -= this.rotten_bonus.point;
 
 		} else {// if not
 			this.python_body.pop();
@@ -263,7 +258,7 @@ class Python {
 		var offset = 1;
 		this.rotten_bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
 		this.rotten_bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
-		this.rotten_bonus.point = 1
+		this.rotten_bonus.point = 1;
 		
 		if ( !this.checkRottenBonusCoordinatesCorrect(this.rotten_bonus.x, this.rotten_bonus.y) ) this.generateNewRottenBonus();
 		
@@ -276,8 +271,10 @@ class Python {
 			var less_than_y = this.python_body[i].y - 1;
 			var bigger_than_x = this.python_body[i].x + 1;
 			var bigger_than_y = this.python_body[i].y + 1; 
+			console.log( less_than_x, less_than_y, bigger_than_x, bigger_than_y)
+			console.log(x, y )
 
-			if (less_than_x <= x && less_than_y <= y || bigger_than_x >= x && bigger_than_y >= y)  return false;
+			if (less_than_x <= x && less_than_y <= y && bigger_than_x >= x && bigger_than_y >= y) return false;
 		}
 		return true;
 	}

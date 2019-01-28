@@ -18,6 +18,8 @@ class PixiVisualizer {
 
 		this.ASSETS_PATH = config.ASSETS_PATH || 'assets/';
 
+		this.START_PYTHON_LENGTH = 3;
+
 		//
 		this.python = python;
 
@@ -65,7 +67,7 @@ class PixiVisualizer {
 
 		window.addEventListener( "screens: start game" , function () {
 			
-			this.removeSnakeBodyPart(this.python_body.length - 3);
+			this.removeSnakeBodyPart(this.python_body.length - this.START_PYTHON_LENGTH);
 			this.updateBonusPosition();
 			this.updateRottenBonusPosition();
 			this.updateBody();
@@ -165,14 +167,17 @@ class PixiVisualizer {
 
 	// <<< CREATING GAME FIELD AND CHARACTERS <<<
 
+
+
 	// DELETE
 	removeSnakeBodyPart( remove_counter ) {
 		while ( remove_counter > 0 ) {
-
 			var last_index = this.python_body.length - 1;
+
 			this.bg_container.removeChild(this.python_body[last_index - 1].sprite);
 			this.assets_array.push(this.python_body[last_index - 1]);
 			this.python_body.splice(last_index - 1, 1);
+
 			remove_counter--;
 		}
 	}
@@ -327,7 +332,7 @@ class PixiVisualizer {
 
 		PIXI.loader
 			.add( ( config.preload_list || [] ).concat([
-				this.ASSETS_PATH+"game-over.json",
+				this.ASSETS_PATH+"smoke.json",
 		    this.ASSETS_PATH+"Ground.png",
 		    this.ASSETS_PATH+"bg.png",
 		    this.ASSETS_PATH+"CartoonSmoke.png",

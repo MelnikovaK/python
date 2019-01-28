@@ -83,6 +83,11 @@ class Screens {
 			$points.text(scope.python.points);
 		});
 
+		window.addEventListener( scope.python.PYTHON_LOST_POINT, function() {
+			var $points = $('.game-screen__points', scope.$container);
+			$points.text(scope.python.points);
+		});
+
 		window.addEventListener( "screens: show_finish_modal" , function() {
 			scope.showModalWindowWithScore('.game-over__modal-form', '.game-over__overlay')
 		});
