@@ -278,21 +278,6 @@ class Python {
 		
 	}
 
-	// generateNewRottenBonus() {
-	// 	this.calculateNewBonusCoordinates(this.rotten_bonus);
-
-	// 	if ( !this.checkRottenBonusCoordinatesCorrect(this.rotten_bonus.x, this.rotten_bonus.y) ) this.generateNewRottenBonus();
-		
-	// }
-
-	// calculateNewBonusCoordinates( bonus ) {
-	// 	var point = 1;
-	// 	var offset = 1;
-	// 	bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
-	// 	bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
-	// 	bonus.point = 1;
-	// }
-
 	checkBonusCoordinatesCorrect( x, y, bonus_name ) {
 		for (var i = 0; i < this.python_body.length; i++ ) {
 			if ( i == 0 ) {
@@ -316,14 +301,7 @@ class Python {
 		}
 		return true;
 	}
-
-	// checkRottenBonusCoordinatesCorrect(x, y) {
-	// 	if  ( !this.checkBonusCoordinatesCorrect(this.rotten_bonus.x, this.rotten_bonus.y) ) return false;
-	// 	if ( this.rotten_bonus.x == this.bonus.x && this.rotten_bonus.y == this.bonus.y ) return false;
-	// 	return true;
-	// }
-
-
+	
 	isGameOver() {
 
 		var python_head = this.python_body[0];

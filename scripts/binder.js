@@ -80,10 +80,12 @@ let inputController = new InputController( config.input, $game_container[0] );
 
 let python = new Python( inputController, config );
 
+inputController.python = python;
+
 let screens = new Screens( $game_container, python );
 
 let sound_manager = new PixiSoundManager(config, python);
 
 let visualizer = new PixiVisualizer($game_container, python, config );
 
-// let particles_manager = new PixiParticlesManager($game_container, visualizer, config, python);
+let particles_manager = new PixiParticlesManager($game_container, visualizer, config, python);

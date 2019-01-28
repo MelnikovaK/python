@@ -21,7 +21,8 @@ class InputController {
     //
     this.swipe_min_distance = config_data.swipe_min_distance;
     this.swipe_max_distance = config_data.swipe_max_distance;
-    
+
+
     //
     var actions_to_bind = config_data.actions;
     if( actions_to_bind ) this.bindActions( actions_to_bind );
@@ -64,6 +65,7 @@ class InputController {
 
   //
   attach( target, dont_enable ) {
+
   	this.detach();
   	this.target = target;
   	target.focus();
@@ -81,7 +83,6 @@ class InputController {
   	this.detachMouse();
   	this.target = null;
   }
-
   // >>> ACTIONS >>>  
 
   bindActions( actions_to_bind ) {
@@ -264,9 +265,13 @@ class InputController {
   computeGestureName(start_X, start_Y, finish_X, finish_Y, on_move) {
 		
 		var gesture_name = '';
-		
+
+		console.log(start_X, start_Y, finish_X, finish_Y)
+
 		var horizontal_difference = start_X - finish_X;
+		console.log('HORIZONTAL: ', horizontal_difference)
 		var vertical_difference = start_Y - finish_Y;
+		console.log('VERTICAL: ',vertical_difference)
 		var horizontal_difference_abs = Math.abs(horizontal_difference);
 		var vertical_difference_abs = Math.abs(vertical_difference);
 
@@ -285,6 +290,7 @@ class InputController {
 			if(  max_length > this.swipe_max_distance ) return gesture_name;
 			return false;
 		}
+		console.log(gesture_name)
 
 		return gesture_name;
 	}
@@ -352,20 +358,21 @@ class InputController {
 	attachTap( target ){
 
 		if( !this.onTap ){
-			
-			var tap_X, tap_Y;
 		  this.onTap = function(event){
 		  	event.preventDefault();
 		  	if (event.which != 1) return;
-		  	tap_X = event.clientX;
-		  	tap_Y = event.clientY;
-		  	var gesture_name = this.computeGestureName( tap_X, tap_Y, event.clientX, event.clientY, false );
+		  	var tap_X = event.clientX,
+		  	    tap_Y = event.clientY,
+		  	    cell_width = this.python.CELL_WIDTH,
+		  	    cell_height = this.python.CELL_HEIGHT,
+		  	    object_x = this.python.python_body[0].x * cell_width,
+		  	    object_y = this.python.python_body[0].y * cell_height;
+		  	var gesture_name = this.computeGestureName( object_x, object_y, tap_X, tap_Y, false );
 		  	if( gesture_name ){
 		  		this.emitMouseActionEvent(this.actions_by_gesture[gesture_name]);
 		  	}
 		  }.bind(this);		 
   	}
-
 		target.addEventListener('click', this.onTap );
 	}
 
