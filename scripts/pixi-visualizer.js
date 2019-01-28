@@ -162,11 +162,16 @@ class PixiVisualizer {
 
 
 		this.bg_container.removeChild(this.python_body[last_index].sptrite);
+
+		console.log(this.python_body);
+
 		this.python_body.pop();
+
+		console.log(this.python_body);
+		
 
 		this.assets_array.push(this.python_body[last_index - 1]);
 
-		console.log(this.python_body);
 	}
 
 	// >>> MOVE PYTHON >>>
@@ -179,8 +184,6 @@ class PixiVisualizer {
 	updateBody() {
 
 		var python_body = python.python_body;
-		console.log(this.python_body[0])
-
 		//BODY
 		for ( var i = 0; i < python_body.length; i++ ) {
 			//python parts move

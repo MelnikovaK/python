@@ -210,15 +210,11 @@ class Python {
 			var last_index = this.python_body.length - 1;
 
 			this.points -= this.rotten_bonus.point;
-			console.log('PYTHON: ', this.python_body);
 			this.python_body.splice(last_index - 1, 1);
 
 
 			this.generateNewRottenBonus();
 			Utils.triggerCustomEvent( window, this.PYTHON_LOST_POINT );
-			console.log('PYTHON: ', this.python_body);
-			
-
 		} else {// if not
 			this.python_body.pop();
 
