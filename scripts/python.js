@@ -271,8 +271,6 @@ class Python {
 			var less_than_y = this.python_body[i].y - 1;
 			var bigger_than_x = this.python_body[i].x + 1;
 			var bigger_than_y = this.python_body[i].y + 1; 
-			console.log( less_than_x, less_than_y, bigger_than_x, bigger_than_y)
-			console.log(x, y )
 
 			if (less_than_x <= x && less_than_y <= y && bigger_than_x >= x && bigger_than_y >= y) return false;
 		}
