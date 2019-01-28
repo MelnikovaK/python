@@ -183,12 +183,17 @@ class Python {
 
 		this.python_direction = this.directions[this.RIGHT];
 
+		this.inputController_direction = this.python_direction;
+
 		if ( this.game_timeout ) clearTimeout(this.game_timeout);
 		this.gameStep();
 	}
 
 
 	movePython() {
+
+		console.log(this.python_direction)
+
 		
 		var next_head_position = {
 			x: this.python_body[0].x + this.python_direction.x,
