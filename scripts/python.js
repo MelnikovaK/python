@@ -133,8 +133,6 @@ class Python {
 		this.pause = _paused;
 		Utils.triggerCustomEvent( window, _paused ? this.PAUSE : this.PLAY );
 		Utils.triggerCustomEvent( window, this.PAUSE_SOUND );
-
-
 	}
 
 	//

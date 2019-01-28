@@ -25,12 +25,11 @@ class PixiParticlesManager {
 			this.get_point_emitter.updateOwnerPos(this.python.python_body[0].x * 20, this.python.python_body[0].y * 20 );
 		}.bind(this));
 
-		window.addEventListener( python.PYTHON_MOVED , function () {
-			// this.elapsed = Date.now();
-			// // var scope = this;
-			// this.update();
+		// window.addEventListener( python.PYTHON_MOVED , function () {
+		// 	this.elapsed = Date.now();
+		// 	this.update();
 
-		}.bind(this));
+		// }.bind(this));
 
 	}
 
@@ -62,6 +61,7 @@ class PixiParticlesManager {
 
 	// update() {
 	// 	var scope = this;
+
 	// 	var updateId = requestAnimationFrame(scope.update);
 	// 	var now = Date.now();
 	// 	for ( var emitter_name in scope.emitters_array ) {
