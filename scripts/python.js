@@ -58,7 +58,6 @@ class Python {
 
 		//
 		this.checkSizeOfFieldElements();
-		// this.initBonuses();
 		this.resetPyhon();
 		//
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
@@ -183,9 +182,10 @@ class Python {
 
 		this.inputController.enabled = true;
 
-		this.python_direction = this.directions[this.RIGHT];
+		this.inputController_direction = this.directions[this.RIGHT];
 
-		this.inputController_direction = this.python_direction;
+		this.python_direction = this.inputController_direction;
+
 
 		if ( this.game_timeout ) clearTimeout(this.game_timeout);
 		this.gameStep();
@@ -208,7 +208,7 @@ class Python {
 		for ( var bonus_name in this.bonuses ) {
 			if ( next_head_position.x == this.bonuses[bonus_name].x && next_head_position.y == this.bonuses[bonus_name].y) {
 
-				this.generateNewBonus(bonus_name);
+				this.resetBonus(bonus_name);
 
 				if( this.points == 0 && this.bonuses[bonus_name].point < 0 ) {
 					this.is_game_over = true;
@@ -249,38 +249,46 @@ class Python {
 		for ( var i = 0; i < this.max_python_length; i++ ) {
 			this.python_body[i] = { x: position_x - i, y: position_y };
 		}
+
+		
+
+	}
+
+	addBonus( bonus_name ){
+		var bonus_data = this.bonus_defenitions[ bonus_name ];
+		bonus_data.type = bonus_name;
+		bonus_data.x = 0;
+		bonus_data.y = 0;
+		this.bonuses.push( bonus_data );
 	}
 
 	initBonuses() {
-		var offset = 1;
-		var apple = {
-			x: ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
-			y: ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
-			point: 1,
-			trigger_action_name: this.PYTHON_GET_POINT,
-			sound: {sound_id: "bonus", loop: false}
-		};
 
-		var rotten_apple = {
-			x: ~~( Math.random() * (this.cells_horizontal - offset*2) + offset ),
-			y: ~~( Math.random() * (this.cells_vertical - offset*2) + offset ),
-			point: -1,
-			trigger_action_name: this.PYTHON_LOST_POINT,
-			action: this.removeSnakePart
+		this.bonus_defenitions = {
+			'apple': {
+				point: 1,
+				trigger_action_name: this.PYTHON_GET_POINT,
+				sound: {sound_id: "bonus", loop: false}
+			},
+			'rotten_apple': {
+				point: -1,
+				trigger_action_name: this.PYTHON_LOST_POINT,
+				action: this.removeSnakePart
+			}
 		}
 
-		this.bonuses = {
-			'apple': apple,
-			'rotten_apple': rotten_apple
-		}
+		addBonus( 'apple' );
+
+		addBonus( 'rotten_apple' );
+
 	}
 
-	generateNewBonus( bonus_name ) {
+	resetBonus( bonus ) {
 		var offset = 1;
-		this.bonuses[bonus_name].x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
-		this.bonuses[bonus_name].y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
+		bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
+		bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
 
-		if ( !this.checkBonusCoordinatesCorrect(this.bonuses[bonus_name].x, this.bonuses[bonus_name].y, bonus_name) ) this.generateNewBonus();
+		if ( !this.checkBonusCoordinatesCorrect(bonus.x, bonus.y, bonus_name) ) this.resetBonus();
 		
 	}
 

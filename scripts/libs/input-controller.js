@@ -262,7 +262,7 @@ class InputController {
   }
 
   //
-  computeGestureName(start_X, start_Y, finish_X, finish_Y, on_move) {
+  computeGestureName(start_X, start_Y, finish_X, finish_Y, on_move, skip_limits ) {
 		
 		var gesture_name = '';
 
@@ -272,7 +272,7 @@ class InputController {
 		var vertical_difference_abs = Math.abs(vertical_difference);
 
 		var max_length = horizontal_difference_abs > vertical_difference_abs ? horizontal_difference_abs : vertical_difference_abs;
-		if( max_length < this.swipe_min_distance ) return; // min swipe length
+		if( !skip_limits && max_length < this.swipe_min_distance ) return; // min swipe length
 
 		if ( horizontal_difference_abs > vertical_difference_abs) {
 			if ( horizontal_difference < 0 ) gesture_name = 'swipe-right';
@@ -282,7 +282,7 @@ class InputController {
 			else gesture_name = 'swipe-up';
 		}
 		
-		if( on_move ) {
+		if( !skip_limits && on_move ) {
 			if(  max_length > this.swipe_max_distance ) return gesture_name;
 			return false;
 		}
