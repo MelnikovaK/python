@@ -6,23 +6,21 @@ class PixiParticlesManager {
 		this.container =  visualizer.app.stage;
 		this.python = python;
 
+		//EMITERS NAMES
+		this.GAME_OVER = 'game_over';
+		this.GET_POINT = 'get_point';
+
 		//
 		this.emitters_array  = {};
 
 		this.initEmittersArray();
 
 		window.addEventListener( python.GAME_OVER , function () {
-			if(!this.game_over_emitter) return;
-			this.game_over_emitter.emit = true;
-			this.game_over_emitter.resetPositionTracking();
-			this.game_over_emitter.updateOwnerPos(this.python.python_body[0].x * 20, this.python.python_body[0].y * 20 );
+			this.updateEmitter(this.GAME_OVER);
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
-			if(!this.get_point_emitter) return;
-			this.get_point_emitter.emit = true;
-			this.get_point_emitter.resetPositionTracking();
-			this.get_point_emitter.updateOwnerPos(this.python.python_body[0].x * 20, this.python.python_body[0].y * 20 );
+			this.updateEmitter(this.GET_POINT);
 		}.bind(this));
 
 		// window.addEventListener( python.PYTHON_MOVED , function () {
@@ -31,6 +29,13 @@ class PixiParticlesManager {
 
 		// }.bind(this));
 
+	}
+
+	updateEmitter(emitter_name) {
+		if(!this.emitters_array[emitter_name]) return;
+			this.emitters_array[emitter_name].emit = true;
+			this.emitters_array[emitter_name].resetPositionTracking();
+			this.emitters_array[emitter_name].updateOwnerPos(this.python.python_body[0].x * 20, this.python.python_body[0].y * 20 );
 	}
 
 	initEmittersArray() {
