@@ -281,7 +281,7 @@ class PixiVisualizer {
 		var next_part_id = this.getNextPartID(python_body[last_index - 2], python_body[last_index - 1]);
 
 		var part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
-		
+
 		var sprite =  this.AM.pullAsset('python_body');
 
 		sprite.texture.frame = new PIXI.Rectangle(
@@ -363,13 +363,14 @@ class PixiVisualizer {
 
 		//GAME FIELD
 		this.AM.addAsset('wall_cell', function(){
-			return new PIXI.Sprite( PIXI.loader.resources[scope.ASSETS_PATH+"Wall.png"].texture ); }, 78 );
+			return new PIXI.Sprite( PIXI.loader.resources[scope.ASSETS_PATH+"Wall.png"].texture ); }, 76 );
 		this.AM.addAsset('ground_cell', function(){
 			return new PIXI.Sprite( PIXI.loader.resources[scope.ASSETS_PATH+"Ground.png"].texture ); }, 360 );
 		//SNAKE PARTS
 		this.AM.addAsset('python_head', head, 3);
 		this.AM.addAsset('python_body', straight_horizontal, 40);
 		this.AM.addAsset('python_tail', tail, 3);
+		//BONUSES
 		this.AM.addAsset('apple', apple , 3);
 		this.AM.addAsset('rotten_apple', rotten_apple, 3);
 	} 
