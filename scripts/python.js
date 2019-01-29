@@ -203,14 +203,13 @@ class Python {
 		for ( var bonus_name in this.bonuses ) {
 			if ( next_head_position.x == this.bonuses[bonus_name].x && next_head_position.y == this.bonuses[bonus_name].y) {
 				flag = true;
-
-				this.points += this.bonuses[bonus_name].point;
 				this.generateNewBonus(bonus_name);
 
-				if ( this.points < 0 ) {
+				if( this.points == 0 && this.bonuses[bonus_name].point == -1) {
 					this.is_game_over = true;
 					return;
 				}
+				this.points += this.bonuses[bonus_name].point;
 
 				if ( this.bonuses[bonus_name].action)  this.bonuses[bonus_name].action(this);
 
@@ -275,7 +274,7 @@ class Python {
 
 	checkBonusCoordinatesCorrect( x, y, bonus_name ) {
 		for (var i = 0; i < this.python_body.length; i++ ) {
-			if ( i == 0 ) {
+			if ( i == 0 ) { //3 клетки от головы
 				var head_x = this.python_body[i].x + 3 * this.python_direction.x;
 				var head_y = this.python_body[i].y + 3 * this.python_direction.y;
 
