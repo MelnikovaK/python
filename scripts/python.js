@@ -205,7 +205,7 @@ class Python {
 				flag = true;
 				this.generateNewBonus(bonus_name);
 
-				if( this.points == 0 && this.bonuses[bonus_name].point == -1) {
+				if( this.points == 0 && this.bonuses[bonus_name].point < 0 ) {
 					this.is_game_over = true;
 					return;
 				}
