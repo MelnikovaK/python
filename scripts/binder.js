@@ -57,6 +57,10 @@ var config = {
 			"swipe-down": {
 				gesture: ['swipe-down'],
 			},
+
+			"tap": {
+				gesture: ['tap']
+			}
 		}
 	},
 
@@ -79,8 +83,6 @@ var config = {
 let inputController = new InputController( config.input, $game_container[0] );
 
 let python = new Python( inputController, config );
-
-inputController.python = python;
 
 let screens = new Screens( $game_container, python );
 

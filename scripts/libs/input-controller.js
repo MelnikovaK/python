@@ -73,7 +73,6 @@ class InputController {
   	this.attachKeyboard( target );
   	this.attachMouse( target );
   	this.attachTouch( target );
-  	this.attachTap( target );
   }
 
   detach() {
@@ -137,19 +136,19 @@ class InputController {
   	if( action.active == activate ) return false;
   	action.active = activate;
   	// console.log('ACTION NAME: ', action)
-  	var event = new CustomEvent( activate ? this.ACTION_ACTIVATED : this.ACTION_DEACTIVATED, { 'detail': action.name });
+  	var event = new CustomEvent( activate ? this.ACTION_ACTIVATED : this.ACTION_DEACTIVATED, { 'detail': { name: action.name}});
   	this.target.dispatchEvent(event);
   }
 
-  emitMouseActionEvent( action ){
+  emitMouseActionEvent( action, tap_x, tap_y ){
   	if ( !( this.enabled && action && action.enabled && this.mouse_enabled ) ) return false;
-  	var event = new CustomEvent( this.ACTION_TRIGGERED, { 'detail': action.name });
+  	var event = new CustomEvent( this.ACTION_TRIGGERED, { 'detail':{ name: action.name, x: tap_x, y: tap_y }});
   	this.target.dispatchEvent(event);
   }
 
   emitTouchActionEvent( action ){
   	if ( !( this.enabled && action && action.enabled && this.touch_enabled ) ) return false;
-  	var event = new CustomEvent( this.ACTION_TRIGGERED, { 'detail': action.name });
+  	var event = new CustomEvent( this.ACTION_TRIGGERED, { 'detail': { name: action.name, x: tap_x, y: tap_y } });
   	this.target.dispatchEvent(event);
   }
 	// <<< ACTIONS <<<  
@@ -223,9 +222,9 @@ class InputController {
 
 		  this.onMouseUp = function(event){
 		  	event.preventDefault();
-		  	var gesture_name = this.computeGestureName( start_X, start_Y, event.clientX, event.clientY, false );
+		  	var gesture_name = this.computeGestureName( start_X, start_Y, event.clientX, event.clientY, false, true );
 		  	if( gesture_name ){
-		  		this.emitMouseActionEvent(this.actions_by_gesture[gesture_name]);
+		  		this.emitMouseActionEvent(this.actions_by_gesture[gesture_name], start_X, start_Y);
 
 		  	}
 		  	this.removeMouseMoveListeners(target);
@@ -235,7 +234,7 @@ class InputController {
 		  	event.preventDefault();
 		  	var finish_X = event.clientX;
         var finish_Y = event.clientY;
-		  	var gesture_name = this.computeGestureName( start_X, start_Y, finish_X, finish_Y, true );
+		  	var gesture_name = this.computeGestureName( start_X, start_Y, finish_X, finish_Y, true, false );
 		  	if (gesture_name) {
 		  		this.emitMouseActionEvent(this.actions_by_gesture[gesture_name]);
 		  		// start_X = event.clientX;
@@ -272,7 +271,13 @@ class InputController {
 		var vertical_difference_abs = Math.abs(vertical_difference);
 
 		var max_length = horizontal_difference_abs > vertical_difference_abs ? horizontal_difference_abs : vertical_difference_abs;
-		if( !skip_limits && max_length < this.swipe_min_distance ) return; // min swipe length
+		if( max_length < this.swipe_min_distance ) {
+			if (!skip_limits) return; // min swipe length
+			else {
+				gesture_name = 'tap';
+				return gesture_name;
+			}
+		}
 
 		if ( horizontal_difference_abs > vertical_difference_abs) {
 			if ( horizontal_difference < 0 ) gesture_name = 'swipe-right';
@@ -313,7 +318,7 @@ class InputController {
 		  	event.preventDefault();
 		  	var finish_X = event.changedTouches[0].clientX;
         var finish_Y = event.changedTouches[0].clientY;
-		  	var gesture_name = this.computeGestureName( start_X, start_Y, finish_X, finish_Y, false );
+		  	var gesture_name = this.computeGestureName( start_X, start_Y, finish_X, finish_Y, false, true );
 		  	if( gesture_name ){
 		  		this.emitTouchActionEvent(this.actions_by_gesture[gesture_name]);
 		  	}
@@ -324,7 +329,7 @@ class InputController {
 		  	event.preventDefault();
 		  	var finish_X = event.changedTouches[0].clientX;
         var finish_Y = event.changedTouches[0].clientY;
-		  	var gesture_name = this.computeGestureName( start_X, start_Y, finish_X, finish_Y, true );
+		  	var gesture_name = this.computeGestureName( start_X, start_Y, finish_X, finish_Y, true, false );
 		  	if (gesture_name) {
 		  		this.emitTouchActionEvent(this.actions_by_gesture[gesture_name]);
 		  		this.removeTouchMoveListeners();
@@ -347,29 +352,5 @@ class InputController {
 	}
 
 	//<<< TOUCH <<<
-
-
-	//Tap
-
-	attachTap( target ){
-
-		if( !this.onTap ){
-		  this.onTap = function(event){
-		  	event.preventDefault();
-		  	if (event.which != 1) return;
-		  	var tap_X = event.clientX,
-		  	    tap_Y = event.clientY,
-		  	    cell_width = this.python.CELL_WIDTH,
-		  	    cell_height = this.python.CELL_HEIGHT,
-		  	    object_x = this.python.python_body[0].x * cell_width,
-		  	    object_y = this.python.python_body[0].y * cell_height;
-		  	var gesture_name = this.computeGestureName( object_x, object_y, tap_X, tap_Y, false );
-		  	if( gesture_name ){
-		  		this.emitMouseActionEvent(this.actions_by_gesture[gesture_name]);
-		  	}
-		  }.bind(this);		 
-  	}
-		target.addEventListener('click', this.onTap );
-	}
 
 }

@@ -44,7 +44,7 @@ class Python {
 		this.pause = false;
 		this.is_game_over = false;
 
-		this.bonuses = {};
+		this.bonuses = [];
 
 		//
 
@@ -94,10 +94,13 @@ class Python {
 
 	initInputControllerEvent(details) {
 		if ( !this.pause ) {
-			var dir = this.directions[details];
+			if ( details.name == 'tap') {
+				details.name = this.inputController.computeGestureName(this.python_body[0].x, this.python_body[0].y, details.x, details.y)
+			}
+			var dir = this.directions[details.name];
 		  if( dir ) {
-		  	var difference_x = this.directions[details].x - this.python_direction.x;
-		  	var difference_y = this.directions[details].y - this.python_direction.y;
+		  	var difference_x = this.directions[details.name].x - this.python_direction.x;
+		  	var difference_y = this.directions[details.name].y - this.python_direction.y;
 		  	if ( difference_x == 0 || difference_y == 0 ) return;
 				this.inputController_direction = dir;
 		  }
@@ -177,6 +180,10 @@ class Python {
 		this.points = 0;
 		this.initBonuses();
 
+		this.bonuses.forEach(function(x) {
+
+		})
+
 
 		this.resetPyhon();
 
@@ -205,32 +212,60 @@ class Python {
 		this.python_body.unshift( next_head_position );
 
 		// check if bonus is eaten
-		for ( var bonus_name in this.bonuses ) {
-			if ( next_head_position.x == this.bonuses[bonus_name].x && next_head_position.y == this.bonuses[bonus_name].y) {
 
-				this.resetBonus(bonus_name);
+		for (var i = 0; i < this.bonuses.length; i++ ) {
+			if (next_head_position.x == this.bonuses[i].x && next_head_position.y == this.bonuses[i].y) {
 
-				if( this.points == 0 && this.bonuses[bonus_name].point < 0 ) {
+				this.resetBonus(this.bonuses[i]);
+				if( this.points == 0 && this.bonuses[i].point < 0 ) {
 					this.is_game_over = true;
-					Utils.triggerCustomEvent(window, this.bonuses[bonus_name].trigger_action_name, {game_over: true});
+					Utils.triggerCustomEvent(window, this.bonuses[i].trigger_action_name, {game_over: true});
 					break;
 				}
 
 				flag = true;
-
 				//action
-				if ( this.bonuses[bonus_name].action)  this.bonuses[bonus_name].action(this);
+				if ( this.bonuses[i].action)  this.bonuses[i].action(this);
 				//trigger action
-				Utils.triggerCustomEvent(window, this.bonuses[bonus_name].trigger_action_name, {game_over: false});
+				Utils.triggerCustomEvent(window, this.bonuses[i].trigger_action_name, {game_over: false});
 
 				//play sound
-				if( this.bonuses[bonus_name].sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, this.bonuses[bonus_name].sound );
+				if( this.bonuses[i].sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, this.bonuses[i].sound );
 
-				this.points += this.bonuses[bonus_name].point;
+				this.points += this.bonuses[i].point;
 
 				break;
 			}
+
 		}
+
+		// for ( var bonus_name in this.bonuses.length; i++ ) {
+
+			// if ( next_head_position.x == this.bonuses[bonus_name].x && next_head_position.y == this.bonuses[bonus_name].y) {
+
+			// 	this.resetBonus(bonus_name);
+
+			// 	if( this.points == 0 && this.bonuses[bonus_name].point < 0 ) {
+			// 		this.is_game_over = true;
+			// 		Utils.triggerCustomEvent(window, this.bonuses[bonus_name].trigger_action_name, {game_over: true});
+			// 		break;
+			// 	}
+
+			// 	flag = true;
+
+			// 	//action
+			// 	if ( this.bonuses[bonus_name].action)  this.bonuses[bonus_name].action(this);
+			// 	//trigger action
+			// 	Utils.triggerCustomEvent(window, this.bonuses[bonus_name].trigger_action_name, {game_over: false});
+
+			// 	//play sound
+			// 	if( this.bonuses[bonus_name].sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, this.bonuses[bonus_name].sound );
+
+			// 	this.points += this.bonuses[bonus_name].point;
+
+			// 	break;
+			// }
+		
 		if ( !flag ) this.python_body.pop();
 
 	}
@@ -255,10 +290,11 @@ class Python {
 	}
 
 	addBonus( bonus_name ){
+		var offset = 1;
 		var bonus_data = this.bonus_defenitions[ bonus_name ];
 		bonus_data.type = bonus_name;
-		bonus_data.x = 0;
-		bonus_data.y = 0;
+		bonus_data.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
+		bonus_data.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
 		this.bonuses.push( bonus_data );
 	}
 
@@ -277,9 +313,9 @@ class Python {
 			}
 		}
 
-		addBonus( 'apple' );
+		this.addBonus( 'apple' );
 
-		addBonus( 'rotten_apple' );
+		this.addBonus( 'rotten_apple' );
 
 	}
 
@@ -288,11 +324,11 @@ class Python {
 		bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
 		bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
 
-		if ( !this.checkBonusCoordinatesCorrect(bonus.x, bonus.y, bonus_name) ) this.resetBonus();
+		if ( !this.checkBonusCoordinatesCorrect(bonus.x, bonus.y, bonus) ) this.resetBonus();
 		
 	}
 
-	checkBonusCoordinatesCorrect( x, y, bonus_name ) {
+	checkBonusCoordinatesCorrect( x, y, bonus) {
 		for (var i = 0; i < this.python_body.length; i++ ) {
 			if ( i == 0 ) { //3 клетки от головы
 				var head_x = this.python_body[i].x + 3 * this.python_direction.x;
@@ -308,10 +344,9 @@ class Python {
 
 			if (less_than_x <= x && less_than_y <= y && bigger_than_x >= x && bigger_than_y >= y) return false;
 		}
-
-		for ( var name in this.bonuses) {
-			if (name == bonus_name) continue;
-			if (x == this.bonuses[name].x && y == this.bonuses[name].y ) return false;
+		for (var i = 0; i < this.bonuses.length; i++) {
+			if (bonus == this.bonuses[i]) continue;
+			if (x == this.bonuses[i].x && y == this.bonuses[i].y ) return false;
 		}
 		return true;
 	}
