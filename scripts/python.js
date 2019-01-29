@@ -204,39 +204,42 @@ class Python {
 		  y: this.python_body[0].y + this.python_direction.y
 		};
 
-		var flag = false;
-
 
 		this.python_body.unshift( next_head_position );
 
 		// check if bonus is eaten
 
 		for (var i = 0; i < this.bonuses.length; i++ ) {
-			if (next_head_position.x == this.bonuses[i].x && next_head_position.y == this.bonuses[i].y) {
+			
+			var bonus = this.bonuses[i];
 
-				this.resetBonus(this.bonuses[i]);
-				if( this.points == 0 && this.bonuses[i].point < 0 ) {
-					this.is_game_over = true;
-					Utils.triggerCustomEvent(window, this.bonuses[i].trigger_action_name, {name: this.bonuses[i].type, game_over: true});
-					break;
-				}
+			if (next_head_position.x == bonus.x && next_head_position.y == bonus.y) {
 
-				flag = true;
-				//action
-				if ( this.bonuses[i].action)  this.bonuses[i].action(this);
-				//trigger action
-				Utils.triggerCustomEvent(window, this.bonuses[i].trigger_action_name, {name: this.bonuses[i].type, game_over: false});
+				this.resetBonus(bonus);				
+
+				// trigger event
+				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {name: bonus.type, game_over: false});
 
 				//play sound
-				if( this.bonuses[i].sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, this.bonuses[i].sound );
+				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
 
-				this.points += this.bonuses[i].point;
+				this.points += bonus.point;
 
-				break;
+				if( this.points < 0 ) { // game over
+					this.points = 0;
+					this.is_game_over = true;
+					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {name: bonus.type, game_over: true});
+					return;
+				}
+
+				//action
+				if ( bonus.action)  bonus.action(this);
+
+				return;
 			}
 		}
-		
-		if ( !flag ) this.python_body.pop();
+
+		this.python_body.pop();
 
 	}
 
