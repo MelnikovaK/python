@@ -228,7 +228,7 @@ class PixiVisualizer {
 				part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
 
 
-				if ( part_oriented_data.frame_name == this.python_body[i].frame_name ) continue;
+				// if ( part_oriented_data.frame_name == this.python_body[i].frame_name ) continue;
 				curr_sprite.texture.frame = new PIXI.Rectangle(
 					part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
 					part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
