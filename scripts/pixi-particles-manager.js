@@ -11,41 +11,35 @@ class PixiParticlesManager {
 		this.GET_POINT = 'get_point';
 
 		//
-		this.emitters_array  = {};
+		this.emitters_array  = [];
 
 		this.initEmittersArray();
 
 		window.addEventListener( python.GAME_OVER , function () {
-			this.updateEmitter(this.GAME_OVER);
+			this.updateEmitter(this.game_over_emitter);
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function () {
-			this.updateEmitter(this.GET_POINT);
+			this.updateEmitter(this.get_point_emitter);
 		}.bind(this));
-
-		// window.addEventListener( python.PYTHON_MOVED , function () {
-		// 	this.elapsed = Date.now();
-		// 	this.update();
-
-		// }.bind(this));
-
 	}
 
-	updateEmitter(emitter_name) {
-		if(!this.emitters_array[emitter_name]) return;
-			this.emitters_array[emitter_name].emit = true;
-			this.emitters_array[emitter_name].resetPositionTracking();
-			this.emitters_array[emitter_name].updateOwnerPos(this.python.python_body[0].x * 20, this.python.python_body[0].y * 20 );
+	updateEmitter(emitter) {
+		if(!emitter) return;
+			emitter.emit = true;
+			emitter.resetPositionTracking();
+			emitter.updateOwnerPos(this.python.python_body[0].x * 20, this.python.python_body[0].y * 20 );
 	}
 
 	initEmittersArray() {
 		this.game_over_emitter = new PIXI.particles.Emitter(this.container, [PIXI.Texture.fromImage(this.ASSETS_PATH  + 'CartoonSmoke.png')], game_over);
 		this.get_point_emitter = new PIXI.particles.Emitter(this.container, [PIXI.Texture.fromImage(this.ASSETS_PATH  + 'coin.png')], get_point, "anim");
 
-		this.emitters_array = {
-			'game_over': this.game_over_emitter,
-			'get_point': this.get_point_emitter
-		}
+		// this.emitters_array = {
+		// 	'game_over': this.game_over_emitter,
+		// 	'get_point': this.get_point_emitter
+		// }
+		this.emitters_array.push(this.game_over_emitter, this.get_point_emitter);
 
 		var elapsed = Date.now();
 		var scope = this;
@@ -53,12 +47,15 @@ class PixiParticlesManager {
 		var update = function(){
 					
 			var updateId = requestAnimationFrame(update);
-				var now = Date.now();
-				for ( var emitter_name in scope.emitters_array ) {
-					if (scope.emitters_array[emitter_name])
-					scope.emitters_array[emitter_name].update((now - elapsed) * 0.001);
-				}
-				elapsed = now;
+			var now = Date.now();
+			var delta = (now - elapsed) * 0.001;
+			elapsed = now;
+
+			for ( var i = 0; i < scope.emitters_array.length; i++ ) {
+				if (scope.emitters_array[i])
+					scope.emitters_array[i].update( delta );
+			}
+			
 		};
 
 		update();
