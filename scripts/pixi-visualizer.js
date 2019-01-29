@@ -73,18 +73,20 @@ class PixiVisualizer {
 
 		window.addEventListener( "screens: start game" , function () {
 			this.removeSnakeBodyPart(this.python_body.length - this.START_PYTHON_LENGTH);
-			this.updateBonusPosition(this.APPLE);
-			this.updateBonusPosition(this.ROTTEN_APPLE);
+			this.removeBonuses(this.bonus_sprite);
+			this.removeBonuses(this.rotten_bonus_sprite);
+			this.updateBonusPosition(this.bonus_sprite);
+			this.updateBonusPosition(this.rotten_bonus_sprite);
 			this.updateBody();
 		}.bind(this));
 
-		window.addEventListener( python.PYTHON_GET_POINT , function () {
-			this.updateBonusPosition(this.APPLE);
+		window.addEventListener( python.PYTHON_GET_POINT , function (e) {
+			this.updateBonusPosition(this.bonus_sprite);
 			this.growPython();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_LOST_POINT , function (e) {
-			this.updateBonusPosition(this.ROTTEN_APPLE);
+			this.updateBonusPosition(this.rotten_bonus_sprite);
 			if ( !e.detail.game_over ) this.removeSnakeBodyPart(1);
 		}.bind(this));
 
@@ -164,13 +166,8 @@ class PixiVisualizer {
  		}
 
  		//BONUS
- 		var bonus = this.bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 3, 64, 64 );
- 		var rotten_bonus = this.rotten_bonus_sprite = this.rotten_bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 1, 3, 64, 64 );
-
- 		this.bonuses = {
- 			'apple': this.bonus_sprite,
- 			'rotten_apple': this.rotten_bonus_sprite
- 		}
+ 		var bonus = this.bonus_sprite = { name: 'apple', sprite: this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 0, 3, 64, 64 )};
+ 		var rotten_bonus = this.rotten_bonus_sprite = {name: 'rotten_apple', sprite: this.rotten_bonus_sprite = this.getSprite( this.ASSETS_PATH+"snake-graphics.png", 1, 3, 64, 64 )};
 	}
 
 	// <<< CREATING GAME FIELD AND CHARACTERS <<<
@@ -188,6 +185,10 @@ class PixiVisualizer {
 
 			remove_counter--;
 		}
+	}
+
+	removeBonuses(bonus) {
+		this.bg_container.removeChild(bonus.sprite);
 	}
 
 	// >>> MOVE PYTHON >>>
@@ -287,9 +288,14 @@ class PixiVisualizer {
 
 
 	// >>> BONUS UPDATE >>>
-	updateBonusPosition(bonus_name){
-		this.setSpritePosition( this.bonuses[bonus_name], this.python.bonuses[bonus_name].x, this.python.bonuses[bonus_name].y );
-		this.bg_container.addChild( this.bonuses[bonus_name] );
+	updateBonusPosition(bonus){
+		var python_bonuses = this.python.bonuses;
+		for ( var i = 0; i < python_bonuses.length; i++ ) {
+			if ( python_bonuses[i].type == bonus.name ) {
+				this.setSpritePosition( bonus.sprite, python_bonuses[i].x, python_bonuses[i].y );
+				if ( !this.bg_container.children.includes(bonus.sprite) ) this.bg_container.addChild( bonus.sprite );
+			}
+		}
 	}
 
 	// <<< BONUS UPDATE <<<

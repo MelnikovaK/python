@@ -62,7 +62,7 @@ class Python {
 		//
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
 			this.initInputControllerEvent(e.detail);
-			switch( e.detail ){
+			switch( e.detail.name ){
 				case "play":
 					this.setPause( false );
 					break;
@@ -95,7 +95,9 @@ class Python {
 	initInputControllerEvent(details) {
 		if ( !this.pause ) {
 			if ( details.name == 'tap') {
-				details.name = this.inputController.computeGestureName(this.python_body[0].x, this.python_body[0].y, details.x, details.y)
+				var python_head_x = this.python_body[0].x * this.CELL_WIDTH,
+						python_head_y = this.python_body[0].y*this.CELL_HEIGHT;
+				details.name = this.inputController.computeGestureName( python_head_x, python_head_y, details.x, details.y)
 			}
 			var dir = this.directions[details.name];
 		  if( dir ) {
@@ -178,12 +180,8 @@ class Python {
 		this.is_game_over = false;
 
 		this.points = 0;
+		this.removeBonuses();
 		this.initBonuses();
-
-		this.bonuses.forEach(function(x) {
-
-		})
-
 
 		this.resetPyhon();
 
@@ -219,7 +217,7 @@ class Python {
 				this.resetBonus(this.bonuses[i]);
 				if( this.points == 0 && this.bonuses[i].point < 0 ) {
 					this.is_game_over = true;
-					Utils.triggerCustomEvent(window, this.bonuses[i].trigger_action_name, {game_over: true});
+					Utils.triggerCustomEvent(window, this.bonuses[i].trigger_action_name, {name: this.bonuses[i].type, game_over: true});
 					break;
 				}
 
@@ -227,7 +225,7 @@ class Python {
 				//action
 				if ( this.bonuses[i].action)  this.bonuses[i].action(this);
 				//trigger action
-				Utils.triggerCustomEvent(window, this.bonuses[i].trigger_action_name, {game_over: false});
+				Utils.triggerCustomEvent(window, this.bonuses[i].trigger_action_name, {name: this.bonuses[i].type, game_over: false});
 
 				//play sound
 				if( this.bonuses[i].sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, this.bonuses[i].sound );
@@ -236,35 +234,7 @@ class Python {
 
 				break;
 			}
-
 		}
-
-		// for ( var bonus_name in this.bonuses.length; i++ ) {
-
-			// if ( next_head_position.x == this.bonuses[bonus_name].x && next_head_position.y == this.bonuses[bonus_name].y) {
-
-			// 	this.resetBonus(bonus_name);
-
-			// 	if( this.points == 0 && this.bonuses[bonus_name].point < 0 ) {
-			// 		this.is_game_over = true;
-			// 		Utils.triggerCustomEvent(window, this.bonuses[bonus_name].trigger_action_name, {game_over: true});
-			// 		break;
-			// 	}
-
-			// 	flag = true;
-
-			// 	//action
-			// 	if ( this.bonuses[bonus_name].action)  this.bonuses[bonus_name].action(this);
-			// 	//trigger action
-			// 	Utils.triggerCustomEvent(window, this.bonuses[bonus_name].trigger_action_name, {game_over: false});
-
-			// 	//play sound
-			// 	if( this.bonuses[bonus_name].sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, this.bonuses[bonus_name].sound );
-
-			// 	this.points += this.bonuses[bonus_name].point;
-
-			// 	break;
-			// }
 		
 		if ( !flag ) this.python_body.pop();
 
@@ -276,6 +246,10 @@ class Python {
 		scope.python_body.splice(last_index - 2, 2);
 	}
 
+	removeBonuses() {
+		this.bonuses.length = 0;
+	}
+
 	resetPyhon() {
 		var position_x = this.python_start_x;
 		var position_y = this.python_start_y;
@@ -284,9 +258,6 @@ class Python {
 		for ( var i = 0; i < this.max_python_length; i++ ) {
 			this.python_body[i] = { x: position_x - i, y: position_y };
 		}
-
-		
-
 	}
 
 	addBonus( bonus_name ){

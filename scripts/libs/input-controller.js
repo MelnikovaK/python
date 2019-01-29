@@ -271,8 +271,8 @@ class InputController {
 		var vertical_difference_abs = Math.abs(vertical_difference);
 
 		var max_length = horizontal_difference_abs > vertical_difference_abs ? horizontal_difference_abs : vertical_difference_abs;
-		if( max_length < this.swipe_min_distance ) {
-			if (!skip_limits) return; // min swipe length
+		if( max_length < this.swipe_min_distance ) {// min swipe length
+			if (!skip_limits) return; 
 			else {
 				gesture_name = 'tap';
 				return gesture_name;
@@ -291,7 +291,6 @@ class InputController {
 			if(  max_length > this.swipe_max_distance ) return gesture_name;
 			return false;
 		}
-		console.log(gesture_name)
 
 		return gesture_name;
 	}
