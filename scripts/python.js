@@ -59,6 +59,7 @@ class Python {
 		//
 		this.checkSizeOfFieldElements();
 		this.resetPyhon();
+
 		//
 		this.inputController.target.addEventListener( inputController.ACTION_ACTIVATED, function (e) {
 			this.initInputControllerEvent(e.detail);
@@ -218,7 +219,7 @@ class Python {
 				this.resetBonus(bonus);				
 
 				// trigger event
-				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {name: bonus.type, game_over: false});
+				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
 
 				//play sound
 				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
@@ -228,7 +229,7 @@ class Python {
 				if( this.points < 0 ) { // game over
 					this.points = 0;
 					this.is_game_over = true;
-					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {name: bonus.type, game_over: true});
+					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: true});
 					return;
 				}
 

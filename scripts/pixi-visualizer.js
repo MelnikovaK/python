@@ -88,26 +88,33 @@ class PixiVisualizer {
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
+			var scope = this;
+			this.python.bonuses.forEach(function(e){
+				e._sprite = scope.AM.pullAsset( e.type );
+				scope.GO_container.addChild( e._sprite );
+				scope.updateBonusPosition( e._sprite, e.x, e.y );
+			});
+
 			this.removeSnakeBodyPart(this.python_body.length - this.START_PYTHON_LENGTH);
-			this.removeBonuses(this.bonus_sprite);
-			this.removeBonuses(this.rotten_bonus_sprite);
-			this.updateBonusPosition(this.bonus_sprite);
-			this.updateBonusPosition(this.rotten_bonus_sprite);
 			this.updateBody();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function (e) {
-			this.updateBonusPosition(this.bonus_sprite);
+			var bonus = e.detail.bonus;
+			this.updateBonusPosition(bonus._sprite, bonus.x, bonus.y );
 			this.growPython();
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_LOST_POINT , function (e) {
-			this.updateBonusPosition(this.rotten_bonus_sprite);
+			var bonus = e.detail.bonus;
+			this.updateBonusPosition(bonus._sprite, bonus.x, bonus.y );
 			if ( !e.detail.game_over ) this.removeSnakeBodyPart(1);
 		}.bind(this));
 
 		window.addEventListener( python.GAME_OVER , function () {
 			this.shakeScreen();
+			this.removeBonuses();
+
 		}.bind(this));
 		
 	}
@@ -163,9 +170,14 @@ class PixiVisualizer {
 	}
 
 	createGameCharacters() {
+		
 		var python_body = this.python.python_body;
-
+		this.GO_container = new PIXI.Container();
+		this.app.stage.addChild( this.GO_container );
 		//SNAKE
+
+		this.snake_container = new PIXI.Container();
+		this.app.stage.addChild( this.snake_container );
 
 		var head = this.head_sprite = this.AM.pullAsset('python_head');
 		head.rotation = 270 * window.Utils.DEG2RAD;
@@ -179,12 +191,8 @@ class PixiVisualizer {
 
  		for ( var i = 0; i < this.python_body.length; i++ ){
 			this.setSpritePosition( this.python_body[i].sprite, python_body[i].x, python_body[i].y );
- 			this.bg_container.addChild(this.python_body[i].sprite);
+ 			this.snake_container.addChild(this.python_body[i].sprite);
  		}
-
- 		//BONUS
- 		var bonus = this.bonus_sprite = { name: 'apple', sprite: this.AM.pullAsset('apple') };
- 		var rotten_bonus = this.rotten_bonus_sprite = {name: 'rotten_apple', sprite:this.AM.pullAsset('rotten_apple')};
 	}
 
 	// <<< CREATING GAME FIELD AND CHARACTERS <<<
@@ -196,7 +204,7 @@ class PixiVisualizer {
 		while ( remove_counter > 0 ) {
 			var last_index = this.python_body.length - 1;
 
-			this.bg_container.removeChild(this.python_body[last_index - 1].sprite);
+			this.snake_container.removeChild(this.python_body[last_index - 1].sprite);
 			this.AM.putAsset(this.python_body[last_index - 1], 'python_body')
 			this.python_body.splice(last_index - 1, 1);
 
@@ -205,7 +213,10 @@ class PixiVisualizer {
 	}
 
 	removeBonuses(bonus) {
-		this.bg_container.removeChild(bonus.sprite);
+		for ( var i = 0; i < this.python.bonuses.length; i++ ){
+			this.AM.putAsset(this.python.bonuses[i]._sprite);
+			this.bg_container.removeChild(this.python.bonuses[i]._sprite);
+		}
 	}
 
 	// >>> MOVE PYTHON >>>
@@ -290,7 +301,7 @@ class PixiVisualizer {
 				this.SPRITE_WIDTH, this.SPRITE_HEIGHT
 		);
 
- 		this.bg_container.addChild( sprite );
+ 		this.snake_container.addChild( sprite );
 
 		this.python_body.splice(last_index - 1, 0, {sprite: sprite, frame_name: part_oriented_data.frame_name });
 	}
@@ -301,14 +312,9 @@ class PixiVisualizer {
 
 
 	// >>> BONUS UPDATE >>>
-	updateBonusPosition(bonus){
-		var python_bonuses = this.python.bonuses;
-		for ( var i = 0; i < python_bonuses.length; i++ ) {
-			if ( python_bonuses[i].type == bonus.name ) {
-				this.setSpritePosition( bonus.sprite, python_bonuses[i].x, python_bonuses[i].y );
-				if ( !this.bg_container.children.includes(bonus.sprite) ) this.bg_container.addChild( bonus.sprite );
-			}
-		}
+	updateBonusPosition( sprite, x, y ){
+		sprite.x = x * this.CELL_WIDTH;
+		sprite.y = y * this.CELL_HEIGHT;
 	}
 
 	// <<< BONUS UPDATE <<<
@@ -353,6 +359,7 @@ class PixiVisualizer {
 	}
 
 	createAssets() {
+		
 		var scope = this;
 
 		var head = function() {return scope.getSprite( scope.ASSETS_PATH+"snake-graphics.png", 4, 1, 64, 64 )};
@@ -366,10 +373,12 @@ class PixiVisualizer {
 			return new PIXI.Sprite( PIXI.loader.resources[scope.ASSETS_PATH+"Wall.png"].texture ); }, 76 );
 		this.AM.addAsset('ground_cell', function(){
 			return new PIXI.Sprite( PIXI.loader.resources[scope.ASSETS_PATH+"Ground.png"].texture ); }, 360 );
+		
 		//SNAKE PARTS
 		this.AM.addAsset('python_head', head, 3);
 		this.AM.addAsset('python_body', straight_horizontal, 40);
 		this.AM.addAsset('python_tail', tail, 3);
+		
 		//BONUSES
 		this.AM.addAsset('apple', apple , 3);
 		this.AM.addAsset('rotten_apple', rotten_apple, 3);
