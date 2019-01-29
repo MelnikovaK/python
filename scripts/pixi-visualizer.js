@@ -83,9 +83,9 @@ class PixiVisualizer {
 			this.growPython();
 		}.bind(this));
 
-		window.addEventListener( python.PYTHON_LOST_POINT , function () {
+		window.addEventListener( python.PYTHON_LOST_POINT , function (e) {
 			this.updateBonusPosition(this.ROTTEN_APPLE);
-			this.removeSnakeBodyPart(1);
+			if ( !e.detail.game_over ) this.removeSnakeBodyPart(1);
 		}.bind(this));
 
 		window.addEventListener( python.GAME_OVER , function () {
