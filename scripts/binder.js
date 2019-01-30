@@ -9,10 +9,10 @@ var config = {
 	cells_horizontal: 20,
 	cells_vertical: 20,
 	
-	field_width: 400,
-	field_height: 400,
-	cell_width: 400/20,
-	cell_height: 400/20,
+	field_width: 600,
+	field_height: 600,
+	cell_width: 600/20,
+	cell_height: 600/20,
 	field_offset_x: 0,
 	field_offset_y: 0,
 
