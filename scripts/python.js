@@ -4,6 +4,7 @@ class Python {
 
 		//
 		this.PYTHON_MOVED = "python:draw";
+		this.GAME_STEP = "python:update_python_body_coordinates";
 		this.PYTHON_GET_POINT = "python:python get point";
 		this.PYTHON_LOST_POINT = "python:python lost point";
 		this.GAME_OVER = "python: game over";
@@ -116,12 +117,12 @@ class Python {
 	checkSizeOfFieldElements() {
 
 		if (!this.FIELD_WIDTH) {
-			if (!this.CELL_WIDTH) this.CELL_WIDTH = 20;
+			if (!this.CELL_WIDTH) this.CELL_WIDTH = 40;
 			else this.FIELD_WIDTH = this.FIELD_WIDTH = this.cells_horizontal * this.CELL_WIDTH;
 		}
 
 		if (!this.FIELD_HEIGHT) {
-			if (!this.CELL_HEIGHT) this.CELL_HEIGHT = 20;
+			if (!this.CELL_HEIGHT) this.CELL_HEIGHT = 40;
 			else this.FIELD_HEIGHT = this.FIELD_HEIGHT = this.cells_vertical * this.CELL_HEIGHT;
 		}
 
@@ -143,38 +144,66 @@ class Python {
 	//
 	startGame(){
 
-		console.log('#START GAME');
-			
+		this.game_step_interval = 500;		
+		this.move_python_interval = 16;
+
 		var scope = this;
+
+		this.movePythonStep = function() {
+			scope.move_python_timeout = setTimeout(scope.movePythonStep, scope.move_python_interval);
+			if ( scope.pause ) return;
+
+			scope.curr_time += scope.move_python_interval;
+			var part_of_interval = ( scope.curr_time - scope.prev_time ) / scope.game_step_interval;
+			scope.prev_time = scope.curr_time;
+
+
+			scope.smoothlyMovePython(part_of_interval);
+
+			if ( scope.isGameOver()) {
+					scope.gameOver();
+					return;
+			}
+
+			Utils.triggerCustomEvent( window, scope.PYTHON_MOVED, {difference: part_of_interval} );
+		}
+
+
 
 
 		if(!this.gameStep){
 
-			this.gameStep = function(){				
-
+			this.gameStep = function(){
+				scope.curr_time = 0;
+				scope.prev_time = 0;		
 				// schedule the next game step
-				scope.game_timeout = setTimeout( scope.gameStep, 300);
-				if ( scope.pause ) return;
-				if (scope.inputController_direction) scope.python_direction = scope.inputController_direction;
+				scope.game_timeout = setTimeout( scope.gameStep, scope.game_step_interval);
 
+				if ( scope.pause ) return;
+
+				if (scope.inputController_direction) scope.python_direction = scope.inputController_direction;
+				
 				if (scope.is_game_over){
 					scope.gameOver();
 					return;
 				}
 				// move python
-				scope.movePython();
+				// scope.movePythonBody();
+				// scope.checkBonusesAreEaten();
 
 				// check game end
-				if ( scope.isGameOver()) {
-					scope.gameOver();
-					return;
-				}
+				// if ( scope.isGameOver()) {
+				// 	scope.gameOver();
+				// 	return;
+				// }
 
 				// redraw
+				// Utils.triggerCustomEvent( window,scope.PYTHON_MOVED );
+				Utils.triggerCustomEvent( window, scope.GAME_STEP );
 
-				Utils.triggerCustomEvent( window,scope.PYTHON_MOVED );
 			};
 		}
+
 
 		Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "music", loop: true} );
 
@@ -192,16 +221,40 @@ class Python {
 
 		this.python_direction = this.inputController_direction;
 
-
 		if ( this.game_timeout ) clearTimeout(this.game_timeout);
+
 		this.gameStep();
+		this.movePythonStep();
+	}
+
+	smoothlyMovePython(time_difference) {
+
+		var increase_x = this.python_direction.x * time_difference;
+		var increase_y = this.python_direction.y * time_difference;
+
+		// for ( var i = 0; i < this.python_body.length; i++ ){
+		// 	this.python_body[i].x += increase_x;
+		// 	this.python_body[i].y += increase_y;
+		// }
+
+		this.python_body[0].x += increase_x;
+		this.python_body[0].y += increase_y;
+
+		this.python_body[this.python_body.length - 1].x += increase_x;
+		this.python_body[this.python_body.length - 1].y += increase_y;
+	
+	}
+
+	roundUpTo2Characters(num) {
+
+		return +(num).toFixed(2);
 	}
 
 
-	movePython() {
+	movePythonBody() {
 		
-		var next_head_position = {
-			x: this.python_body[0].x + this.python_direction.x,
+    var next_head_position = {
+	    x: this.python_body[0].x + this.python_direction.x,
 		  y: this.python_body[0].y + this.python_direction.y
 		};
 
@@ -345,6 +398,7 @@ class Python {
 
 	gameOver(){
 
+		clearTimeout(this.move_python_timeout);
 		clearTimeout( this.game_timeout );
 		this.inputController.enabled = false;
 
