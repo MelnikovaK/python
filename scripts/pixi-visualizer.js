@@ -19,7 +19,7 @@ class PixiVisualizer {
 		this.ASSETS_PATH = config.ASSETS_PATH || 'assets/';
 
 		this.START_PYTHON_LENGTH = 3;
-
+		this.logic_step_interval = config.logic_step_interval;
 
 		//
 		this.AM = new AssetManager(this);
@@ -72,7 +72,8 @@ class PixiVisualizer {
 		this.loadAssets( config );
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
-			this.moveActionGame();
+			// this.moveActionGame();
+			this.onPythonMoved();	
 		}.bind(this));
 
 		window.addEventListener( "screens: start game" , function () {
@@ -84,7 +85,10 @@ class PixiVisualizer {
 			});
 
 			this.removeSnakeBodyPart(this.python_body.length - this.START_PYTHON_LENGTH);
-			this.updateBody();
+			// this.updateBody();
+
+			this.startRenderer();
+
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_POINT , function (e) {
@@ -102,7 +106,7 @@ class PixiVisualizer {
 		window.addEventListener( python.GAME_OVER , function () {
 			this.shakeScreen();
 			this.removeBonuses();
-
+			this.stopRenderer();
 		}.bind(this));
 		
 	}
@@ -395,6 +399,102 @@ class PixiVisualizer {
 
 		return this.getSprite( this.ASSETS_PATH+"snake-graphics.png", x, y, 64, 64 );
 	}
+
+
+
+
+	// *************************************************************
+	//
+
+	startRenderer(){
+
+		var scope = this;
+
+		var python_body = this.python.python_body;
+
+		this.render_timer = setInterval( render, 1000 / 60 );
+		this.logic_step_timestamp = Date.now();
+
+		// var timer_prev = Date.now();
+		
+		function render(){
+			
+			var time_current = Date.now();
+			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
+			// console.log('>', delta );
+
+			var head = python_body[0];
+			var head_sprite = scope.python_body[0].sprite;
+
+			scope.setSpritePosition( head_sprite,
+				head.prev_x + (head.x - head.prev_x) * delta,
+				head.prev_y + (head.y - head.prev_y) * delta
+			);
+			
+			var aim_to_shoulders = scope.snake_parts[ scope.getNextPartID(python_body[2], python_body[1]) ].angle;
+			var aim_to_neck = scope.snake_parts[ scope.getNextPartID(python_body[1], python_body[0]) ].angle;
+
+			/*
+			if( Math.abs(aim_to_shoulders - aim_to_neck) > Math.PI ) {
+				if( ( aim_to_shoulders - aim_to_neck + Utils.PI2 ) % Utils.PI2 > Math.PI ){
+					aim_to_shoulders -= Math.PI;
+				}else{
+					aim_to_shoulders += Math.PI;
+				} 
+			}
+			*/
+
+			console.log( aim_to_shoulders, aim_to_neck, aim_to_shoulders - aim_to_neck );
+			
+			head_sprite.rotation = aim_to_shoulders + (aim_to_neck - aim_to_shoulders) * delta;
+
+			/*
+			for ( var i = 0; i < python_body.length; i++ ) {
+			//python parts move
+			this.setSpritePosition( this.python_body[i].sprite, python_body[i].x, python_body[i].y );
+
+			var curr_sprite = this.python_body[i].sprite;
+
+			var prev_part_id = this.getPrevPartID(python_body[i-1], python_body[i]); // "-10"
+			var next_part_id = this.getNextPartID(python_body[i+1], python_body[i]);// "-10"
+
+			var part_oriented_data;
+
+			if( !python_body[i-1] ){ // head part
+				part_oriented_data = this.snake_parts[ next_part_id ];
+				curr_sprite.rotation = part_oriented_data.angle;
+
+			}else if( !python_body[i+1] ) { // tail part
+				part_oriented_data = this.snake_parts[ prev_part_id ];
+
+				curr_sprite.rotation = part_oriented_data.angle;
+
+			}else{ // body part
+				part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
+
+				// if ( part_oriented_data.frame_name == this.python_body[i].frame_name ) continue;
+				curr_sprite.texture.frame = new PIXI.Rectangle(
+					part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
+					part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
+					this.SPRITE_WIDTH, this.SPRITE_HEIGHT
+				);
+			}
+			this.python_body[i].frame_name = part_oriented_data.frame_name;
+			*/
+		}
+
+	}
+
+	stopRenderer(){
+		clearInterval(this.render_timer);
+	}
+
+	onPythonMoved(){
+		var python_body = python.python_body;
+		console.log("==============>");
+		this.logic_step_timestamp = Date.now();
+	}	
+	// *************************************************************
 
 	// <<< UTILS <<<
 

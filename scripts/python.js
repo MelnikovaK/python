@@ -35,7 +35,7 @@ class Python {
 		this.directions[this.UP] = this.directions['swipe-up'] = {x:0, y:-1, rotation: 0};
 		this.directions[this.DOWN] = this.directions['swipe-down'] = {x:0, y:1, rotation: 180 * window.Utils.DEG2RAD};
 
-
+		this.logic_step_interval = config.logic_step_interval;
 		
 
 		this.inputController_direction = '';
@@ -153,7 +153,7 @@ class Python {
 			this.gameStep = function(){				
 
 				// schedule the next game step
-				scope.game_timeout = setTimeout( scope.gameStep, 300);
+				scope.game_timeout = setTimeout( scope.gameStep, scope.logic_step_interval );
 				if ( scope.pause ) return;
 				if (scope.inputController_direction) scope.python_direction = scope.inputController_direction;
 
@@ -200,21 +200,38 @@ class Python {
 
 	movePython() {
 		
-		var next_head_position = {
-			x: this.python_body[0].x + this.python_direction.x,
-		  y: this.python_body[0].y + this.python_direction.y
+
+		// var next_head_position = {
+		// 	x: this.python_body[0].x + this.python_direction.x,
+		//   y: this.python_body[0].y + this.python_direction.y
+		// };
+
+
+		// this.python_body.unshift( next_head_position );
+		
+		for( var i = this.python_body.length-1; i>0; i-- ){
+			var part = this.python_body[i];
+			var prev_part = this.python_body[i-1];
+			part.prev_x = part.x;
+			part.prev_y = part.y;
+			part.x = prev_part.x;
+			part.y = prev_part.y;
 		};
 
+		var head = this.python_body[0];
+		head.prev_x = head.x;
+		head.prev_y = head.y;
+		head.x = this.python_body[0].x + this.python_direction.x;
+		head.y = this.python_body[0].y + this.python_direction.y;
 
-		this.python_body.unshift( next_head_position );
 
 		// check if bonus is eaten
-
+/*
 		for (var i = 0; i < this.bonuses.length; i++ ) {
 			
 			var bonus = this.bonuses[i];
 
-			if (next_head_position.x == bonus.x && next_head_position.y == bonus.y) {
+			if (head.x == bonus.x && head.y == bonus.y) {
 
 				this.resetBonus(bonus);				
 
@@ -238,9 +255,10 @@ class Python {
 
 				return;
 			}
-		}
 
-		this.python_body.pop();
+		}
+		*/
+		// this.python_body.pop();
 
 	}
 
