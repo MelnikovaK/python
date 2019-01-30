@@ -218,9 +218,6 @@ class Python {
 
 				this.resetBonus(bonus);				
 
-				// trigger event
-				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
-
 				//play sound
 				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
 
@@ -229,10 +226,13 @@ class Python {
 				if( this.points < 0 ) { // game over
 					this.points = 0;
 					this.is_game_over = true;
+					this.python_body.pop();
 					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: true});
 					return;
 				}
 
+				// trigger event
+				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
 				//action
 				if ( bonus.action)  bonus.action(this);
 

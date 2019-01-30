@@ -23,18 +23,6 @@ class PixiVisualizer {
 
 		//
 		this.AM = new AssetManager(this);
-		// this.AM.addAsset('head', function(){
-		// 	return new PIXI.Sprite('head.png');
-		// }, 1 );
-		// this.AM.addAsset('bodypart', function(){
-		// 	return new PIXI.Sprite('body.png');
-		// }, 10 );
-
-		// var bodypart_sprite = AM.pullAsset('bodypart');
-		// AM.putAsset(bodypart_sprite);
-		// AM.putAllAssets();
-
-
 
 		//
 		this.APPLE = 'apple';
@@ -215,7 +203,7 @@ class PixiVisualizer {
 	removeBonuses(bonus) {
 		for ( var i = 0; i < this.python.bonuses.length; i++ ){
 			this.AM.putAsset(this.python.bonuses[i]._sprite);
-			this.bg_container.removeChild(this.python.bonuses[i]._sprite);
+			this.GO_container.removeChild(this.python.bonuses[i]._sprite);
 		}
 	}
 
@@ -254,7 +242,6 @@ class PixiVisualizer {
 
 			}else{ // body part
 				part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
-
 
 				// if ( part_oriented_data.frame_name == this.python_body[i].frame_name ) continue;
 				curr_sprite.texture.frame = new PIXI.Rectangle(
