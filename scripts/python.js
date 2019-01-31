@@ -57,6 +57,23 @@ class Python {
 		this.python_start_y = python_start_y || 3;
 
 		//
+		this.parts_indexes = {
+			"-10": 2,
+			"0-1": 1,
+			"10": 4,
+			"01": 8,
+		};
+
+		//
+		this.python_directions = {};
+		this.python_directions[1] = { angle: 180 * window.Utils.DEG2RAD, name: 'down'};//tail down
+		this.python_directions[2] = { angle: 90 * window.Utils.DEG2RAD, name: 'right'};//tail right
+		this.python_directions[4] = { angle: 270 * window.Utils.DEG2RAD, name: 'left'};//tail left
+		this.python_directions[8] = { angle: 0, name: 'up'};//tail up
+
+		
+
+		//
 		this.checkSizeOfFieldElements();
 		this.resetPyhon();
 
@@ -184,7 +201,6 @@ class Python {
 		this.removeBonuses();
 		this.initBonuses();
 
-		this.resetPyhon();
 
 		this.inputController.enabled = true;
 
@@ -192,6 +208,7 @@ class Python {
 
 		this.python_direction = this.inputController_direction;
 
+		this.resetPyhon();
 
 		if ( this.game_timeout ) clearTimeout(this.game_timeout);
 		this.gameStep();
@@ -200,7 +217,7 @@ class Python {
 
 	movePython() {
 		
-
+		var scope = this;
 		// var next_head_position = {
 		// 	x: this.python_body[0].x + this.python_direction.x,
 		//   y: this.python_body[0].y + this.python_direction.y
@@ -209,6 +226,8 @@ class Python {
 
 		// this.python_body.unshift( next_head_position );
 		
+		var is_tail = true;
+
 		for( var i = this.python_body.length-1; i>0; i-- ){
 			var part = this.python_body[i];
 			var prev_part = this.python_body[i-1];
@@ -216,6 +235,13 @@ class Python {
 			part.prev_y = part.y;
 			part.x = prev_part.x;
 			part.y = prev_part.y;
+
+			if( is_tail ){
+				scope.updatePartDirection( part, this.python_body[i-2] );
+				is_tail = false;
+			}else{
+				scope.updatePartDirection( part );
+			}
 		};
 
 		var head = this.python_body[0];
@@ -223,10 +249,10 @@ class Python {
 		head.prev_y = head.y;
 		head.x = this.python_body[0].x + this.python_direction.x;
 		head.y = this.python_body[0].y + this.python_direction.y;
-
+		scope.updatePartDirection( head );
+		// console.log( head.angle, head.direction_name );
 
 		// check if bonus is eaten
-/*
 		for (var i = 0; i < this.bonuses.length; i++ ) {
 			
 			var bonus = this.bonuses[i];
@@ -243,13 +269,15 @@ class Python {
 				if( this.points < 0 ) { // game over
 					this.points = 0;
 					this.is_game_over = true;
-					this.python_body.pop();
+					// this.python_body.pop();
 					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: true});
 					return;
 				}
 
 				// trigger event
 				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
+				// scope.addBodyPart();
+
 				//action
 				if ( bonus.action)  bonus.action(this);
 
@@ -257,9 +285,26 @@ class Python {
 			}
 
 		}
-		*/
+		
 		// this.python_body.pop();
 
+	}
+
+	updatePartDirection( part, target_part ){
+		
+		var _id;
+		if( target_part ){
+			_id = ( part.x - target_part.x ).toString() + ( part.y - target_part.y ).toString();
+		}else{
+			_id = ( part.prev_x - part.x ).toString() + ( part.prev_y - part.y ).toString();
+		}
+		var _dir = this.python_directions[ this.parts_indexes[_id] ];
+		// console.log( _id, part.x, part.prev_x, _dir );
+		// console.log( _id, _dir );
+		part.prev_angle = part.angle;
+		part.angle = _dir.angle;
+		part.prev_direction_name = part.direction_name;
+		part.direction_name = _dir.name;
 	}
 
 	removeSnakePart(scope) {
@@ -278,9 +323,19 @@ class Python {
 
 		this.python_body.length = 0;
 		for ( var i = 0; i < this.max_python_length; i++ ) {
-			this.python_body[i] = { x: position_x - i, y: position_y };
+			var part = this.python_body[i] = {
+				x: position_x - i,
+				y: position_y,
+				prev_x: position_x - i-1,
+				prev_y: position_y
+			};
+			this.updatePartDirection( part );
 		}
 	}
+
+	// addBodyPart(){
+
+	// }
 
 	addBonus( bonus_name ){
 		var offset = 1;

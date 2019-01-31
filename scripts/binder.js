@@ -17,7 +17,8 @@ var config = {
 	field_offset_y: 0,
 
 	logic_step_interval: 500,
-
+	max_python_length: 4,
+	
 	input: {
 		keyboard_enabled: true,
 		mouse_enabled: true,
