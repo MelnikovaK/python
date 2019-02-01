@@ -233,10 +233,6 @@ class Python {
 				prev_prev_y = part.prev_y;
 			}
 			scope.changePythonPartCoordinates(part, prev_part.x, prev_part.y, part.x, part.y);
-			// part.prev_x = part.x;
-			// part.prev_y = part.y;
-			// part.x = prev_part.x;
-			// part.y = prev_part.y;
 
 			if( is_tail ){
 				scope.updatePartDirection( part, this.python_body[i-2] );

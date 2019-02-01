@@ -59,12 +59,12 @@ class PixiVisualizer {
 		this.snake_parts[4] = { frame_position: [3,3], angle: 270 * window.Utils.DEG2RAD, frame_name: 'left'};//tail left
 		this.snake_parts[8] = { frame_position: [3,2], angle: 0, frame_name: 'up'};//tail up
 
-		this.snake_parts[1+2] = { frame_position: [0,0], frame_name: '┘'};// UL  ┘
-		this.snake_parts[1+8] = { frame_position: [2,1], frame_name: '|'};// UD  |
-		this.snake_parts[1+4] = { frame_position: [2,0], frame_name: '└'};// UD  └
-		this.snake_parts[2+8] = { frame_position: [0,1], frame_name: '┐'};// UD  ┐
-		this.snake_parts[4+8] = { frame_position: [2,2], frame_name: '┌'};// UD  ┌
-		this.snake_parts[2+4] = { frame_position: [1,0], frame_name: '-'};// UD  -
+		this.snake_parts[1+2] = { frame_position: [0,0], frame_name: 'left-up'};// UL  ┘
+		this.snake_parts[1+8] = { frame_position: [2,1], frame_name: 'straight-vertical'};// UD  |
+		this.snake_parts[1+4] = { frame_position: [2,0], frame_name: 'up-right'};// UD  └
+		this.snake_parts[2+8] = { frame_position: [0,1], frame_name: 'left-down'};// UD  ┐
+		this.snake_parts[4+8] = { frame_position: [2,2], frame_name: 'down-right'};// UD  ┌
+		this.snake_parts[2+4] = { frame_position: [1,0], frame_name: 'straight-horizontal'};// UD  -
 
 
 		//
@@ -211,25 +211,14 @@ class PixiVisualizer {
 		this.snake_container.addChild(this.pre_tail_sprite);
 
 		//MASK
+
 		this.neck_mask = new PIXI.Graphics();
 		this.snake_container.addChild(this.neck_mask);
-		this.neck_mask.x = this.app.screen.width / 2;
-		this.neck_mask.y = this.app.screen.height / 2;
-		this.neck_mask.lineStyle(0);
 		this.neck_sprite.mask = this.neck_mask;
-		this.neck_mask.beginFill(0xe74c3c); 
-		this.neck_mask.drawCircle(60, 185, 300);
-		this.neck_mask.endFill();
 
 		this.pre_tail_mask = new PIXI.Graphics();
 		this.snake_container.addChild(this.pre_tail_mask);
-		this.pre_tail_mask.x = this.app.screen.width / 2;
-		this.pre_tail_mask.y = this.app.screen.height / 2;
-		this.pre_tail_mask.lineStyle(0);
 		this.pre_tail_sprite.mask = this.pre_tail_mask;
-		this.pre_tail_mask.beginFill(0xe74c3c); 
-		this.pre_tail_mask.drawCircle(60, 185, 300);
-		this.pre_tail_mask.endFill();
 
 	}
 
@@ -393,11 +382,124 @@ class PixiVisualizer {
 			
 			var time_current = Date.now();
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
+
+			// console.log(delta)
 			// head
 			_updateSingleSprite( python_body[0], python_body[0]._sprite, delta );
 			//tail
 			_updateSingleSprite( python_body[python_body.length-1], python_body[python_body.length-1]._sprite, delta );
-		
+
+			if ( python_body[0].y == python_body[1].y && python_body[0].x > python_body[1].x) {
+				_moveRightMask(scope.neck_mask, scope.neck_sprite, delta);
+			}
+
+			if ( python_body[0].x == python_body[1].x && python_body[0].y > python_body[1].y) {
+				_moveDownMask(scope.neck_mask, scope.neck_sprite, delta);
+			}
+
+			// _updateNeckMask(scope.neck_mask, scope.neck_sprite, delta);
+			_updatePretailMask(scope.pre_tail_mask, scope.pre_tail_sprite, delta );
+
+
+			// !!!!!!!!!!!!!
+			// 1 - lt, 2 - rt, 3 - rb, 4 -lb
+			var mask_states = {}
+			var _stright_states = [
+				[ 0,.999, 1,.999, 1,1, 0,1 ],
+				[ 0,0, 1,0, 1,1, 0,1 ]
+			];
+
+			// TODO: define sector state
+			// TODO: generate rotated states for each direction
+
+			// on draw the mask
+			var state = mask_states['up'];
+			var coef = .25;
+			var coef_inverted = 1 - coef;
+			var prev_state = state[0];
+			var next_state = state[1];
+
+			var curr_state = [];
+			for( var i=0; i< prev_state.length; i++ ){
+				curr_state[i] = prev_state[i] + (next_state[i] - prev_state[i]) * coef;
+			}
+			
+			mask.clear();
+			mask.beginFill(0xe74c3c); 
+			mask.moveTo(curr_state[0] * scope.CELL_WIDTH, curr_state[1] * scope.CELL_HEIGHT );
+			for( var i=2; i< prev_state.length; i+=2 ){
+				mask.lineTo(curr_state[i] * scope.CELL_WIDTH, curr_state[i+1] * scope.CELL_HEIGHT);
+			}
+			mask.endFill();
+
+		}
+
+
+
+		function _moveRightMask(mask, sprite,  delta) {
+			mask.clear();
+
+			var start_position_x = sprite.x - scope.CELL_HEIGHT / 2 ;
+			var start_position_y =  sprite.y + scope.CELL_HEIGHT / 2;
+			mask.beginFill(0xe74c3c); 
+			mask.moveTo(start_position_x, start_position_y );
+			mask.lineTo(start_position_x, start_position_y - scope.CELL_HEIGHT);
+			mask.lineTo(start_position_x + scope.CELL_WIDTH * delta , start_position_y - scope.CELL_HEIGHT);
+			mask.lineTo(start_position_x + scope.CELL_WIDTH * delta , start_position_y) ;
+			mask.lineTo(start_position_x, start_position_y );
+
+			mask.endFill();
+		}
+
+		function _moveDownMask(mask, sprite,  delta) {
+			mask.clear();
+			var start_position_x = sprite.x - scope.CELL_HEIGHT / 2 ;
+			var start_position_y =  sprite.y + scope.CELL_HEIGHT / 2;
+
+			mask.beginFill(0xe74c3c); 
+			mask.moveTo(start_position_x, start_position_y );
+			mask.lineTo(start_position_x, start_position_y - scope.CELL_HEIGHT);
+			if (delta < 0.5) {
+				mask.lineTo(start_position_x + scope.CELL_WIDTH * delta * 2,  start_position_y - scope.CELL_HEIGHT);
+			} else {
+				mask.lineTo(start_position_x + scope.CELL_WIDTH, start_position_y - scope.CELL_HEIGHT);
+				mask.lineTo(start_position_x + scope.CELL_WIDTH, start_position_y - scope.CELL_HEIGHT + scope.CELL_HEIGHT * delta) ;
+			}
+			mask.lineTo(start_position_x, start_position_y );
+			mask.endFill();
+
+		}
+
+		function _updatePretailMask(mask, sprite,  delta) {
+			mask.clear();
+
+			var start_position_x = sprite.x + scope.CELL_HEIGHT / 2 ;
+			var half_sprite_width = sprite.x - scope.CELL_HEIGHT / 2 ;
+			var start_position_y =  sprite.y + scope.CELL_HEIGHT / 2;
+			mask.beginFill(0xe74c3c); 
+			mask.moveTo(start_position_x, start_position_y);
+			mask.lineTo(start_position_x, start_position_y - scope.CELL_HEIGHT);
+			mask.lineTo(half_sprite_width + scope.CELL_WIDTH * delta , start_position_y - scope.CELL_HEIGHT);
+			mask.lineTo(half_sprite_width + scope.CELL_WIDTH * delta , start_position_y);
+			mask.lineTo(start_position_x, start_position_y);
+			mask.endFill();
+
+
+			// var start_position_x = sprite.x - scope.CELL_HEIGHT / 2 ;
+			// var start_position_y =  sprite.y + scope.CELL_HEIGHT / 2;
+			// mask.beginFill(0xe74c3c); 
+			// mask.moveTo(start_position_x, start_position_y);
+			// if ( delta < 0.5 ) {
+			// 	mask.lineTo(start_position_x + scope.CELL_WIDTH * delta * 2, start_position_y - scope.CELL_HEIGHT);
+			// 	mask.lineTo(start_position_x + scope.CELL_WIDTH , start_position_y - scope.CELL_HEIGHT);
+			// 	mask.lineTo(start_position_x + scope.CELL_WIDTH, start_position_y);
+			// } else {
+			// 	mask.lineTo(start_position_x + scope.CELL_WIDTH, start_position_y - (scope.CELL_HEIGHT - scope.CELL_HEIGHT * delta / 2));
+			// 	mask.lineTo(start_position_x + scope.CELL_WIDTH, start_position_y);
+
+			// }
+			// mask.lineTo(start_position_x, start_position_y);
+			// mask.endFill();
 		}
 
 		function _updateSingleSprite( part, _sprite, delta ){
@@ -444,9 +546,9 @@ class PixiVisualizer {
 
 
 	onPythonMoved(){
-		var scope = this;
-		
+
 		var python_body = this.python.python_body;
+
 		console.log("==============>");
 		this.updatePythonBodyArray();
 
@@ -455,28 +557,23 @@ class PixiVisualizer {
 			python_body[i]._sprite.visible = true;
 		}
 
-		function _updateNeck() {
-			scope.setSpritePosition( scope.neck_sprite, python_body[0].prev_x, python_body[0].prev_y );
-			scope.changeBodyPart( scope.neck_sprite, python_body[1], python_body[0], python_body[2], false, false);
-			
-			scope.neck_mask.clear;
-			scope.neck_mask.beginFill(0xe74c3c); 
-			scope.neck_mask.drawCircle(scope.neck_sprite.x, scope.neck_sprite.y, 515);
-			scope.neck_mask.endFill();
-		}
+		//update neck
+		this.setSpritePosition( this.neck_sprite, python_body[0].prev_x, python_body[0].prev_y );
+		this.changeBodyPart( this.neck_sprite, python_body[1], python_body[0], python_body[2], false, false);
+		// this.neck_sprite.visible = false;
 		//update pre tail
+		var last_index = python_body.length -1;
+		this.changeBodyPart( this.pre_tail_sprite, python_body[last_index - 1], python_body[last_index-2], python_body[last_index], true, true);
+		// this.pre_tail_sprite.visible = false;
 
-		function _updatePretail() {
-			var last_index = python_body.length -1;
-			scope.changeBodyPart( scope.pre_tail_sprite, python_body[last_index - 1], python_body[last_index-2], python_body[last_index], true, true);
-			scope.pre_tail_mask.clear;
-			scope.pre_tail_mask.beginFill(0xe74c3c); 
-			scope.pre_tail_mask.drawCircle(scope.pre_tail_sprite.x, scope.pre_tail_sprite.y, 515);
-			scope.pre_tail_mask.endFill();
-		}
-		
-		_updateNeck();
-		_updatePretail();
+		// if ( python_body[0].x == python_body[1].x) {
+		// 	if (python_body[0].y > python_body[1].y) {
+		// 		console.log('down')
+		// 	} else if(python_body[0].y < python_body[1].y) console.log('up')
+		// } else if( python_body[0].y == python_body[1].y) {
+		// 	if(python_body[0].x > python_body[1].x) console.log('right');
+		// 	else console.log('left')
+		// }
 
 		python_body[python_body.length - 2]._sprite.visible = false;
 		this.logic_step_timestamp = Date.now();
