@@ -134,7 +134,6 @@ class PixiVisualizer {
 
 				python_body[i]._sprite = this.AM.pullAsset( sprite_name );
 				this.snake_container.addChild( python_body[i]._sprite );
-				python_body[i]._sprite.visible = true;
 			}
 		}
 	}
@@ -217,31 +216,20 @@ class PixiVisualizer {
 		this.neck_mask.x = this.app.screen.width / 2;
 		this.neck_mask.y = this.app.screen.height / 2;
 		this.neck_mask.lineStyle(0);
-
 		this.neck_sprite.mask = this.neck_mask;
-		var count = 0;
-
-
-	    // this.neck_mask.beginFill(0x8bc5ff, 0.4);
-	  //  	this.neck_mask.beginFill(0xFFFF0B, 0.5);
-			// this.neck_mask.drawCircle(470, 200,100);
-			// this.neck_mask.endFill();
-
-			this.neck_mask.beginFill(0xe74c3c); // Red
-
-// Draw a circle
-			this.neck_mask.drawCircle(60, 185, 300); // drawCircle(x, y, radius)
-
-// Applies fill to lines and shapes since the last call to beginFill.
+		this.neck_mask.beginFill(0xe74c3c); 
+		this.neck_mask.drawCircle(60, 185, 300);
 		this.neck_mask.endFill();
 
-	    // this.neck_mask.moveTo(-120 + Math.sin(count) * 20, -100 + Math.cos(count)* 20);
-	    // this.neck_mask.lineTo(120 + Math.cos(count) * 20, -100 + Math.sin(count)* 20);
-	    // this.neck_mask.lineTo(120 + Math.sin(count) * 20, 100 + Math.cos(count)* 20);
-	    // this.neck_mask.lineTo(-120 + Math.cos(count)* 20, 100 + Math.sin(count)* 20);
-
-
-
+		this.pre_tail_mask = new PIXI.Graphics();
+		this.snake_container.addChild(this.pre_tail_mask);
+		this.pre_tail_mask.x = this.app.screen.width / 2;
+		this.pre_tail_mask.y = this.app.screen.height / 2;
+		this.pre_tail_mask.lineStyle(0);
+		this.pre_tail_sprite.mask = this.pre_tail_mask;
+		this.pre_tail_mask.beginFill(0xe74c3c); 
+		this.pre_tail_mask.drawCircle(60, 185, 300);
+		this.pre_tail_mask.endFill();
 
 	}
 
@@ -464,6 +452,7 @@ class PixiVisualizer {
 
 		for( var i=1; i < python_body.length-1; i++){
 			this.changeBodyPart( python_body[i]._sprite, python_body[i], python_body[i-1], python_body[i+1], true, true);
+			python_body[i]._sprite.visible = true;
 		}
 
 		function _updateNeck() {
@@ -476,19 +465,18 @@ class PixiVisualizer {
 			scope.neck_mask.endFill();
 		}
 		//update pre tail
-		var last_index = python_body.length -1;
-		this.changeBodyPart( this.pre_tail_sprite, python_body[last_index - 1], python_body[last_index-2], python_body[last_index], true, true);
 
+		function _updatePretail() {
+			var last_index = python_body.length -1;
+			scope.changeBodyPart( scope.pre_tail_sprite, python_body[last_index - 1], python_body[last_index-2], python_body[last_index], true, true);
+			scope.pre_tail_mask.clear;
+			scope.pre_tail_mask.beginFill(0xe74c3c); 
+			scope.pre_tail_mask.drawCircle(scope.pre_tail_sprite.x, scope.pre_tail_sprite.y, 515);
+			scope.pre_tail_mask.endFill();
+		}
 		
-		// _updateAccessoryPythonPart(this.pre_tail_sprite, python_body[python_body.length - 3], python_body[python_body.length - 1], python_body[python_body.length - 2]);
-		// _updateAccessoryPythonPart(this.neck_sprite, 0, python_body[1], python_body[0]);
 		_updateNeck();
-
-
-		
-
-		console.log(this.neck_mask)
-		console.log(this.neck_sprite)
+		_updatePretail();
 
 		python_body[python_body.length - 2]._sprite.visible = false;
 		this.logic_step_timestamp = Date.now();
