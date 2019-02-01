@@ -297,26 +297,7 @@ class Python {
 		var copy = Object.assign({}, scope.python_body[last_index]);
 		var insert_element = copy;
 		insert_element._sprite = undefined;
-
-		// scope.changePythonPartCoordinates(insert_element, copy.x, copy.y, copy.prev_prev_x, copy.prev_prev_y);
 		scope.changePythonPartCoordinates(scope.python_body[last_index], scope.python_body[last_index].prev_x, scope.python_body[last_index].prev_y, x, y);
-
-		// var insert_element = {
-		// 	x: copy.x,
-		// 	y:copy.y,
-		// 	prev_x: copy.prev_prev_x,
-		// 	prev_y:copy.prev_prev_y
-		// }
-
-		// var update_tail = {
-		// 	x: scope.python_body[last_index].prev_x,
-		// 	y: scope.python_body[last_index].prev_y,
-		// 	prev_x: x,
-		// 	prev_y: y
-		// }
-
-		// scope.python_body[last_index] = update_tail;
-		// scope.python_body[last_index].y = scope.python_body[last_index].prev_y;
 
 		scope.python_body.splice(last_index, 0, insert_element);
 	}
@@ -348,10 +329,16 @@ class Python {
 	removeSnakePart(scope) {
 		var last_index = scope.python_body.length - 1;
 
-		Utils.triggerCustomEvent(window, this.REMOVE_PYTHON_PART, {sprite: scope.python_body[last_index - 1]._sprite})
+		var deleted_elem = Object.assign({}, scope.python_body[last_index - 1]);
+
 		
-		scope.python_body[last_index] = scope.python_body[last_index - 2];
+		scope.python_body[last_index] = scope.python_body[last_index - 1];
+		scope.python_body[last_index]._sprite = undefined;
 		scope.python_body.splice(last_index - 1, 1);
+
+		console.log(scope.python_body)
+
+		Utils.triggerCustomEvent(window, this.REMOVE_PYTHON_PART, {sprite: deleted_elem._sprite})
 
 	}
 
