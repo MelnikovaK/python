@@ -218,10 +218,48 @@ class Python {
 	movePython() {
 		
 		var scope = this;
-		// var next_head_position = {
-		// 	x: this.python_body[0].x + this.python_direction.x,
-		//   y: this.python_body[0].y + this.python_direction.y
-		// };
+		var next_head_position = {
+			x: this.python_body[0].x + this.python_direction.x,
+		  y: this.python_body[0].y + this.python_direction.y
+		};
+
+		var python_grow = false;
+
+
+		for (var i = 0; i < this.bonuses.length; i++ ) {
+			
+			var bonus = this.bonuses[i];
+
+			if (next_head_position.x == bonus.x && next_head_position.y == bonus.y) {
+
+				this.resetBonus(bonus);				
+
+				//play sound
+				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
+
+				this.points += bonus.point;
+
+				if( this.points < 0 ) { // game over
+					this.points = 0;
+					this.is_game_over = true;
+					// this.python_body.pop();
+					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: true});
+					return;
+				}
+
+				if( bonus.point > 0) python_grow = true;
+
+				// trigger event
+				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
+				// scope.addBodyPart();
+
+				//action
+				if ( bonus.action)  bonus.action(this);
+
+				return;
+			}
+
+		}
 
 
 		// this.python_body.unshift( next_head_position );
@@ -229,6 +267,7 @@ class Python {
 		var is_tail = true;
 
 		for( var i = this.python_body.length-1; i>0; i-- ){
+			if ( is_tail && python_grow ) continue;
 			var part = this.python_body[i];
 			var prev_part = this.python_body[i-1];
 			part.prev_x = part.x;
@@ -247,47 +286,21 @@ class Python {
 		var head = this.python_body[0];
 		head.prev_x = head.x;
 		head.prev_y = head.y;
-		head.x = this.python_body[0].x + this.python_direction.x;
-		head.y = this.python_body[0].y + this.python_direction.y;
+		head.x = next_head_position.x;
+		head.y = next_head_position.y;
 		scope.updatePartDirection( head );
 		// console.log( head.angle, head.direction_name );
 
 		// check if bonus is eaten
-		for (var i = 0; i < this.bonuses.length; i++ ) {
-			
-			var bonus = this.bonuses[i];
-
-			if (head.x == bonus.x && head.y == bonus.y) {
-
-				this.resetBonus(bonus);				
-
-				//play sound
-				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
-
-				this.points += bonus.point;
-
-				if( this.points < 0 ) { // game over
-					this.points = 0;
-					this.is_game_over = true;
-					// this.python_body.pop();
-					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: true});
-					return;
-				}
-
-				// trigger event
-				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
-				// scope.addBodyPart();
-
-				//action
-				if ( bonus.action)  bonus.action(this);
-
-				return;
-			}
-
-		}
 		
 		// this.python_body.pop();
 
+	}
+
+	growPythonLength(scope) {
+		var pre_last_index = scope.python_body.length - 2;
+		var new_part = scope.python_body[pre_last_index];
+		scope.python_body.splice(pre_last_index, 0 , new_part);
 	}
 
 	updatePartDirection( part, target_part ){
@@ -352,7 +365,8 @@ class Python {
 			'apple': {
 				point: 1,
 				trigger_action_name: this.PYTHON_GET_POINT,
-				sound: {sound_id: "bonus", loop: false}
+				sound: {sound_id: "bonus", loop: false},
+				action: this.growPythonLength
 			},
 			'rotten_apple': {
 				point: -1,

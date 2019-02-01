@@ -80,16 +80,8 @@ class PixiVisualizer {
 			var scope = this;
 
 			this.updateBonusesArray();
-			// this.python.bonuses.forEach(function(e){
-			// 	e._sprite = scope.AM.pullAsset( e.type );
-			// 	scope.GO_container.addChild( e._sprite );
-			// 	scope.updateBonusPosition( e._sprite, e.x, e.y );
-			// });
-
 			this.removeSnakeBodyPart(this.python_body.length - this.START_PYTHON_LENGTH);
 			this.updatePythonBodyArray();
-			// this.updateBody();
-
 			this.startRenderer();
 
 		}.bind(this));
@@ -109,6 +101,7 @@ class PixiVisualizer {
 		window.addEventListener( python.GAME_OVER , function () {
 			this.shakeScreen();
 			this.removeBonuses();
+			this.removePython();
 			this.stopRenderer();
 		}.bind(this));
 		
@@ -125,7 +118,7 @@ class PixiVisualizer {
 
 	updatePythonBodyArray() {
 		var python_body = this.python.python_body;
-		var scope = this;
+
 		for ( var i = 0; i < python_body.length; i++) {
 			var sprite_name;
 			var angle = undefined;
@@ -141,13 +134,20 @@ class PixiVisualizer {
 			else sprite_name = 'python_body';
 			if ( !python_body[i]._sprite ) {
 
-				python_body[i]._sprite = scope.AM.pullAsset( sprite_name );
-				scope.snake_container.addChild( python_body[i]._sprite );
+				python_body[i]._sprite = this.AM.pullAsset( sprite_name );
+				this.snake_container.addChild( python_body[i]._sprite );
 			}
-			this.setSpritePosition( python_body[i]._sprite, python_body[i].x, python_body[i].y );
 			if ( angle ) {
 				python_body[i]._sprite.rotation = angle;
 			}
+		}
+	}
+
+	removePython() {
+		var python_body = this.python.python_body;
+		for ( var i = 0; i < python_body.length; i++ ){
+			this.AM.putAsset( python_body[i]._sprite );
+			this.snake_container.removeChild( python_body[i]._sprite );
 		}
 	}
 
@@ -201,7 +201,7 @@ class PixiVisualizer {
 		}
 	}
 
-	createGameCharacters() {
+	createGameCharactersContainers() {
 		
 		var python_body = this.python.python_body;
 		this.GO_container = new PIXI.Container();
@@ -210,30 +210,6 @@ class PixiVisualizer {
 
 		this.snake_container = new PIXI.Container();
 		this.app.stage.addChild( this.snake_container );
-
-		// this.initPythonParts();
-
-		// var head = this.head_sprite = this.AM.pullAsset('python_head');
-		// head.rotation = 270 * window.Utils.DEG2RAD;
-
- 		// var straight_body = this.straight_body_sprite = this.AM.pullAsset('python_body');
-
- 		// var tail = this.tail_sprite = this.AM.pullAsset('python_tail');
-		// tail.rotation = 90 * window.Utils.DEG2RAD;
-
- 		// this.python_body.push( { sprite: head, frame_name:'head-right'} );
- 		// for( var i=1; i<this.python.python_body.length-1; i++){
-	 	// 	this.python_body.push( {sprite: this.AM.pullAsset('python_body'), frame_name:'-'});
-	 	// }
- 		// this.python_body.push( {sprite: tail, frame_name: 'tail-right'});
-
- 		// // console.log("P> ", this.python_body );
-
- 		// for ( var i = 0; i < this.python_body.length; i++ ){
-			// // this.setSpritePosition( this.python_body[i].sprite, python_body[i].x, python_body[i].y );
- 		// 	this.snake_container.addChild(this.python_body[i].sprite);
- 		// }
-
 	}
 
 	// <<< CREATING GAME FIELD AND CHARACTERS <<<
@@ -325,25 +301,26 @@ class PixiVisualizer {
 
 
 	growPython() {
-		var python_body = this.python.python_body;
-		var last_index = python_body.length - 1;
+		// var python_body = this.python.python_body;
+		// var last_index = python_body.length - 1;
 
-		var prev_part_id = this.getPrevPartID(python_body[last_index], python_body[last_index - 1]); // "-10"
-		var next_part_id = this.getNextPartID(python_body[last_index - 2], python_body[last_index - 1]);
+		// var prev_part_id = this.getPrevPartID(python_body[last_index], python_body[last_index - 1]); // "-10"
+		// var next_part_id = this.getNextPartID(python_body[last_index - 2], python_body[last_index - 1]);
 
-		var part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
+		// var part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
 
-		var sprite =  this.AM.pullAsset('python_body');
+		// var sprite =  this.AM.pullAsset('python_body');
 
-		sprite.texture.frame = new PIXI.Rectangle(
-				part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
-				part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
-				this.SPRITE_WIDTH, this.SPRITE_HEIGHT
-		);
+		// sprite.texture.frame = new PIXI.Rectangle(
+		// 		part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
+		// 		part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
+		// 		this.SPRITE_WIDTH, this.SPRITE_HEIGHT
+		// );
 
- 		this.snake_container.addChild( sprite );
+ 	// 	this.snake_container.addChild( sprite );
 
-		this.python_body.splice(last_index - 1, 0, {sprite: sprite, frame_name: part_oriented_data.frame_name });
+		// this.python_body.splice(last_index - 1, 0, {sprite: sprite, frame_name: part_oriented_data.frame_name });
+		this.updatePythonBodyArray();
 	}
 
 	// <<< MOVE PYTHON <<<
@@ -393,7 +370,7 @@ class PixiVisualizer {
 			function _setup() {
 				scope.createAssets();
 				scope.createGameField();
-				scope.createGameCharacters();
+				scope.createGameCharactersContainers();
 		 		Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE );
 			}
 	}
@@ -476,7 +453,6 @@ class PixiVisualizer {
 			// head
 			_updateSingleSprite( python_body[0], python_body[0]._sprite, delta );
 
-			console.log(python_body)
 
 			//
 			_updateSingleSprite( python_body[python_body.length-1], python_body[python_body.length-1]._sprite, delta );
@@ -514,6 +490,7 @@ class PixiVisualizer {
 		
 		var python_body = this.python.python_body;
 		console.log("==============>");
+		console.log(python_body)
 		this.updatePythonBodyArray();
 
 		for( var i=1; i < python_body.length-1; i++){
