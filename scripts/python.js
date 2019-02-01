@@ -329,7 +329,7 @@ class Python {
 	removeSnakePart(scope) {
 		var last_index = scope.python_body.length - 1;
 
-		var deleted_elem = Object.assign({}, scope.python_body[last_index - 1]);
+		var deleted_elem = Object.assign({}, scope.python_body[last_index]);
 
 		
 		scope.python_body[last_index] = scope.python_body[last_index - 1];
@@ -338,7 +338,7 @@ class Python {
 
 		console.log(scope.python_body)
 
-		Utils.triggerCustomEvent(window, this.REMOVE_PYTHON_PART, {sprite: deleted_elem._sprite})
+		Utils.triggerCustomEvent(window, scope.REMOVE_PYTHON_PART, {sprite: deleted_elem._sprite})
 
 	}
 

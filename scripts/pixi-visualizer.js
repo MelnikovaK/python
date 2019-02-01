@@ -100,6 +100,7 @@ class PixiVisualizer {
 		}.bind(this));
 
 		window.addEventListener( python.REMOVE_PYTHON_PART , function (e) {
+			console.log('*********************************')
 			var sprite = e.detail.sprite;
 			this.removeSnakeBodyPart( sprite );
 			this.updatePythonBodyArray();
@@ -218,6 +219,7 @@ class PixiVisualizer {
 
 	// DELETE
 	removeSnakeBodyPart( sprite ) {
+		console.log(sprite)
 		this.AM.putAsset(sprite);
 		this.snake_container.removeChild(sprite);
 	}
