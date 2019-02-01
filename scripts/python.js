@@ -11,6 +11,7 @@ class Python {
 		this.PLAY = "python: pause inactive";
 		this.PLAY_SOUND = "sound-manager:play";
 		this.PAUSE_SOUND = "sound-manager:pause";
+		this.REMOVE_PYTHON_PART = "visualizer:remove_python_part"
 
 
 		//
@@ -218,62 +219,24 @@ class Python {
 	movePython() {
 		
 		var scope = this;
-		var next_head_position = {
-			x: this.python_body[0].x + this.python_direction.x,
-		  y: this.python_body[0].y + this.python_direction.y
-		};
 
-		var python_grow = false;
-
-
-		for (var i = 0; i < this.bonuses.length; i++ ) {
-			
-			var bonus = this.bonuses[i];
-
-			if (next_head_position.x == bonus.x && next_head_position.y == bonus.y) {
-
-				this.resetBonus(bonus);				
-
-				//play sound
-				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
-
-				this.points += bonus.point;
-
-				if( this.points < 0 ) { // game over
-					this.points = 0;
-					this.is_game_over = true;
-					// this.python_body.pop();
-					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: true});
-					return;
-				}
-
-				if( bonus.point > 0) python_grow = true;
-
-				// trigger event
-				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
-				// scope.addBodyPart();
-
-				//action
-				if ( bonus.action)  bonus.action(this);
-
-				return;
-			}
-
-		}
-
-
-		// this.python_body.unshift( next_head_position );
+		var prev_prev_x, prev_prev_y;
 		
 		var is_tail = true;
 
 		for( var i = this.python_body.length-1; i>0; i-- ){
-			if ( is_tail && python_grow ) continue;
+			// if ( is_tail && python_grow ) continue;
 			var part = this.python_body[i];
 			var prev_part = this.python_body[i-1];
-			part.prev_x = part.x;
-			part.prev_y = part.y;
-			part.x = prev_part.x;
-			part.y = prev_part.y;
+			if( is_tail ) {
+				prev_prev_x = part.prev_x;
+				prev_prev_y = part.prev_y;
+			}
+			scope.changePythonPartCoordinates(part, prev_part.x, prev_part.y, part.x, part.y);
+			// part.prev_x = part.x;
+			// part.prev_y = part.y;
+			// part.x = prev_part.x;
+			// part.y = prev_part.y;
 
 			if( is_tail ){
 				scope.updatePartDirection( part, this.python_body[i-2] );
@@ -286,21 +249,83 @@ class Python {
 		var head = this.python_body[0];
 		head.prev_x = head.x;
 		head.prev_y = head.y;
-		head.x = next_head_position.x;
-		head.y = next_head_position.y;
+		head.x = this.python_body[0].x + this.python_direction.x;
+		head.y = this.python_body[0].y + this.python_direction.y;
 		scope.updatePartDirection( head );
 		// console.log( head.angle, head.direction_name );
 
 		// check if bonus is eaten
 		
+		for (var i = 0; i < this.bonuses.length; i++ ) {
+			
+			var bonus = this.bonuses[i];
+
+			if (head.x == bonus.x && head.y == bonus.y) {
+
+				this.resetBonus(bonus);				
+
+				//play sound
+				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
+
+				this.points += bonus.point;
+
+				if( this.points < 0 ) { // game over
+					this.points = 0;
+					// this.is_game_over = true;
+					// this.python_body.pop();
+					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
+					return;
+				}
+
+				// trigger event
+				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
+				// scope.addBodyPart();
+
+				//action
+				if ( bonus.action)  bonus.action(this, prev_prev_x, prev_prev_y );
+
+				return;
+			}
+
+		}
 		// this.python_body.pop();
 
 	}
 
-	growPythonLength(scope) {
-		var pre_last_index = scope.python_body.length - 2;
-		var new_part = scope.python_body[pre_last_index];
-		scope.python_body.splice(pre_last_index, 0 , new_part);
+	growPythonLength(scope, x, y) {
+		var last_index = scope.python_body.length - 1;
+		var copy = Object.assign({}, scope.python_body[last_index]);
+		var insert_element = copy;
+		insert_element._sprite = undefined;
+
+		// scope.changePythonPartCoordinates(insert_element, copy.x, copy.y, copy.prev_prev_x, copy.prev_prev_y);
+		scope.changePythonPartCoordinates(scope.python_body[last_index], scope.python_body[last_index].prev_x, scope.python_body[last_index].prev_y, x, y);
+
+		// var insert_element = {
+		// 	x: copy.x,
+		// 	y:copy.y,
+		// 	prev_x: copy.prev_prev_x,
+		// 	prev_y:copy.prev_prev_y
+		// }
+
+		// var update_tail = {
+		// 	x: scope.python_body[last_index].prev_x,
+		// 	y: scope.python_body[last_index].prev_y,
+		// 	prev_x: x,
+		// 	prev_y: y
+		// }
+
+		// scope.python_body[last_index] = update_tail;
+		// scope.python_body[last_index].y = scope.python_body[last_index].prev_y;
+
+		scope.python_body.splice(last_index, 0, insert_element);
+	}
+
+	changePythonPartCoordinates(part, x, y, prev_x, prev_y) {
+		part.x = x;
+		part.y = y,
+		part.prev_x = prev_x;
+		part.prev_y = prev_y;
 	}
 
 	updatePartDirection( part, target_part ){
@@ -322,8 +347,12 @@ class Python {
 
 	removeSnakePart(scope) {
 		var last_index = scope.python_body.length - 1;
+
+		Utils.triggerCustomEvent(window, this.REMOVE_PYTHON_PART, {sprite: scope.python_body[last_index - 1]._sprite})
+		
 		scope.python_body[last_index] = scope.python_body[last_index - 2];
-		scope.python_body.splice(last_index - 2, 2);
+		scope.python_body.splice(last_index - 1, 1);
+
 	}
 
 	removeBonuses() {
