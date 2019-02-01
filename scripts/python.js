@@ -271,7 +271,7 @@ class Python {
 
 				if( this.points < 0 ) { // game over
 					this.points = 0;
-					// this.is_game_over = true;
+					this.is_game_over = true;
 					// this.python_body.pop();
 					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
 					return;

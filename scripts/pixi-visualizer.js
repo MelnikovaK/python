@@ -88,7 +88,6 @@ class PixiVisualizer {
 		window.addEventListener( python.PYTHON_GET_POINT , function (e) {
 			var bonus = e.detail.bonus;
 			this.updateBonusPosition(bonus._sprite, bonus.x, bonus.y );
-			// this.growPython();
 			this.updatePythonBodyArray();
 
 		}.bind(this));
@@ -96,16 +95,12 @@ class PixiVisualizer {
 		window.addEventListener( python.PYTHON_LOST_POINT , function (e) {
 			var bonus = e.detail.bonus;
 			this.updateBonusPosition(bonus._sprite, bonus.x, bonus.y );
-			// if ( !e.detail.game_over ) this.removeSnakeBodyPart(1);
 		}.bind(this));
 
 		window.addEventListener( python.REMOVE_PYTHON_PART , function (e) {
-			console.log('*********************************')
 			var sprite = e.detail.sprite;
 			this.removeSnakeBodyPart( sprite );
 			this.updatePythonBodyArray();
-			// this.updateBonusPosition(bonus._sprite, bonus.x, bonus.y );
-			// if ( !e.detail.game_over ) this.removeSnakeBodyPart(1);
 		}.bind(this));
 
 		window.addEventListener( python.GAME_OVER , function () {
@@ -128,7 +123,6 @@ class PixiVisualizer {
 
 	updatePythonBodyArray() {
 		var python_body = this.python.python_body;
-		console.log(python_body)
 		for ( var i = 0; i < python_body.length; i++) {
 			var sprite_name;
 
@@ -211,6 +205,44 @@ class PixiVisualizer {
 
 		this.snake_container = new PIXI.Container();
 		this.app.stage.addChild( this.snake_container );
+
+		this.neck_sprite = this.AM.pullAsset( 'python_body' );
+		this.pre_tail_sprite = this.AM.pullAsset( 'python_body' );
+		this.snake_container.addChild(this.neck_sprite);
+		this.snake_container.addChild(this.pre_tail_sprite);
+
+		//MASK
+		this.neck_mask = new PIXI.Graphics();
+		this.snake_container.addChild(this.neck_mask);
+		this.neck_mask.x = this.app.screen.width / 2;
+		this.neck_mask.y = this.app.screen.height / 2;
+		this.neck_mask.lineStyle(0);
+
+		this.neck_sprite.mask = this.neck_mask;
+		var count = 0;
+
+
+	    // this.neck_mask.beginFill(0x8bc5ff, 0.4);
+	  //  	this.neck_mask.beginFill(0xFFFF0B, 0.5);
+			// this.neck_mask.drawCircle(470, 200,100);
+			// this.neck_mask.endFill();
+
+			this.neck_mask.beginFill(0xe74c3c); // Red
+
+// Draw a circle
+			this.neck_mask.drawCircle(60, 185, 300); // drawCircle(x, y, radius)
+
+// Applies fill to lines and shapes since the last call to beginFill.
+		this.neck_mask.endFill();
+
+	    // this.neck_mask.moveTo(-120 + Math.sin(count) * 20, -100 + Math.cos(count)* 20);
+	    // this.neck_mask.lineTo(120 + Math.cos(count) * 20, -100 + Math.sin(count)* 20);
+	    // this.neck_mask.lineTo(120 + Math.sin(count) * 20, 100 + Math.cos(count)* 20);
+	    // this.neck_mask.lineTo(-120 + Math.cos(count)* 20, 100 + Math.sin(count)* 20);
+
+
+
+
 	}
 
 	// <<< CREATING GAME FIELD AND CHARACTERS <<<
@@ -232,52 +264,6 @@ class PixiVisualizer {
 	}
 
 	// >>> MOVE PYTHON >>>
-	moveActionGame() {
-
-		this.updateBody();
-
-	}
-
-	updateBody() {
-
-		var python_body = python.python_body;
-
-
-		//BODY
-		for ( var i = 0; i < python_body.length; i++ ) {
-			//python parts move
-			this.setSpritePosition( this.python_body[i].sprite, python_body[i].x, python_body[i].y );
-
-			var curr_sprite = this.python_body[i].sprite;
-
-			var prev_part_id = this.getPrevPartID(python_body[i-1], python_body[i]); // "-10"
-			var next_part_id = this.getNextPartID(python_body[i+1], python_body[i]);// "-10"
-
-			var part_oriented_data;
-
-			if( !python_body[i-1] ){ // head part
-				part_oriented_data = this.snake_parts[ next_part_id ];
-				curr_sprite.rotation = part_oriented_data.angle;
-
-			}else if( !python_body[i+1] ) { // tail part
-				part_oriented_data = this.snake_parts[ prev_part_id ];
-
-				curr_sprite.rotation = part_oriented_data.angle;
-
-			}else{ // body part
-				part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
-
-				// if ( part_oriented_data.frame_name == this.python_body[i].frame_name ) continue;
-				curr_sprite.texture.frame = new PIXI.Rectangle(
-					part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
-					part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
-					this.SPRITE_WIDTH, this.SPRITE_HEIGHT
-				);
-			}
-			this.python_body[i].frame_name = part_oriented_data.frame_name;
-		}
-
-	}
 
 	getPrevPartID(prev_part, curr_part, use_prev) {
 		return prev_part && this.parts_indexes[ this.getDiffString( curr_part, prev_part, use_prev ) ]; // "-10"
@@ -292,30 +278,6 @@ class PixiVisualizer {
 		var diff_x = use_prev ? (fisrt_elem.prev_x - sec_elem.prev_x) : (fisrt_elem.x - sec_elem.x);
 		var diff_y = use_prev ? (fisrt_elem.prev_y - sec_elem.prev_y) : (fisrt_elem.y - sec_elem.y);
 		return diff_x.toString() + diff_y.toString();
-	}
-
-
-	growPython() {
-		// var python_body = this.python.python_body;
-		// var last_index = python_body.length - 1;
-
-		// var prev_part_id = this.getPrevPartID(python_body[last_index], python_body[last_index - 1]); // "-10"
-		// var next_part_id = this.getNextPartID(python_body[last_index - 2], python_body[last_index - 1]);
-
-		// var part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
-
-		// var sprite =  this.AM.pullAsset('python_body');
-
-		// sprite.texture.frame = new PIXI.Rectangle(
-		// 		part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
-		// 		part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
-		// 		this.SPRITE_WIDTH, this.SPRITE_HEIGHT
-		// );
-
- 	// 	this.snake_container.addChild( sprite );
-
-		// this.python_body.splice(last_index - 1, 0, {sprite: sprite, frame_name: part_oriented_data.frame_name });
-		this.updatePythonBodyArray();
 	}
 
 	// <<< MOVE PYTHON <<<
@@ -477,30 +439,56 @@ class PixiVisualizer {
 		clearInterval(this.render_timer);
 	}
 
+	changeBodyPart( part_sprite, curr_part, prev_part, next_part, change_coordinates, use_prev ) {
+		if ( change_coordinates) this.setSpritePosition( part_sprite, curr_part.prev_x, curr_part.prev_y );
+
+		// change body part visual
+		var prev_part_id = this.getPrevPartID(prev_part, curr_part, use_prev ); // "-10"
+		var next_part_id = this.getNextPartID(next_part, curr_part, use_prev );// "-10"
+
+		var part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
+		part_sprite.texture.frame = new PIXI.Rectangle(
+			part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
+			part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
+			this.SPRITE_WIDTH, this.SPRITE_HEIGHT
+		);
+	}
+
+
 	onPythonMoved(){
+		var scope = this;
 		
 		var python_body = this.python.python_body;
 		console.log("==============>");
-		console.log(python_body)
 		this.updatePythonBodyArray();
 
 		for( var i=1; i < python_body.length-1; i++){
-			var part_sprite = python_body[i]._sprite;
-			this.setSpritePosition( part_sprite, python_body[i].prev_x, python_body[i].prev_y );
-
-			// change body part visual
-			var prev_part_id = this.getPrevPartID(python_body[i-1], python_body[i], true ); // "-10"
-			var next_part_id = this.getNextPartID(python_body[i+1], python_body[i], true );// "-10"
-
-			var part_oriented_data = this.snake_parts[ prev_part_id + next_part_id ];
-			part_sprite.texture.frame = new PIXI.Rectangle(
-				part_oriented_data.frame_position[0] * this.SPRITE_WIDTH,
-				part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
-				this.SPRITE_WIDTH, this.SPRITE_HEIGHT
-			);
-
-			// if( i == python_body.length - 2 ) part_sprite.visible = false;	
+			this.changeBodyPart( python_body[i]._sprite, python_body[i], python_body[i-1], python_body[i+1], true, true);
 		}
+
+		function _updateNeck() {
+			scope.setSpritePosition( scope.neck_sprite, python_body[0].prev_x, python_body[0].prev_y );
+			scope.changeBodyPart( scope.neck_sprite, python_body[1], python_body[0], python_body[2], false, false);
+			
+			scope.neck_mask.clear;
+			scope.neck_mask.beginFill(0xe74c3c); 
+			scope.neck_mask.drawCircle(scope.neck_sprite.x, scope.neck_sprite.y, 515);
+			scope.neck_mask.endFill();
+		}
+		//update pre tail
+		var last_index = python_body.length -1;
+		this.changeBodyPart( this.pre_tail_sprite, python_body[last_index - 1], python_body[last_index-2], python_body[last_index], true, true);
+
+		
+		// _updateAccessoryPythonPart(this.pre_tail_sprite, python_body[python_body.length - 3], python_body[python_body.length - 1], python_body[python_body.length - 2]);
+		// _updateAccessoryPythonPart(this.neck_sprite, 0, python_body[1], python_body[0]);
+		_updateNeck();
+
+
+		
+
+		console.log(this.neck_mask)
+		console.log(this.neck_sprite)
 
 		python_body[python_body.length - 2]._sprite.visible = false;
 		this.logic_step_timestamp = Date.now();

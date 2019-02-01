@@ -16,7 +16,7 @@ var config = {
 	field_offset_x: 0,
 	field_offset_y: 0,
 
-	logic_step_interval: 500,
+	logic_step_interval: 2000,
 	max_python_length: 4,
 	
 	input: {
