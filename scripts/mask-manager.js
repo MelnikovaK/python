@@ -37,6 +37,10 @@ class MaskManager() {
 		this.mask.endFill();
 	}
 
+	straightHorizontal() {
+		
+	}
+
 	spriteIncreaseStraightRight(mask, sprite) {
 		mask.clear();
 
