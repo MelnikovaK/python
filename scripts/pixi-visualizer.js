@@ -54,25 +54,12 @@ class PixiVisualizer {
 			"10": 4,
 			"01": 8,
 		};
-	// !!!!!!!!!!!!!
-			// 1 - lt, 2 - rt, 3 - rb, 4 -lb
+
 		this.mask_states = {
         'up':[
           [ 0,1, 1,1, 1,1, 0,1 ],
           [ 0,0, 1,0, 1,1, 0,1 ]
         ],
-        // 'left': [
-        //   [ 1,0, 1,0, 1,1, 1,1 ],
-        //   [ 0,0, 1,0, 1,1, 0,1 ],
-        // ],
-        // 'right': [
-        //   [ 0,0, 0,0, 0,1 ,0,1 ],
-        //   [ 0,0, 1,0, 1,1, 0,1 ],
-        // ],
-        // 'down': [
-        //   [ 0,0, 1,0, 1,0, 0,0 ],
-        //   [ 0,0, 1,0, 1,1, 0,1 ],
-        // ],
       };
 
 
@@ -90,8 +77,8 @@ class PixiVisualizer {
       };
 
       this.mask_rotation = {
-      	'left-down': 270 * window.Utils.DEG2RAD,
-      	'left-up': 0,
+      	'left-down': 0,
+      	'left-up': 270 * window.Utils.DEG2RAD,
       	'down-right': 180 * window.Utils.DEG2RAD,
       	'up-right': 90 * window.Utils.DEG2RAD,
       }
@@ -173,43 +160,24 @@ class PixiVisualizer {
 		}.bind(this));
 		
 
-		// !!!
-		_generateMask( 'up' );
-      // _generateMask('right','down',4);
+		_generateMask( 'up', 'left' );
+		_generateMask( 'left', 'down' );
+		_generateMask( 'down', 'right' );
+		
     console.log( 'mask: ', scope.mask_states );
 
-    function _generateMask( original_mask_name) {
-			var copy = scope.mask_states;
-			var up = copy[original_mask_name];
+    function _generateMask( original_mask_name, creating_mask_name) {
 
-      var left = [[],[]];
-      var down = [[],[]];
-      var right = [[],[]];
+			var orig_mask = scope.mask_states[original_mask_name];
+			var new_mask = [[],[]];
 
-      for (var i = 0; i < up.length; i++) 
-      	for ( var j = 0; j < up[i].length; j+=2) {
-      		left[i][j] = up[i][j + 1];
-      		left[i][j + 1] = ( 1 - up[i][j]);
+      for (var i = 0; i < orig_mask.length; i++) 
+      	for ( var j = 0; j < orig_mask[i].length; j+=2) {
+      		new_mask[i][j] = orig_mask[i][j + 1];
+      		new_mask[i][j + 1] = ( 1 - orig_mask[i][j]);
       }
-
-      for (var i = 0; i < left.length; i++) 
-      	for ( var j = 0; j < left[i].length; j+=2) {
-      		down[i][j] = left[i][j + 1];
-      		down[i][j + 1] = ( 1 - left[i][j]);
-      }
-
-      for (var i = 0; i < down.length; i++) 
-      	for ( var j = 0; j < down[i].length; j+=2) {
-      		right[i][j] = down[i][j + 1];
-      		right[i][j + 1] = ( 1 - down[i][j]);
-      }
-
-      scope.mask_states['left'] = left;
-      scope.mask_states['down'] = down;
-      scope.mask_states['right'] = right;
-      
+      scope.mask_states[creating_mask_name] = new_mask;
 		}
-
 	}
 
 
@@ -315,19 +283,15 @@ class PixiVisualizer {
 
 		this.neck_mask = new PIXI.Graphics();
 		this.neck_sprite.addChild(this.neck_mask);
-		// this.snake_container.addChild(this.neck_mask);
-		// this.neck_mask.x = this.neck_sprite.x - this.CELL_WIDTH / 2;
-		// this.neck_mask.y = this.neck_sprite.y - this.CELL_HEIGHT / 2;
 		this.neck_sprite.mask = this.neck_mask;
-		// this.neck_mask.pivot.set(32,32)
 
 		this.pre_tail_mask = new PIXI.Graphics();
 		this.pre_tail_sprite.addChild(this.pre_tail_mask);
-		// this.pre_tail_mask.x = this.pre_tail_sprite.x - this.CELL_WIDTH / 2;
-		// this.pre_tail_mask.y = this.pre_tail_sprite.y - this.CELL_HEIGHT / 2;
-		// this.snake_container.addChild(this.pre_tail_mask);
 		this.pre_tail_sprite.mask = this.pre_tail_mask;
 
+		this.example = new PIXI.Graphics();
+		this.bg_container.addChild(this.example);
+		this.setSpritePosition( this.example, 7, 8 );
 
 	}
 
@@ -495,7 +459,7 @@ class PixiVisualizer {
 			_updateSingleSprite( python_body[python_body.length-1], python_body[python_body.length-1]._sprite, delta );
 
 			_updateMask(scope.neck_mask, delta, scope.neck_mask_points, false, scope.neck_mask_rotation);
-			_updateMask(scope.pre_tail_mask, delta, scope.pre_tail_mask_points, true, scope.pre_tail_mask_rotation);
+			// _updateMask(scope.pre_tail_mask, delta, scope.pre_tail_mask_points, true, scope.pre_tail_mask_rotation);
 
 		}
 
@@ -527,7 +491,17 @@ class PixiVisualizer {
 				mask.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
 			}
 			mask.endFill();
-			// if ( rotation ) mask.rotation = rotation;
+			if ( rotation ) mask.rotation = rotation;
+
+			scope.example.clear();
+			scope.example.beginFill(0xe74c3c); 
+			scope.example.moveTo(curr_state[0] * scope.CELL_WIDTH * 2, curr_state[1] * scope.CELL_HEIGHT * 2 );
+			for( var i=2; i < prev_state.length; i += 2 ){
+				scope.example.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
+			}
+			scope.example.endFill();
+			if ( rotation ) scope.example.rotation = rotation;
+			
 		}
 
 
