@@ -400,7 +400,7 @@ class PixiVisualizer {
 
 
 			// !!!!!!!!!!!!!
-			// 1 - lb, 2 - rb, 3 - rt, 4 -lt
+			// 1 - lt, 2 - rt, 3 - rb, 4 -lb
 
 			scope.mask_states = {
         'up':[
@@ -420,30 +420,50 @@ class PixiVisualizer {
           [ .999,0, 1,0, 1,1, .999,1 ],
           [ 0,0, 1,0, 1,1, 0,1 ],
         ],
+
         'left-down': [
-          [ 0,1, 0,1,  0,0, 0,1, ],
-          [ 1,1, 0,1,  0,0, 1,1, ],
-          [1,1, 0,1, 0,0, 1,0,  ],
+          // [ 0,0, 0,0, 0,1, 0,1, ],
+          // [ 0,0, 1,0,  0,1, 0,1, ],
+          // [ 0,0, 1,0, 0,1, 1,0,  ],
+
+          [ 0,0, 0,0, 0,1, 0,1, ],
+          [ 0,0, 0,1, 1,1, 1,1, ],
+          [ 0,0, 0,1, 0,1, 1,0, ],
         ],
 
         'left-up': [
-          [ 0,1, 0,1,  0,0, 0,1, ],
-          [ 1,1, 0,1,  0,0, 1,1, ],
-          [1,1, 0,1, 0,0, 1,0,  ],
+          [ 0,1, 0,1, 0,0, 0,1, ],
+          [ 1,1, 0,1, 0,0, 1,1, ],
+          [ 1,1, 0,1, 0,0, 1,0, ],
         ],
 
         'down-right': [
-        [0,0, 0,0, 1,.999, 0,.999],
-        [0,0, .999,0, 1,1, .999,1],
-        [0,0, 1,0, 1,1, 0,1 ],
+	        [0,0, 0,0, 1,1, 0,1],
+	        [0,0, 1,0, 1,1, 1,1],
+	        [0,0, 1,0, 1,1, 0,1 ],
+        ],
+
+        'up-right': [
+	        [0,0, 0,0, 1,1, 0,1],
+	        [0,0, 1,0, 1,1, 1,1],
+	        [0,0, 1,0, 1,1, 0,1 ],
         ]
       }
 
-      // console.log(scope.neck_sprite_name, scope.pre_tail_sprite_name)
-			// var _stright_states = [
-			// 	[ 0,.999, 1,.999, 1,1, 0,1 ],
-			// 	[ 0,0, 1,0, 1,1, 0,1 ]
-			// ];
+      // var direction_to_rotation = {
+      // 	'right': 
+      // }
+
+      // var curve_body_part = {
+      // 	'left-down': {
+      // 		array: [
+      // 		 	[ 0,0, 0,0, 0,1, 0,1, ],
+	     //      [ 0,0, 0,1, 1,1, 1,1, ],
+	     //      [ 0,0, 0,1, 0,1, 1,0, ],
+      // 		],
+      // 		// rotation = 
+      // 	}
+      // };
 
 			// TODO: define sector state
 			// TODO: generate rotated states for each direction
@@ -453,18 +473,22 @@ class PixiVisualizer {
 			if (scope.neck_sprite_name == 'straight-horizontal' || scope.neck_sprite_name == 'straight-vertical') direction = scope.neck_direction;
 			else {
 				direction = scope.neck_sprite_name;
-				coef = 2;
+				coef = scope.mask_states[direction].length - 1;
 				straight = false;
 			}
 
 			_updateMask(scope.neck_mask, delta, direction, false, coef, straight);
+
+			// scope.neck_mask.rotation = 360 * window.Utils.DEG2RAD;
 			// _updateMask(scope.pre_tail_mask, delta, scope.pre_tail_direction, true, straight);
 
 
 		}
 
 		function _updateMask(mask, delta, direction, invert, coefficient, straight ) {
-			console.log(direction)
+
+			console.log(direction);
+			
 			var coef = coefficient || 1;
 			var state = scope.mask_states[direction];
 			var prev_state, next_state;
@@ -474,7 +498,7 @@ class PixiVisualizer {
 			if( !straight && delta > .5) {
 				prev_state = state[1];
 				next_state = state[2];
-				 // diff /= coef;
+				 diff = (delta  - 0.5) * coef;
 				console.log('******************************');
 			} else {
 				prev_state = state[0];
@@ -487,7 +511,7 @@ class PixiVisualizer {
 			for( var i=0; i < prev_state.length; i++ ){
 				curr_state[i] = prev_state[i] + (next_state[i] - prev_state[i]) * diff;
 			}
-			// if ( !straight ) console.log(curr_state);
+			if ( !straight ) console.log(curr_state);
 			
 			mask.clear();
 			mask.beginFill(0xe74c3c); 
@@ -496,6 +520,7 @@ class PixiVisualizer {
 				mask.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
 			}
 			mask.endFill();
+			// console.log(mask.rotation)
 
 			scope.example.clear();
 			scope.example.beginFill(0xe74c3c); 
@@ -504,8 +529,7 @@ class PixiVisualizer {
 				scope.example.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
 			}
 			scope.example.endFill();
-
-		
+			// scope.example.rotation = 180 * window.Utils.DEG2RAD;
 		}
 
 
@@ -576,7 +600,6 @@ class PixiVisualizer {
 
 		this.neck_direction = this.getPartDirection(0);
 		this.pre_tail_direction = this.getPartDirection(last_index - 1);
-
 		// this.neck_mask.pivot.set(0,0);
 
 		// console.log( this.neck_mask.x, this.neck_mask.y, this.neck_sprite.x, this.neck_sprite.y, this.neck_mask.pivot, this.neck_sprite.pivot);
