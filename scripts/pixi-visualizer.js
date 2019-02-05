@@ -59,11 +59,11 @@ class PixiVisualizer {
 		this.snake_parts[4] = { frame_position: [3,3], angle: 270 * window.Utils.DEG2RAD, frame_name: 'left'};//tail left
 		this.snake_parts[8] = { frame_position: [3,2], angle: 0, frame_name: 'up'};//tail up
 
-		this.snake_parts[1+2] = { frame_position: [0,0], frame_name: 'left-up'};// UL  ┘
+		this.snake_parts[1+2] = { frame_position: [0,0], frame_name: 'down-right'};// UL  ┘
 		this.snake_parts[1+8] = { frame_position: [2,1], frame_name: 'straight-vertical'};// UD  |
-		this.snake_parts[1+4] = { frame_position: [2,0], frame_name: 'up-right'};// UD  └
-		this.snake_parts[2+8] = { frame_position: [0,1], frame_name: 'left-down'};// UD  ┐
-		this.snake_parts[4+8] = { frame_position: [2,2], frame_name: 'down-right'};// UD  ┌
+		this.snake_parts[1+4] = { frame_position: [2,0], frame_name: 'left-down'};// UD  └
+		this.snake_parts[2+8] = { frame_position: [0,1], frame_name: 'up-right'};// UD  ┐
+		this.snake_parts[4+8] = { frame_position: [2,2], frame_name: 'left-up'};// UD  ┌
 		this.snake_parts[2+4] = { frame_position: [1,0], frame_name: 'straight-horizontal'};// UD  -
 
 
@@ -225,6 +225,10 @@ class PixiVisualizer {
 		// this.pre_tail_mask.y = this.pre_tail_sprite.y - this.CELL_HEIGHT / 2;
 		// this.snake_container.addChild(this.pre_tail_mask);
 		this.pre_tail_sprite.mask = this.pre_tail_mask;
+
+		this.example = new PIXI.Graphics();
+		this.snake_container.addChild(this.example);
+		this.setSpritePosition( this.example, 9, 8 );
 
 	}
 
@@ -388,8 +392,6 @@ class PixiVisualizer {
 			
 			var time_current = Date.now();
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
-
-			// console.log(delta)
 			// head
 			_updateSingleSprite( python_body[0], python_body[0]._sprite, delta );
 			//tail
@@ -398,30 +400,46 @@ class PixiVisualizer {
 
 
 			// !!!!!!!!!!!!!
-			// 1 - lt, 2 - rt, 3 - rb, 4 -lb
+			// 1 - lb, 2 - rb, 3 - rt, 4 -lt
+
 			scope.mask_states = {
-				'up':[
-					[ 0,.999, 1,.999, 1,1, 0,1 ],
-					[ 0,0, 1,0, 1,1, 0,1 ],
-				],
-				'right': [
-					[ .999, 0, 1, 0, 1,1, .999,1 ],
-					[ 0,0, 1,0, 1,1, 0,1 ],
-				],
-				'down': [
-					[ 0,.999, 1,.999, 1,1, 0,1 ],
-					[ 0,0, 1,0, 1,1, 0,1 ],
-				],
-				'left': [
-					[ 0,0, 1,0, 1,1, 0,1 ],
-					[ .999,0, 1,0, 1,1, .999,1 ],
-				],
-				'up-right': [
-					[ 0,.999, 1,.999, 1,1, 0,1 ],
-					[0,0, 1,0, 1,0, 0,1 ],
-					[ 0,0, 1,0, 1,1, 0,1 ],
-				]
-			}
+        'up':[
+          [ 0,.999, 1,.999, 1,1, 0,1 ],
+          [ 0,0, 1,0, 1,1, 0,1 ]
+
+        ],
+        'right': [
+          [ 0,0, 0,0, 0,1 ,0,1 ],
+          [ 0,0, 1,0, 1,1, 0,1 ],
+        ],
+        'down': [
+          [ 0,0, 1,0, 1,.111, 0,.111 ],
+          [ 0,0, 1,0, 1,1, 0,1 ],
+        ],
+        'left': [
+          [ .999,0, 1,0, 1,1, .999,1 ],
+          [ 0,0, 1,0, 1,1, 0,1 ],
+        ],
+        'left-down': [
+          [ 0,1, 0,1,  0,0, 0,1, ],
+          [ 1,1, 0,1,  0,0, 1,1, ],
+          [1,1, 0,1, 0,0, 1,0,  ],
+        ],
+
+        'left-up': [
+          [ 0,1, 0,1,  0,0, 0,1, ],
+          [ 1,1, 0,1,  0,0, 1,1, ],
+          [1,1, 0,1, 0,0, 1,0,  ],
+        ],
+
+        'down-right': [
+        [0,0, 0,0, 1,.999, 0,.999],
+        [0,0, .999,0, 1,1, .999,1],
+        [0,0, 1,0, 1,1, 0,1 ],
+        ]
+      }
+
+      // console.log(scope.neck_sprite_name, scope.pre_tail_sprite_name)
 			// var _stright_states = [
 			// 	[ 0,.999, 1,.999, 1,1, 0,1 ],
 			// 	[ 0,0, 1,0, 1,1, 0,1 ]
@@ -430,43 +448,46 @@ class PixiVisualizer {
 			// TODO: define sector state
 			// TODO: generate rotated states for each direction
 
-			_updateMask(scope.neck_mask, delta, scope.neck_direction);
+			var direction, coef, straight = true;;
 
-			// on draw the mask
-			// var state = mask_states[scope.neck_direction];
-			// var coef = .5;
-			// var coef_inverted = 1 - coef;
-			// var prev_state = state[0];
-			// var next_state = state[1];
+			if (scope.neck_sprite_name == 'straight-horizontal' || scope.neck_sprite_name == 'straight-vertical') direction = scope.neck_direction;
+			else {
+				direction = scope.neck_sprite_name;
+				coef = 2;
+				straight = false;
+			}
 
-			// var curr_state = [];
-			// for( var i=0; i < prev_state.length; i++ ){
-			// 	curr_state[i] = prev_state[i] + (next_state[i] - prev_state[i]) * delta / coef;
-			// }
-			// // console.log(curr_state);
-			
-			// scope.neck_mask.clear();
-			// scope.neck_mask.beginFill(0xe74c3c); 
-			// scope.neck_mask.moveTo(curr_state[0] * scope.CELL_WIDTH * 2, curr_state[1] * scope.CELL_HEIGHT * 2 );
-			// for( var i=2; i < prev_state.length; i += 2 ){
-			// 	scope.neck_mask.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
-			// }
-			// scope.neck_mask.endFill();
+			_updateMask(scope.neck_mask, delta, direction, false, coef, straight);
+			// _updateMask(scope.pre_tail_mask, delta, scope.pre_tail_direction, true, straight);
+
 
 		}
 
-		function _updateMask(mask, delta, direction ) {
+		function _updateMask(mask, delta, direction, invert, coefficient, straight ) {
+			console.log(direction)
+			var coef = coefficient || 1;
 			var state = scope.mask_states[direction];
-			var coef = .5;
-			var coef_inverted = 1 - coef;
-			var prev_state = state[0];
-			var next_state = state[1];
+			var prev_state, next_state;
+			if ( invert ) var diff = 1 - delta;
+			else var diff = delta;
+			if ( !straight && delta <=.5) diff *= coef;
+			if( !straight && delta > .5) {
+				prev_state = state[1];
+				next_state = state[2];
+				 // diff /= coef;
+				console.log('******************************');
+			} else {
+				prev_state = state[0];
+				next_state = state[1];
+			}
+			
+			// console.log(direction, prev_state)
 
 			var curr_state = [];
 			for( var i=0; i < prev_state.length; i++ ){
-				curr_state[i] = prev_state[i] + (next_state[i] - prev_state[i]) * delta / coef;
+				curr_state[i] = prev_state[i] + (next_state[i] - prev_state[i]) * diff;
 			}
-			// console.log(curr_state);
+			// if ( !straight ) console.log(curr_state);
 			
 			mask.clear();
 			mask.beginFill(0xe74c3c); 
@@ -475,6 +496,14 @@ class PixiVisualizer {
 				mask.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
 			}
 			mask.endFill();
+
+			scope.example.clear();
+			scope.example.beginFill(0xe74c3c); 
+			scope.example.moveTo(curr_state[0] * scope.CELL_WIDTH * 2, curr_state[1] * scope.CELL_HEIGHT * 2 );
+			for( var i=2; i < prev_state.length; i += 2 ){
+				scope.example.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
+			}
+			scope.example.endFill();
 
 		
 		}
@@ -497,7 +526,6 @@ class PixiVisualizer {
 				}
 			}
 			var angle = prev_angle + (part.angle - prev_angle) * delta;
-			// console.log( prev_angle * Utils.RAD2DEG +" > "+ part.angle * Utils.RAD2DEG );
 			_sprite.rotation = angle;
 		}
 
@@ -507,7 +535,7 @@ class PixiVisualizer {
 		clearInterval(this.render_timer);
 	}
 
-	changeBodyPart( part_sprite, curr_part, prev_part, next_part, change_coordinates, use_prev ) {
+	changeBodyPart( part_sprite, curr_part, prev_part, next_part, change_coordinates, use_prev, i ) {
 		if ( change_coordinates) this.setSpritePosition( part_sprite, curr_part.prev_x, curr_part.prev_y );
 
 		// change body part visual
@@ -520,6 +548,8 @@ class PixiVisualizer {
 			part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
 			this.SPRITE_WIDTH, this.SPRITE_HEIGHT
 		);
+		if(i == 0) this.neck_sprite_name = part_oriented_data.frame_name;
+		if(i == this.python.python_body.length - 2) this.pre_tail_sprite_name = part_oriented_data.frame_name;
 	}
 
 
@@ -532,31 +562,24 @@ class PixiVisualizer {
 		this.updatePythonBodyArray();
 
 		for( var i=1; i < python_body.length-1; i++){
-			this.changeBodyPart( python_body[i]._sprite, python_body[i], python_body[i-1], python_body[i+1], true, true);
+			this.changeBodyPart( python_body[i]._sprite, python_body[i], python_body[i-1], python_body[i+1], true, true, i);
 			python_body[i]._sprite.visible = true;
 		}
 
 		//update neck
 		this.setSpritePosition( this.neck_sprite, python_body[0].prev_x, python_body[0].prev_y );
-		this.changeBodyPart( this.neck_sprite, python_body[1], python_body[0], python_body[2], false, false);
+		this.changeBodyPart( this.neck_sprite, python_body[1], python_body[0], python_body[2], false, false, 0);
 
 		//update pre tail
 		var last_index = python_body.length -1;
 		this.changeBodyPart( this.pre_tail_sprite, python_body[last_index - 1], python_body[last_index-2], python_body[last_index], true, true);
-		if (python_body[0].x == python_body[1].x) {
-			if (python_body[0].y > python_body[1].y) this.neck_direction = 'down';
-			else this.neck_direction = 'up';
-		} else if( python_body[0].y == python_body[1].y) {
-			if(python_body[0].x > python_body[1].x)  this.neck_direction = 'right';
-			else this.neck_direction = 'left';
-		}
+
 		this.neck_direction = this.getPartDirection(0);
-		this.neck_mask.x = this.neck_sprite.x - this.CELL_WIDTH / 2;
-		console.log(this.neck_mask.x);
-		console.log(this.neck_sprite.x);
+		this.pre_tail_direction = this.getPartDirection(last_index - 1);
 
-		// this.pre_tail_direction = this.getPartDirection(last_index - 1)
+		// this.neck_mask.pivot.set(0,0);
 
+		// console.log( this.neck_mask.x, this.neck_mask.y, this.neck_sprite.x, this.neck_sprite.y, this.neck_mask.pivot, this.neck_sprite.pivot);
 
 		python_body[python_body.length - 2]._sprite.visible = false;
 		this.logic_step_timestamp = Date.now();
