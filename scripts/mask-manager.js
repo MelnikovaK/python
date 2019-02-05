@@ -6,51 +6,70 @@ class MaskManager() {
 		this.sprite = sprite;
 		this.mask = mask;
 
-		this.sprite_masks = {};
+		this.mask_states = {
+			'up':[
+          [ 0,.999, 1,.999, 1,1, 0,1 ],
+          [ 0,0, 1,0, 1,1, 0,1 ]
 
-		this.sprite_mask['left-down'] = this.leftDown;
-		this.sprite_mask['straight-horizontal'] = this.leftDown;
-		this.sprite_mask['left-down'] = this.leftDown;
-		this.sprite_mask['left-down'] = this.leftDown;
-		this.sprite_mask['left-down'] = this.leftDown;
-		this.sprite_mask['left-down'] = this.leftDown;
-		this.sprite_mask['left-down'] = this.leftDown;
+        ],
+      'right': [
+        [ 0,0, 0,0, 0,1 ,0,1 ],
+        [ 0,0, 1,0, 1,1, 0,1 ],
+      ],
+      'down': [
+        [ 0,0, 1,0, 1,.111, 0,.111 ],
+        [ 0,0, 1,0, 1,1, 0,1 ],
+      ],
+      'left': [
+        [ .999,0, 1,0, 1,1, .999,1 ],
+        [ 0,0, 1,0, 1,1, 0,1 ],
+      ],
 
-		this.start_position_x_right = this.sprite.x - this.CELL_HEIGHT / 2 ;
-		this.start_position_y_right = this.sprite.y + this.CELL_HEIGHT / 2;
-	}
+      'left-down': [
+      	[ 0,0, 0,0, 0,1, 0,1, ],
+        [ 0,0, 1,0, 0,1, 0,1, ],
+       	[ 0,0, 1,0, 1,1, 0,1 ],
+      ],
 
-	leftDown(delta) {
-		this.mask.clear();
+      'left-up': [
+        [ 0,1, 0,1, 0,0, 0,1, ],
+        [ 1,1, 0,1, 0,0, 1,1, ],
+        [ 1,1, 0,1, 0,0, 1,0, ],
+      ],
 
-		this.mask.beginFill(0xe74c3c); 
-		this.mask.moveTo(this.start_position_x_right, this.start_position_y_right );
-		this.mask.lineTo(this.start_position_x_right, this.start_position_y_right - this.CELL_HEIGHT);
-		if (delta < 0.5) {
-			this.mask.lineTo(this.start_position_x_right + this.CELL_WIDTH * delta * 2,  this.start_position_y_right - this.CELL_HEIGHT);
-			this.mask.lineTo(this.start_position_x_right, this.start_position_y_right );
-		} else {
-			this.mask.lineTo(this.start_position_x_right + this.CELL_WIDTH, this.start_position_y_right - this.CELL_HEIGHT);
-			this.mask.lineTo(this.start_position_x_right + this.CELL_WIDTH, this.start_position_y_right - this.CELL_HEIGHT + this.CELL_HEIGHT * delta) ;
-			this.mask.lineTo(this.start_position_x_right, this.start_position_y_right );
+      'down-right': [
+        [ 0,1, 0,1, 0,0, 0,1, ],
+        [ 1,1, 0,1, 0,0, 1,1, ],
+        [ 1,1, 0,1, 0,0, 1,0, ],
+      ],
+
+      'up-right': [
+        [ 0,1, 0,1, 0,0, 0,1, ],
+        [ 1,1, 0,1, 0,0, 1,1, ],
+        [ 1,1, 0,1, 0,0, 1,0, ],
+      ]
 		}
-		this.mask.endFill();
-	}
 
-	straightHorizontal() {
-		
-	}
+		this.curve_body_part = {
+      	'clockwise': [
+      		[ 0,0, 0,0, 0,1, 0,1, ],
+          [ 0,0, 1,0, 0,1, 0,1, ],
+         	[ 0,0, 1,0, 1,1, 0,1 ],
+      	],
+      	'counterclockwise': [
+      		[ 0,1, 0,1, 0,0, 0,1, ],
+          [ 1,1, 0,1, 0,0, 1,1, ],
+          [ 1,1, 0,1, 0,0, 1,0, ],
+      	]
+      };
 
-	spriteIncreaseStraightRight(mask, sprite) {
-		mask.clear();
+      this.mask_rotation = {
+      	'left-down': 270 * window.Utils.DEG2RAD,
+      	'left-up': 0,
+      	'down-right': 180 * window.Utils.DEG2RAD,
+      	'up-right': 90 * window.Utils.DEG2RAD,
+      }
 
-		mask.beginFill(0xe74c3c); 
-		mask.moveTo(this.start_position_x_right, this.start_position_y_right );
-		mask.lineTo(this.start_position_x_right, this.start_position_y_right - this.CELL_HEIGHT);
-		mask.lineTo(this.start_position_x_right + this.CELL_WIDTH * delta , this.start_position_y_right - this.CELL_HEIGHT);
-		mask.lineTo(this.start_position_x_right + this.CELL_WIDTH * delta , this.start_position_y_right) ;
-		mask.lineTo(this.start_position_x_right, this.start_position_y_right );
-		mask.endFill();
 	}
 
 }

@@ -1,6 +1,10 @@
 class PixiVisualizer {
 	
 	constructor($container, python, config) {
+		
+
+		var scope = this;
+
 		this.$container = $container;
 
 		//EVENT NAMES
@@ -50,6 +54,66 @@ class PixiVisualizer {
 			"10": 4,
 			"01": 8,
 		};
+	// !!!!!!!!!!!!!
+			// 1 - lt, 2 - rt, 3 - rb, 4 -lb
+		this.mask_states = {
+        'up':[
+          [ 0,1, 1,1, 1,1, 0,1 ],
+          [ 0,0, 1,0, 1,1, 0,1 ]
+        ],
+        // 'left': [
+        //   [ 1,0, 1,0, 1,1, 1,1 ],
+        //   [ 0,0, 1,0, 1,1, 0,1 ],
+        // ],
+        // 'right': [
+        //   [ 0,0, 0,0, 0,1 ,0,1 ],
+        //   [ 0,0, 1,0, 1,1, 0,1 ],
+        // ],
+        // 'down': [
+        //   [ 0,0, 1,0, 1,0, 0,0 ],
+        //   [ 0,0, 1,0, 1,1, 0,1 ],
+        // ],
+      };
+
+
+      this.curve_body_part = {
+      	'clockwise': [
+      		[ 0,0, 0,0, 0,1, 0,1, ],
+          [ 0,0, 1,0, 0,1, 0,1, ],
+         	[ 0,0, 1,0, 1,1, 0,1 ],
+      	],
+      	'counterclockwise': [
+      		[ 0,1, 0,1, 0,0, 0,1, ],
+          [ 1,1, 0,1, 0,0, 1,1, ],
+          [ 1,1, 0,1, 0,0, 1,0, ],
+      	]
+      };
+
+      this.mask_rotation = {
+      	'left-down': 270 * window.Utils.DEG2RAD,
+      	'left-up': 0,
+      	'down-right': 180 * window.Utils.DEG2RAD,
+      	'up-right': 90 * window.Utils.DEG2RAD,
+      }
+
+      this.rotations = {
+      	'left-down': {
+      		'left': 'counterclockwise',
+      		'down':'clockwise',
+      	},
+      	'left-up': {
+      		'up':'counterclockwise',
+      		'left':'clockwise',
+      	},
+      	'down-right':{
+      		'right':'clockwise',
+      		'down': 'counterclockwise',
+      	},
+      	'up-right': {
+      		'up': 'clockwise',
+      		'right': 'counterclockwise'
+      	}
+      };
 
 		//
 		this.snake_parts = {};
@@ -74,8 +138,6 @@ class PixiVisualizer {
 		window.addEventListener( "screens: start game" , function () {
 			var scope = this;
 			this.updateBonusesArray();
-			// this.removeSnakeBodyPart(this.python_body.length - this.START_PYTHON_LENGTH);
-			// this.updatePythonBodyArray();
 			this.startRenderer();
 
 		}.bind(this));
@@ -110,7 +172,46 @@ class PixiVisualizer {
 			this.removePython();
 		}.bind(this));
 		
+
+		// !!!
+		_generateMask( 'up' );
+      // _generateMask('right','down',4);
+    console.log( 'mask: ', scope.mask_states );
+
+    function _generateMask( original_mask_name) {
+			var copy = scope.mask_states;
+			var up = copy[original_mask_name];
+
+      var left = [[],[]];
+      var down = [[],[]];
+      var right = [[],[]];
+
+      for (var i = 0; i < up.length; i++) 
+      	for ( var j = 0; j < up[i].length; j+=2) {
+      		left[i][j] = up[i][j + 1];
+      		left[i][j + 1] = ( 1 - up[i][j]);
+      }
+
+      for (var i = 0; i < left.length; i++) 
+      	for ( var j = 0; j < left[i].length; j+=2) {
+      		down[i][j] = left[i][j + 1];
+      		down[i][j + 1] = ( 1 - left[i][j]);
+      }
+
+      for (var i = 0; i < down.length; i++) 
+      	for ( var j = 0; j < down[i].length; j+=2) {
+      		right[i][j] = down[i][j + 1];
+      		right[i][j + 1] = ( 1 - down[i][j]);
+      }
+
+      scope.mask_states['left'] = left;
+      scope.mask_states['down'] = down;
+      scope.mask_states['right'] = right;
+      
+		}
+
 	}
+
 
 	updateBonusesArray() {
 		var scope = this;
@@ -218,6 +319,7 @@ class PixiVisualizer {
 		// this.neck_mask.x = this.neck_sprite.x - this.CELL_WIDTH / 2;
 		// this.neck_mask.y = this.neck_sprite.y - this.CELL_HEIGHT / 2;
 		this.neck_sprite.mask = this.neck_mask;
+		// this.neck_mask.pivot.set(32,32)
 
 		this.pre_tail_mask = new PIXI.Graphics();
 		this.pre_tail_sprite.addChild(this.pre_tail_mask);
@@ -226,9 +328,6 @@ class PixiVisualizer {
 		// this.snake_container.addChild(this.pre_tail_mask);
 		this.pre_tail_sprite.mask = this.pre_tail_mask;
 
-		this.example = new PIXI.Graphics();
-		this.snake_container.addChild(this.example);
-		this.setSpritePosition( this.example, 9, 8 );
 
 	}
 
@@ -385,8 +484,6 @@ class PixiVisualizer {
 		this.render_timer = setInterval( render, 1000 / 60 );
 		this.logic_step_timestamp = Date.now();
 		render();
-
-		// var timer_prev = Date.now();
 		
 		function render(){
 			
@@ -397,122 +494,32 @@ class PixiVisualizer {
 			//tail
 			_updateSingleSprite( python_body[python_body.length-1], python_body[python_body.length-1]._sprite, delta );
 
-
-
-			// !!!!!!!!!!!!!
-			// 1 - lt, 2 - rt, 3 - rb, 4 -lb
-
-			scope.mask_states = {
-        'up':[
-          [ 0,.999, 1,.999, 1,1, 0,1 ],
-          [ 0,0, 1,0, 1,1, 0,1 ]
-
-        ],
-        'right': [
-          [ 0,0, 0,0, 0,1 ,0,1 ],
-          [ 0,0, 1,0, 1,1, 0,1 ],
-        ],
-        'down': [
-          [ 0,0, 1,0, 1,.111, 0,.111 ],
-          [ 0,0, 1,0, 1,1, 0,1 ],
-        ],
-        'left': [
-          [ .999,0, 1,0, 1,1, .999,1 ],
-          [ 0,0, 1,0, 1,1, 0,1 ],
-        ],
-
-        'left-down': [
-          // [ 0,0, 0,0, 0,1, 0,1, ],
-          // [ 0,0, 1,0,  0,1, 0,1, ],
-          // [ 0,0, 1,0, 0,1, 1,0,  ],
-
-          [ 0,0, 0,0, 0,1, 0,1, ],
-          [ 0,0, 0,1, 1,1, 1,1, ],
-          [ 0,0, 0,1, 0,1, 1,0, ],
-        ],
-
-        'left-up': [
-          [ 0,1, 0,1, 0,0, 0,1, ],
-          [ 1,1, 0,1, 0,0, 1,1, ],
-          [ 1,1, 0,1, 0,0, 1,0, ],
-        ],
-
-        'down-right': [
-	        [0,0, 0,0, 1,1, 0,1],
-	        [0,0, 1,0, 1,1, 1,1],
-	        [0,0, 1,0, 1,1, 0,1 ],
-        ],
-
-        'up-right': [
-	        [0,0, 0,0, 1,1, 0,1],
-	        [0,0, 1,0, 1,1, 1,1],
-	        [0,0, 1,0, 1,1, 0,1 ],
-        ]
-      }
-
-      // var direction_to_rotation = {
-      // 	'right': 
-      // }
-
-      // var curve_body_part = {
-      // 	'left-down': {
-      // 		array: [
-      // 		 	[ 0,0, 0,0, 0,1, 0,1, ],
-	     //      [ 0,0, 0,1, 1,1, 1,1, ],
-	     //      [ 0,0, 0,1, 0,1, 1,0, ],
-      // 		],
-      // 		// rotation = 
-      // 	}
-      // };
-
-			// TODO: define sector state
-			// TODO: generate rotated states for each direction
-
-			var direction, coef, straight = true;;
-
-			if (scope.neck_sprite_name == 'straight-horizontal' || scope.neck_sprite_name == 'straight-vertical') direction = scope.neck_direction;
-			else {
-				direction = scope.neck_sprite_name;
-				coef = scope.mask_states[direction].length - 1;
-				straight = false;
-			}
-
-			_updateMask(scope.neck_mask, delta, direction, false, coef, straight);
-
-			// scope.neck_mask.rotation = 360 * window.Utils.DEG2RAD;
-			// _updateMask(scope.pre_tail_mask, delta, scope.pre_tail_direction, true, straight);
-
+			_updateMask(scope.neck_mask, delta, scope.neck_mask_points, false, scope.neck_mask_rotation);
+			_updateMask(scope.pre_tail_mask, delta, scope.pre_tail_mask_points, true, scope.pre_tail_mask_rotation);
 
 		}
 
-		function _updateMask(mask, delta, direction, invert, coefficient, straight ) {
+		
 
-			console.log(direction);
-			
-			var coef = coefficient || 1;
-			var state = scope.mask_states[direction];
-			var prev_state, next_state;
-			if ( invert ) var diff = 1 - delta;
-			else var diff = delta;
-			if ( !straight && delta <=.5) diff *= coef;
-			if( !straight && delta > .5) {
-				prev_state = state[1];
-				next_state = state[2];
-				 diff = (delta  - 0.5) * coef;
-				console.log('******************************');
-			} else {
-				prev_state = state[0];
-				next_state = state[1];
-			}
-			
-			// console.log(direction, prev_state)
+		function _updateMask(mask, delta, direction, invert, rotation) {
+
+			var state = direction || scope.mask_states['right'];
+			var prev_state, next_state, coef;
+
+			var zones = state.length - 1;
+			var zone_length = 1 / zones;
+			var zone_index = ~~(delta / zone_length);
+			coef = (delta - zone_index * zone_length) * ( 1 / zone_length);
+			if ( invert ) coef = 1 - coef;
+
+			prev_state = state[zone_index];
+			next_state = state[zone_index + 1];
 
 			var curr_state = [];
 			for( var i=0; i < prev_state.length; i++ ){
-				curr_state[i] = prev_state[i] + (next_state[i] - prev_state[i]) * diff;
+				curr_state[i] = prev_state[i] + (next_state[i] - prev_state[i]) * coef;
 			}
-			if ( !straight ) console.log(curr_state);
-			
+
 			mask.clear();
 			mask.beginFill(0xe74c3c); 
 			mask.moveTo(curr_state[0] * scope.CELL_WIDTH * 2, curr_state[1] * scope.CELL_HEIGHT * 2 );
@@ -520,16 +527,7 @@ class PixiVisualizer {
 				mask.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
 			}
 			mask.endFill();
-			// console.log(mask.rotation)
-
-			scope.example.clear();
-			scope.example.beginFill(0xe74c3c); 
-			scope.example.moveTo(curr_state[0] * scope.CELL_WIDTH * 2, curr_state[1] * scope.CELL_HEIGHT * 2 );
-			for( var i=2; i < prev_state.length; i += 2 ){
-				scope.example.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
-			}
-			scope.example.endFill();
-			// scope.example.rotation = 180 * window.Utils.DEG2RAD;
+			// if ( rotation ) mask.rotation = rotation;
 		}
 
 
@@ -572,6 +570,7 @@ class PixiVisualizer {
 			part_oriented_data.frame_position[1] * this.SPRITE_HEIGHT,
 			this.SPRITE_WIDTH, this.SPRITE_HEIGHT
 		);
+
 		if(i == 0) this.neck_sprite_name = part_oriented_data.frame_name;
 		if(i == this.python.python_body.length - 2) this.pre_tail_sprite_name = part_oriented_data.frame_name;
 	}
@@ -600,9 +599,18 @@ class PixiVisualizer {
 
 		this.neck_direction = this.getPartDirection(0);
 		this.pre_tail_direction = this.getPartDirection(last_index - 1);
-		// this.neck_mask.pivot.set(0,0);
 
-		// console.log( this.neck_mask.x, this.neck_mask.y, this.neck_sprite.x, this.neck_sprite.y, this.neck_mask.pivot, this.neck_sprite.pivot);
+		if (this.neck_sprite_name == 'straight-horizontal' || this.neck_sprite_name == 'straight-vertical') this.neck_mask_points = this.mask_states[this.neck_direction];
+		else {
+			this.neck_mask_points = this.curve_body_part[this.rotations[this.neck_sprite_name][this.neck_direction]];
+			this.neck_mask_rotation = this.mask_rotation[this.neck_sprite_name];
+		}	
+
+		if (this.pre_tail_sprite_name == 'straight-horizontal' || this.pre_tail_sprite_name == 'straight-vertical') this.pre_tail_mask_points = this.mask_states[this.pre_tail_direction];
+		else {
+			this.pre_tail_mask_points = this.curve_body_part[this.rotations[this.pre_tail_sprite_name][this.pre_tail_direction]];
+			this.pre_tail_mask_rotation = this.mask_rotation[this.pre_tail_sprite_name];
+		}
 
 		python_body[python_body.length - 2]._sprite.visible = false;
 		this.logic_step_timestamp = Date.now();
