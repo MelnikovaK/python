@@ -16,7 +16,7 @@ var config = {
 	field_offset_x: 0,
 	field_offset_y: 0,
 
-	logic_step_interval: 5000,
+	logic_step_interval: 1500,
 	max_python_length: 4,
 	
 	input: {
@@ -91,6 +91,6 @@ let screens = new Screens( $game_container, python );
 
 let sound_manager = new PixiSoundManager(config, python);
 
-let visualizer = new PixiVisualizer($game_container, python, config );
+let renderer = new ThreejsRenderer($game_container, python, config );
 
-let particles_manager = new PixiParticlesManager($game_container, visualizer, config, python);
+// let particles_manager = new PixiParticlesManager($game_container, renderer, config, python);

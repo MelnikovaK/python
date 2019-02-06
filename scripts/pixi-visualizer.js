@@ -56,51 +56,45 @@ class PixiVisualizer {
 		};
 
 		this.mask_states = {
-        'up':[
-          [ 0,1, 1,1, 1,1, 0,1 ],
-          [ 0,0, 1,0, 1,1, 0,1 ]
-        ],
-      };
+      'up':[
+        [ 0,1, 1,1, 1,1, 0,1 ],
+        [ 0,0, 1,0, 1,1, 0,1 ]
+      ],
+    };
 
+    this.curve_mask_states = {
+    	'left-up': {
+    		'clockwise': [
+	    		[ 1,0, 1,0, 0,0, 1,0 ],
+					[ 1,1, 1,0, 0,0, 1,1 ],
+					[ 1,1, 1,0, 0,0, 0,1 ],
+		    	],
+	    	'counterclockwise': [
+	    		[ 0,1, 0,1, 0,0, 0,1, ],
+	        [ 1,1, 0,1, 0,0, 1,1, ],
+	        [ 1,1, 0,1, 0,0, 1,0, ],
+	    	]
+    	},
+    };
 
-      this.curve_body_part = {
-      	'clockwise': [
-      		[ 0,0, 0,0, 0,1, 0,1, ],
-          [ 0,0, 1,0, 0,1, 0,1, ],
-         	[ 0,0, 1,0, 1,1, 0,1 ],
-      	],
-      	'counterclockwise': [
-      		[ 0,1, 0,1, 0,0, 0,1, ],
-          [ 1,1, 0,1, 0,0, 1,1, ],
-          [ 1,1, 0,1, 0,0, 1,0, ],
-      	]
-      };
-
-      this.mask_rotation = {
-      	'left-down': 0,
-      	'left-up': 270 * window.Utils.DEG2RAD,
-      	'down-right': 180 * window.Utils.DEG2RAD,
-      	'up-right': 90 * window.Utils.DEG2RAD,
-      }
-
-      this.rotations = {
-      	'left-down': {
-      		'left': 'counterclockwise',
-      		'down':'clockwise',
-      	},
-      	'left-up': {
-      		'up':'counterclockwise',
-      		'left':'clockwise',
-      	},
-      	'down-right':{
-      		'right':'clockwise',
-      		'down': 'counterclockwise',
-      	},
-      	'up-right': {
-      		'up': 'clockwise',
-      		'right': 'counterclockwise'
-      	}
-      };
+    this.rotations = {
+    	'left-down': {
+    		'left': 'counterclockwise',
+    		'down':'clockwise',
+    	},
+    	'left-up': {
+    		'up':'counterclockwise',
+    		'left':'clockwise',
+    	},
+    	'down-right':{
+    		'right':'clockwise',
+    		'down': 'counterclockwise',
+    	},
+    	'up-right': {
+    		'up': 'clockwise',
+    		'right': 'counterclockwise'
+    	}
+    };
 
 		//
 		this.snake_parts = {};
@@ -160,23 +154,64 @@ class PixiVisualizer {
 		}.bind(this));
 		
 
-		_generateMask( 'up', 'left' );
-		_generateMask( 'left', 'down' );
-		_generateMask( 'down', 'right' );
-		
-    console.log( 'mask: ', scope.mask_states );
+		_generateMask( 'up', 'left', scope.mask_states );
+		_generateMask( 'left', 'down', scope.mask_states );
+		_generateMask( 'down', 'right', scope.mask_states );
 
-    function _generateMask( original_mask_name, creating_mask_name) {
 
-			var orig_mask = scope.mask_states[original_mask_name];
-			var new_mask = [[],[]];
+		_generateCurvePartMask( 'left-up', 'left-down' );
+		_generateCurvePartMask( 'left-down', 'down-right' );
+		_generateCurvePartMask( 'down-right', 'up-right' );
+		// console.log(this.curve_mask_states)
 
-      for (var i = 0; i < orig_mask.length; i++) 
+		this.invert_mask_states = {};
+		this.invert_mask_states['left'] = this.mask_states['left'];
+		this.invert_mask_states['right'] = this.mask_states['left'];
+		this.invert_mask_states['up'] = this.mask_states['down'];
+		this.invert_mask_states['down'] = this.mask_states['up'];
+
+
+		var copy = JSON.parse(JSON.stringify(this.curve_mask_states));
+
+		this.invert_mask_states['up-right'] = copy['left-down'];
+		this.invert_mask_states['left-down'] = copy['up-right'];
+		this.invert_mask_states['left-up'] = copy['down-right'];
+		this.invert_mask_states['down-right'] = copy['left-up'];
+
+
+    function _generateCurvePartMask( original_mask_name, creating_mask_name ) {
+    	var orig_mask = scope.curve_mask_states[original_mask_name];
+    	var first_state = 'clockwise';
+    	var sec_state = 'counterclockwise';
+			var new_mask = { 'clockwise': [], 'counterclockwise': []};
+
+      for (var i = 0; i < orig_mask[first_state].length; i++) {
+      	new_mask[first_state].push([]);
+      	new_mask[sec_state].push([]);
+      	for ( var j = 0; j < orig_mask[first_state][i].length; j+=2) {
+      		new_mask[first_state][i][j] = orig_mask[first_state][i][j + 1];
+      		new_mask[first_state][i][j + 1] = ( 1 - orig_mask[first_state][i][j]);
+
+      		new_mask[sec_state][i][j] = orig_mask[sec_state][i][j + 1];
+      		new_mask[sec_state][i][j + 1] = ( 1 - orig_mask[sec_state][i][j]);
+      	}
+      }
+      scope.curve_mask_states[creating_mask_name] = new_mask;
+    }
+
+    function _generateMask( original_mask_name, creating_mask_name, original_mask_array) {
+
+			var orig_mask = original_mask_array[original_mask_name];
+			var new_mask = [];
+
+      for (var i = 0; i < orig_mask.length; i++) {
+      	new_mask.push([]);
       	for ( var j = 0; j < orig_mask[i].length; j+=2) {
       		new_mask[i][j] = orig_mask[i][j + 1];
       		new_mask[i][j + 1] = ( 1 - orig_mask[i][j]);
+      	}
       }
-      scope.mask_states[creating_mask_name] = new_mask;
+      original_mask_array[creating_mask_name] = new_mask;
 		}
 	}
 
@@ -450,7 +485,8 @@ class PixiVisualizer {
 		render();
 		
 		function render(){
-			
+
+
 			var time_current = Date.now();
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
 			// head
@@ -458,23 +494,25 @@ class PixiVisualizer {
 			//tail
 			_updateSingleSprite( python_body[python_body.length-1], python_body[python_body.length-1]._sprite, delta );
 
-			_updateMask(scope.neck_mask, delta, scope.neck_mask_points, false, scope.neck_mask_rotation);
-			// _updateMask(scope.pre_tail_mask, delta, scope.pre_tail_mask_points, true, scope.pre_tail_mask_rotation);
+			_updateMask( scope.neck_mask, delta, scope.neck_mask_points, false );
+			_updateMask( scope.pre_tail_mask, delta, scope.pre_tail_mask_points, true );
 
 		}
 
 		
 
-		function _updateMask(mask, delta, direction, invert, rotation) {
+		function _updateMask( mask, delta, direction, invert ) {
 
 			var state = direction || scope.mask_states['right'];
+
 			var prev_state, next_state, coef;
 
 			var zones = state.length - 1;
 			var zone_length = 1 / zones;
 			var zone_index = ~~(delta / zone_length);
 			coef = (delta - zone_index * zone_length) * ( 1 / zone_length);
-			if ( invert ) coef = 1 - coef;
+
+			if ( invert && state.length < 3) coef = 1 - coef;
 
 			prev_state = state[zone_index];
 			next_state = state[zone_index + 1];
@@ -491,17 +529,16 @@ class PixiVisualizer {
 				mask.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
 			}
 			mask.endFill();
-			if ( rotation ) mask.rotation = rotation;
+			// if ( !invert ) {
+			// 	scope.example.clear();
+			// 	scope.example.beginFill(0xe74c3c); 
+			// 	scope.example.moveTo(curr_state[0] * scope.CELL_WIDTH * 2, curr_state[1] * scope.CELL_HEIGHT * 2 );
+			// 	for( var i=2; i < prev_state.length; i += 2 ){
+			// 		scope.example.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
+			// 	}
+			// 	scope.example.endFill();
+			// }
 
-			scope.example.clear();
-			scope.example.beginFill(0xe74c3c); 
-			scope.example.moveTo(curr_state[0] * scope.CELL_WIDTH * 2, curr_state[1] * scope.CELL_HEIGHT * 2 );
-			for( var i=2; i < prev_state.length; i += 2 ){
-				scope.example.lineTo(curr_state[i] * scope.CELL_WIDTH * 2, curr_state[i+1] * scope.CELL_HEIGHT * 2);
-			}
-			scope.example.endFill();
-			if ( rotation ) scope.example.rotation = rotation;
-			
 		}
 
 
@@ -556,6 +593,7 @@ class PixiVisualizer {
 		var last_index = python_body.length - 1;
 
 		console.log("==============>");
+
 		this.updatePythonBodyArray();
 
 		for( var i=1; i < python_body.length-1; i++){
@@ -568,27 +606,33 @@ class PixiVisualizer {
 		this.changeBodyPart( this.neck_sprite, python_body[1], python_body[0], python_body[2], false, false, 0);
 
 		//update pre tail
-		var last_index = python_body.length -1;
 		this.changeBodyPart( this.pre_tail_sprite, python_body[last_index - 1], python_body[last_index-2], python_body[last_index], true, true);
 
-		this.neck_direction = this.getPartDirection(0);
-		this.pre_tail_direction = this.getPartDirection(last_index - 1);
 
-		if (this.neck_sprite_name == 'straight-horizontal' || this.neck_sprite_name == 'straight-vertical') this.neck_mask_points = this.mask_states[this.neck_direction];
-		else {
-			this.neck_mask_points = this.curve_body_part[this.rotations[this.neck_sprite_name][this.neck_direction]];
-			this.neck_mask_rotation = this.mask_rotation[this.neck_sprite_name];
-		}	
+		var neck_direction = this.getPartDirection(0);
+		var pre_tail_direction = this.getPartDirection(last_index - 1);
 
-		if (this.pre_tail_sprite_name == 'straight-horizontal' || this.pre_tail_sprite_name == 'straight-vertical') this.pre_tail_mask_points = this.mask_states[this.pre_tail_direction];
-		else {
-			this.pre_tail_mask_points = this.curve_body_part[this.rotations[this.pre_tail_sprite_name][this.pre_tail_direction]];
-			this.pre_tail_mask_rotation = this.mask_rotation[this.pre_tail_sprite_name];
-		}
+		this.neck_mask_points = this.getMaskMoveDirection(this.neck_sprite_name, neck_direction, false);
+		this.pre_tail_mask_points = this.getMaskMoveDirection(this.pre_tail_sprite_name, pre_tail_direction, true);
 
 		python_body[python_body.length - 2]._sprite.visible = false;
+
 		this.logic_step_timestamp = Date.now();
 	}	
+
+	getMaskMoveDirection(sprite_name, direction, invert ) {
+		if (sprite_name == 'straight-horizontal' || sprite_name == 'straight-vertical') {
+			if (invert) return this.invert_mask_states[direction];
+			else return this.mask_states[direction];
+
+		} else {
+			if (invert) {
+				var copy = JSON.parse(JSON.stringify(this.invert_mask_states));
+				return copy[ sprite_name ][this.rotations[sprite_name][direction]].reverse();
+			}
+			else return this.curve_mask_states[ sprite_name ][this.rotations[sprite_name][direction]];
+		}	
+	}
 
 	getPartDirection(index) {
 		var python_body = this.python.python_body;

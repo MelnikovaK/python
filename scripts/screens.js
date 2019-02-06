@@ -59,7 +59,7 @@ class Screens {
 		});
 
 		// START
-		this.showScreen('preload-screen');
+		this.showScreen('start-screen');
 		
 	}
 
@@ -240,6 +240,7 @@ class Screens {
 			<div class="screen  game-screen">
 				<div>Points: <span class="game-screen__points">0</span></div>
 				<button class="game-screen_pause-btn button" data-emit-event="${this.PAUSE}"  data-click-sound="" >Pause</button>
+				<div class="game-screen__container"></div>
 			</div>
 
 		`,
