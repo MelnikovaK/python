@@ -4,6 +4,7 @@ class ThreejsRenderer {
 		//ACTIONS
 		this.PRELOAD_PROGRESS = "screens:preload_progress";
 		this.PRELOAD_COMPLETE = "screens:preload_complete";
+		this.SHOW_FINISH_SCREEN = "screens: show_finish_modal";
 
 
 		//
@@ -54,10 +55,8 @@ class ThreejsRenderer {
 
 		window.addEventListener( python.REMOVE_PYTHON_PART , function (e) {
 			var model = e.detail.model;
-			console.log(model)
-
-			this.removePythonPart( model );
-		}.bind(this));
+			scope.removePythonPart( model );
+		});
 
 		window.addEventListener( python.PYTHON_LOST_POINT , function (e) {
 			var bonus = e.detail.bonus;
@@ -65,11 +64,35 @@ class ThreejsRenderer {
 			scope.updateSnake();
 
 		});
+
+		window.addEventListener( python.GAME_OVER , function () {
+			scope.removePython();
+			scope.removeBonuses();
+			cancelAnimationFrame( scope.requestAnimationFrame_id );
+			Utils.triggerCustomEvent( window, scope.SHOW_FINISH_SCREEN );
+
+		});
+	}
+
+	removePython() {
+		var python_body = this.python.python_body;
+		for ( var i = 0; i < python_body.length; i++ ) {
+			var python_part = python_body[i]._model;
+			this.removePythonPart(python_part);
+		}
+	}
+
+	removeBonuses() {
+		var bonuses = this.python.bonuses;
+		for ( var i = 0; i < bonuses.length; i++ ) {
+			var model = bonuses[i]._model;
+			this.GO_container.remove(model)
+			model.geometry.dispose();
+			model.material.dispose();
+		}
 	}
 
 	removePythonPart(part) {
-
-		console.log(part)
 		this.snake_container.remove(part);
 		part.geometry.dispose();
 		part.material.dispose();
@@ -177,7 +200,7 @@ class ThreejsRenderer {
 		//
 		var t = 0;
 		function animate() {
-			requestAnimationFrame( animate );
+			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
 		var python_body =  scope.python.python_body;
 
 			var time_current = Date.now();

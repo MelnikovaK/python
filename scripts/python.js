@@ -379,7 +379,6 @@ class Python {
 		}
 
 		this.addBonus( 'apple' );
-
 		this.addBonus( 'rotten_apple' );
 
 	}
@@ -421,7 +420,7 @@ class Python {
 		var python_head = this.python_body[0];
 
 		// check bounds
-		if( python_head.x < 1 || python_head.x >= this.cells_horizontal || python_head.y < 1 || python_head.y >= this.cells_vertical ) return true;
+		if( python_head.x < 1 || python_head.x >= this.cells_horizontal - 1 || python_head.y < 1 || python_head.y >= this.cells_vertical - 1 ) return true;
 
 		//
 		for ( var i = 1; i < this.python_body.length; i++) {
