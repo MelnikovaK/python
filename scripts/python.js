@@ -273,18 +273,16 @@ class Python {
 					return;
 				}
 
-				// trigger event
-				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
 				// scope.addBodyPart();
 
 				//action
 				if ( bonus.action)  bonus.action(this, prev_prev_x, prev_prev_y );
 
+				// trigger event
+				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
 				return;
 			}
-
 		}
-		// this.python_body.pop();
 
 	}
 
@@ -292,7 +290,7 @@ class Python {
 		var last_index = scope.python_body.length - 1;
 		var copy = Object.assign({}, scope.python_body[last_index]);
 		var insert_element = copy;
-		insert_element._sprite = undefined;
+		insert_element._model = undefined;
 		scope.changePythonPartCoordinates(scope.python_body[last_index], scope.python_body[last_index].prev_x, scope.python_body[last_index].prev_y, x, y);
 
 		scope.python_body.splice(last_index, 0, insert_element);
@@ -314,8 +312,6 @@ class Python {
 			_id = ( part.prev_x - part.x ).toString() + ( part.prev_y - part.y ).toString();
 		}
 		var _dir = this.python_directions[ this.parts_indexes[_id] ];
-		// console.log( _id, part.x, part.prev_x, _dir );
-		// console.log( _id, _dir );
 		part.prev_angle = part.angle;
 		part.angle = _dir.angle;
 		part.prev_direction_name = part.direction_name;
@@ -325,16 +321,14 @@ class Python {
 	removeSnakePart(scope) {
 		var last_index = scope.python_body.length - 1;
 
-		var deleted_elem = Object.assign({}, scope.python_body[last_index]);
+		var deleted_elem = scope.python_body[last_index - 1]._model;
 
-		
-		scope.python_body[last_index] = scope.python_body[last_index - 1];
-		scope.python_body[last_index]._sprite = undefined;
-		scope.python_body.splice(last_index - 1, 1);
+		scope.python_body[last_index - 1]._model = scope.python_body[last_index]._model;
+		scope.python_body.splice(last_index, 1);
 
 		console.log(scope.python_body)
 
-		Utils.triggerCustomEvent(window, scope.REMOVE_PYTHON_PART, {sprite: deleted_elem._sprite})
+		Utils.triggerCustomEvent(window, scope.REMOVE_PYTHON_PART, {model: deleted_elem})
 
 	}
 
@@ -358,9 +352,6 @@ class Python {
 		}
 	}
 
-	// addBodyPart(){
-
-	// }
 
 	addBonus( bonus_name ){
 		var offset = 1;

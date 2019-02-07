@@ -59,7 +59,7 @@ class Screens {
 		});
 
 		// START
-		this.showScreen('start-screen');
+		this.showScreen('preload-screen');
 		
 	}
 
@@ -100,13 +100,13 @@ class Screens {
 			scope.hideModalWindow( $('.game-screen__modal-form'), $('.overlay') );
 		});
 
-		window.addEventListener( "pixi-visualizer:preload_progress", function(e) {
+		window.addEventListener( "screens:preload_progress", function(e) {
 
 			var $progressbar = $('.progressbar');
 			$progressbar.css('width', ~~(e.detail) + '%');
 		});
 
-		window.addEventListener( "pixi-visualizer:preload_complete", function(e) {
+		window.addEventListener( "screens:preload_complete", function(e) {
 			scope.showScreen('start-screen');
 		});
 	}
