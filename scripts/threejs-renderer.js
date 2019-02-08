@@ -6,6 +6,7 @@ class ThreejsRenderer {
 		this.PRELOAD_COMPLETE = "screens:preload_complete";
 		this.SHOW_FINISH_SCREEN = "screens: show_finish_modal";
 
+		this.camera_on_head = false;
 
 		//
 		// this.logic_step_interval = python.logic_step_interval;
@@ -60,7 +61,7 @@ class ThreejsRenderer {
 		});
 
 		window.addEventListener( "renderer:change_camera_position", function() {
-			scope.changeCameraPosition();
+			scope.camera_on_head = scope.camera_on_head ? false : true;
 		});
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
@@ -274,6 +275,8 @@ class ThreejsRenderer {
 			// camera.position.set( 0, 50 + Math.sin(t)*10, 20 );
 			// camera.lookAt( ZERO );
 			//
+			if (scope.camera_on_head) scope.changeCameraPosition(delta);
+
 			scope.renderer.render( scope.scene, scope.camera );
 		}
 		
@@ -375,14 +378,19 @@ class ThreejsRenderer {
 		}		
 	}
 
-	changeCameraPosition() {
+	changeCameraPosition(delta) {
 		var direction = this.python.python_direction;
 		var python_body = this.python.python_body;
-		var next_cell_x = python_body[0].x + direction.x;
-		var next_cell_y = python_body[0].y + direction.y;
-		console.log(next_cell_x, next_cell_y)
-		this.camera.position.set( python_body[0].x, 10, python_body[0].y );
-		this.camera.lookAt( new THREE.Vector3(next_cell_x, 1 ,next_cell_y) );
+		var x = python_body[0]._model.position.x - this.CELLS_HORIZONTAL / 2 + .5;
+		var z = python_body[0]._model.position.z - this.CELLS_VERTICAL / 2 + .5;
+
+
+		var next_cell_x = python_body[0]._model.position.x + direction.x * delta;
+		var next_cell_y = python_body[0]._model.position.z + direction.y * delta;
+		// this.camera.rotation.y = -90 / 180 * Math.PI;
+		this.camera.rotation.x = python_body[0]._model.rotation.x * delta;
+		this.camera.position.set( x, 1, z);
+		this.camera.lookAt( new THREE.Vector3(x + direction.x, .5 ,z + direction.y) );
 	}
 
 	removePython() {
