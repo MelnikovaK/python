@@ -9,7 +9,7 @@ class Screens {
 		this.PLAY = "screens: game playing";
 		this.TOGGLE_SOUND = "sound-manager:toggle_sound";
 		this.GAME_OVER = "screens:game-over";
-		this.CHANGE_CAMERA_POSITION = "screens:change_camera_position";
+		this.CHANGE_CAMERA_POSITION = "renderer:change_camera_position";
 
 
 		//

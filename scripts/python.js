@@ -372,7 +372,7 @@ class Python {
 			frog.x = ~~( Math.random() * (scope.cells_horizontal - 2) + 1) ;
 			frog.y = ~~(Math.random() * (scope.cells_vertical - 2) + 1 );
 			Utils.triggerCustomEvent(window, scope.REDRAW_BONUS, {bonus: frog})
-		}, 10000);
+		}, 3000);
 	}
 
 
@@ -436,12 +436,12 @@ class Python {
 
 	checkBonusCoordinatesCorrect( x, y, bonus) {
 		for (var i = 0; i < this.python_body.length; i++ ) {
-			// if ( i == 0 ) { //3 клетки от головы
-			// 	var head_x = this.python_body[i].x + 3 * this.python_direction.x;
-			// 	var head_y = this.python_body[i].y + 3 * this.python_direction.y;
+			if ( i == 0 ) { //3 клетки от головы
+				var head_x = this.python_body[i].x + 3 * this.python_direction.x;
+				var head_y = this.python_body[i].y + 3 * this.python_direction.y;
 
-			// 	if ( x <= head_x && x >= this.python_body[i].x &&  y <= head_y && y >= this.python_body[i].y) return false;
-			// }
+				if ( x <= head_x && x >= this.python_body[i].x &&  y <= head_y && y >= this.python_body[i].y) return false;
+			}
 
 			var less_than_x = this.python_body[i].x - 1;
 			var less_than_y = this.python_body[i].y - 1;

@@ -8,7 +8,7 @@ class ThreejsRenderer {
 
 
 		//
-		this.logic_step_interval = python.logic_step_interval;
+		// this.logic_step_interval = python.logic_step_interval;
 
 
 		var scope = this;
@@ -60,8 +60,7 @@ class ThreejsRenderer {
 		});
 
 		window.addEventListener( "renderer:change_camera_position", function() {
-			scope.logic_step_interval = python.logic_step_interval;
-			scope.onPythonMoved();	
+			scope.changeCameraPosition();
 		});
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
@@ -69,13 +68,13 @@ class ThreejsRenderer {
 			scope.onPythonMoved();	
 		});
 
-		window.addEventListener(python.PAUSE, function() {
-			cancelAnimationFrame( scope.requestAnimationFrame_id );
-		});
+		// window.addEventListener(python.PAUSE, function() {
+		// 	cancelAnimationFrame( scope.requestAnimationFrame_id );
+		// });
 
-		window.addEventListener(python.PLAY, function() {
-			scope.startRendering();
-		});
+		// window.addEventListener(python.PLAY, function() {
+		// 	scope.startRendering();
+		// });
 
 		window.addEventListener(python.REDRAW_BONUS, function(e) {
 			var bonus = e.detail.bonus;
@@ -108,7 +107,6 @@ class ThreejsRenderer {
 		window.addEventListener( python.GAME_OVER , function () {
 			scope.removePython();
 			scope.removeBonuses();
-			cancelAnimationFrame( scope.requestAnimationFrame_id );
 			Utils.triggerCustomEvent( window, scope.SHOW_FINISH_SCREEN );
 
 		});
@@ -136,34 +134,6 @@ class ThreejsRenderer {
 		this.ground_texture = textureLoader.load( this.PATH + "ground.jpg");
 		this.wall_texture = textureLoader.load( this.PATH + "wall.jpg");
 		this.snake_texture = textureLoader.load( this.PATH + "snake.jpg");
-	}
-
-	initContainers() {
-		this.game_container = new THREE.Group();
-		this.scene.add(this.game_container);
-
-		this.game_field = new THREE.Group();
-		this.game_field.position.y = .5;
-		this.game_field.position.x = - this.CELLS_HORIZONTAL / 2 + .5;
-		this.game_field.position.z = - this.CELLS_VERTICAL / 2 + .5;
-		this.game_container.add(this.game_field);
-
-		this.snake_container = new THREE.Group();
-		this.game_field.add(this.snake_container);
-
-
-		this.GO_container = new THREE.Group();
-		this.game_field.add(this.GO_container);
-	}
-
-	updateBonusPosition(bonus,x,y) {
-		bonus.position.x = x;
-		bonus.position.z = y;
-	}
-
-	onPythonMoved() {
-		var python_body =  this.python.python_body;
-		this.logic_step_timestamp = Date.now();
 	}
 
 	initScene() {
@@ -230,13 +200,41 @@ class ThreejsRenderer {
 
 	}
 
+	initContainers() {
+		this.game_container = new THREE.Group();
+		this.scene.add(this.game_container);
+
+		this.game_field = new THREE.Group();
+		this.game_field.position.y = .5;
+		this.game_field.position.x = - this.CELLS_HORIZONTAL / 2 + .5;
+		this.game_field.position.z = - this.CELLS_VERTICAL / 2 + .5;
+		this.game_container.add(this.game_field);
+
+		this.snake_container = new THREE.Group();
+		this.game_field.add(this.snake_container);
+
+
+		this.GO_container = new THREE.Group();
+		this.game_field.add(this.GO_container);
+	}
+
+	updateBonusPosition(bonus,x,y) {
+		bonus.position.x = x;
+		bonus.position.z = y;
+	}
+
+	onPythonMoved() {
+		var python_body =  this.python.python_body;
+		this.logic_step_timestamp = Date.now();
+	}
+
+
 	startRendering() {
 		var scope = this;
    	function animate() {
 			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
 
 			scope.controls.update();
-
 
 			var python_body =  scope.python.python_body;
 
@@ -248,7 +246,7 @@ class ThreejsRenderer {
 				if (python_part) {
 					python_part.position.x = python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta;
 					python_part.position.z = python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta;
-					if( i == python_body.length - 1 ) {
+					if( i == python_body.length - 1  || i == 0) {
 						var prev_angle = python_body[i].prev_angle;
 						var dist = Math.abs(python_body[i].angle - prev_angle);
 						if( dist > Math.PI ){
@@ -319,7 +317,6 @@ class ThreejsRenderer {
 				if ( i == python_body.length - 1 ) {
 					var python_part = new THREE.Mesh( new THREE.CylinderGeometry( 0, .5, 1.5, 16 ), snake_material );
 					python_part.rotation.x = python_body[i].angle;
-					python_part.rotation.z = python_body[i].angle;
 				} else var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
 
 				python_part.castShadow = true;
@@ -350,6 +347,12 @@ class ThreejsRenderer {
 				scope.GO_container.add(bonus);
 			}
 		}		
+	}
+
+	changeCameraPosition() {
+		var head = this.python.python_body[0];
+		this.camera.position.set( head.prev_x - 10, 5, head.prev_y - 10);
+		this.camera.lookAt( head );
 	}
 
 	removePython() {
