@@ -6,6 +6,7 @@ class Python {
 		this.PYTHON_MOVED = "python:draw";
 		this.PYTHON_GET_POINT = "python:python get point";
 		this.PYTHON_LOST_POINT = "python:python lost point";
+		this.PYTHON_GET_ACCELERATION = "python:python get acceleration";
 		this.GAME_OVER = "python: game over";
 		this.PAUSE = "python: pause active";
 		this.PLAY = "python: pause inactive";
@@ -36,6 +37,7 @@ class Python {
 		this.directions[this.UP] = this.directions['swipe-up'] = {x:0, y:-1, rotation: 0};
 		this.directions[this.DOWN] = this.directions['swipe-down'] = {x:0, y:1, rotation: 180 * window.Utils.DEG2RAD};
 
+		this.start_logic_step_interval = config.logic_step_interval;;
 		this.logic_step_interval = config.logic_step_interval;
 		
 
@@ -277,7 +279,7 @@ class Python {
 
 				//action
 				if ( bonus.action)  bonus.action(this, prev_prev_x, prev_prev_y );
-
+				console.log(this.logic_step_interval)
 				// trigger event
 				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
 				return;
@@ -326,10 +328,18 @@ class Python {
 		scope.python_body[last_index - 1]._model = scope.python_body[last_index]._model;
 		scope.python_body.splice(last_index, 1);
 
-		console.log(scope.python_body)
+		// console.log(scope.python_body)
 
 		Utils.triggerCustomEvent(window, scope.REMOVE_PYTHON_PART, {model: deleted_elem})
 
+	}
+
+	accelerateMoving(scope) {
+		if ( scope.logic_step_interval != scope.start_logic_step_interval ) return;
+		scope.logic_step_interval /= 2;
+		setTimeout( function() {
+			scope.logic_step_interval *= 2;
+		}, 5000); 
 	}
 
 	removeBonuses() {
@@ -375,11 +385,22 @@ class Python {
 				point: -1,
 				trigger_action_name: this.PYTHON_LOST_POINT,
 				action: this.removeSnakePart
+			},
+			'stone': {
+				point: 0,
+				trigger_action_name: this.GAME_OVER
+			},
+			'accelerator': {
+				point: 0,
+				trigger_action_name: this.PYTHON_GET_ACCELERATION,
+				action: this.accelerateMoving
 			}
 		}
 
 		this.addBonus( 'apple' );
 		this.addBonus( 'rotten_apple' );
+		this.addBonus( 'stone' );
+		this.addBonus( 'accelerator' );
 
 	}
 

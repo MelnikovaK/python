@@ -8,7 +8,7 @@ class ThreejsRenderer {
 
 
 		//
-		this.logic_step_interval = config.logic_step_interval;
+		this.logic_step_interval = python.logic_step_interval;
 
 
 		var scope = this;
@@ -27,9 +27,24 @@ class ThreejsRenderer {
 		this.CELLS_HORIZONTAL = config.cells_horizontal;
 		this.CELLS_VERTICAL = config.cells_vertical;
 
+		this.BONUS_RADIUS = .5;
+		this.BONUS_SEGMENTS = 16;
+		this.BONUS_RINGS = 16;
+
+
 		this.bonuses_type_color = {};
-		this.bonuses_type_color['apple'] = '#940000';
-		this.bonuses_type_color['rotten_apple'] = '#0E16C4';
+		this.bonuses_type_color['apple'] = {
+			color: '#940000',
+			shape: new THREE.SphereGeometry( this.BONUS_RADIUS, this.BONUS_SEGMENTS, this.BONUS_RINGS)};
+		this.bonuses_type_color['rotten_apple'] = {
+			color: '#0E16C4',
+			shape: new THREE.SphereGeometry( this.BONUS_RADIUS, this.BONUS_SEGMENTS, this.BONUS_RINGS)};
+		this.bonuses_type_color['stone'] = {
+			color:'#60604D',
+			shape: new THREE.BoxBufferGeometry( 1, 1, 1 )};
+		this.bonuses_type_color['accelerator'] = {
+			color:'#FFFC29',
+			shape: new THREE.CylinderBufferGeometry( 0, .5, 1, 3, 1 )};
 
 		this.preloadTextures();
 		this.initScene();
@@ -39,11 +54,11 @@ class ThreejsRenderer {
 		
 		window.addEventListener( "screens: start game" , function () {
 			scope.updateSnake();
-			scope.initBonuses();
-			// scope.updateBonusesPosition();
+			scope.updateBonuses();
 		});
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
+			scope.logic_step_interval = python.logic_step_interval;
 			scope.onPythonMoved();	
 		});
 
@@ -51,6 +66,11 @@ class ThreejsRenderer {
 			var bonus = e.detail.bonus;
 			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
 			scope.updateSnake();
+		});
+
+		window.addEventListener( python.PYTHON_GET_ACCELERATION , function (e) {
+			var bonus = e.detail.bonus;
+			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
 		});
 
 		window.addEventListener( python.REMOVE_PYTHON_PART , function (e) {
@@ -73,31 +93,7 @@ class ThreejsRenderer {
 
 		});
 	}
-
-	removePython() {
-		var python_body = this.python.python_body;
-		for ( var i = 0; i < python_body.length; i++ ) {
-			var python_part = python_body[i]._model;
-			this.removePythonPart(python_part);
-		}
-	}
-
-	removeBonuses() {
-		var bonuses = this.python.bonuses;
-		for ( var i = 0; i < bonuses.length; i++ ) {
-			var model = bonuses[i]._model;
-			this.GO_container.remove(model)
-			model.geometry.dispose();
-			model.material.dispose();
-		}
-	}
-
-	removePythonPart(part) {
-		this.snake_container.remove(part);
-		part.geometry.dispose();
-		part.material.dispose();
-	}
-
+	
 	preloadTextures() {
 		var scope = this;
 
@@ -195,13 +191,34 @@ class ThreejsRenderer {
 
 		this.scene.add( spotLight );
 
+		this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
+		this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+		this.controls.dampingFactor = 0.25;
+		this.controls.screenSpacePanning = false;
+		this.controls.minDistance = 10;
+		this.controls.maxDistance = 500;
+		this.controls.maxPolarAngle = Math.PI / 2;
+		window.addEventListener( 'resize', onWindowResize, false );
+
+		function onWindowResize() {
+			this.camera.aspect = window.innerWidth / window.innerHeight;
+			this.camera.updateProjectionMatrix();
+			this.renderer.setSize( window.innerWidth, window.innerHeight );
+		}
+
+
+
 
 
 		//
-		var t = 0;
+		// var t = 0;
 		function animate() {
 			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
-		var python_body =  scope.python.python_body;
+
+			scope.controls.update();
+
+
+			var python_body =  scope.python.python_body;
 
 			var time_current = Date.now();
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
@@ -246,7 +263,6 @@ class ThreejsRenderer {
 	initGameField() {
 		var scope = this;
 		
-
 		var textureLoader = new THREE.TextureLoader();
 
 		var groundMaterial = new THREE.MeshLambertMaterial( { color: 0xffffff, map: this.ground_texture });
@@ -260,7 +276,6 @@ class ThreejsRenderer {
 		var geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );	
 		for ( var i = 0; i < scope.CELLS_HORIZONTAL; i++ )
 			for ( var j = 0; j < scope.CELLS_VERTICAL; j++ ) {
-
 				if ( i == 0 || j == 0 || i == scope.CELLS_HORIZONTAL - 1 || j == scope.CELLS_VERTICAL - 1)  {
 					var mesh = new THREE.Mesh( geometry, cube_material );
 					mesh.position.x = i;
@@ -295,11 +310,9 @@ class ThreejsRenderer {
 				scope.snake_container.add(python_part);
 			}
 		}
-		console.log(python_body[python_body.length - 1]._model)
-		console.log(python_body[python_body.length - 2]._model)
 	}
 
-	initBonuses() {
+	updateBonuses() {
 		var scope = this;
 		var bonuses = this.python.bonuses;
 
@@ -308,14 +321,41 @@ class ThreejsRenderer {
 		const RINGS = 16;
 
 		for ( var i = 0; i < bonuses.length; i++ ) {
-			const apple_material = new THREE.MeshLambertMaterial({ color: this.bonuses_type_color[bonuses[i].type]});
-			var bonus = new THREE.Mesh( new THREE.SphereGeometry( RADIUS, SEGMENTS, RINGS), apple_material);
-			bonus.position.x = bonuses[i].x;
-			bonus.position.z = bonuses[i].y;
-			bonuses[i]._model = bonus;
-			scope.GO_container.add(bonus);
+			if ( !bonuses[i]._model ) {
+				const bonus_material = new THREE.MeshLambertMaterial({ color: this.bonuses_type_color[bonuses[i].type].color});
+				var bonus = new THREE.Mesh( this.bonuses_type_color[bonuses[i].type].shape, bonus_material);
+				bonus.position.x = bonuses[i].x;
+				bonus.position.z = bonuses[i].y;
+				bonuses[i]._model = bonus;
+				scope.GO_container.add(bonus);
+			}
 		}		
 	}
+
+	removePython() {
+		var python_body = this.python.python_body;
+		for ( var i = 0; i < python_body.length; i++ ) {
+			var python_part = python_body[i]._model;
+			this.removePythonPart(python_part);
+		}
+	}
+
+	removeBonuses() {
+		var bonuses = this.python.bonuses;
+		for ( var i = 0; i < bonuses.length; i++ ) {
+			var model = bonuses[i]._model;
+			this.GO_container.remove(model)
+			model.geometry.dispose();
+			model.material.dispose();
+		}
+	}
+
+	removePythonPart(part) {
+		this.snake_container.remove(part);
+		part.geometry.dispose();
+		part.material.dispose();
+	}
+
 
 
 
