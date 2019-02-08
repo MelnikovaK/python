@@ -92,11 +92,6 @@ class ThreejsRenderer {
 			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
 		});
 
-		window.addEventListener( python.REMOVE_PYTHON_PART , function (e) {
-			var model = e.detail.model;
-			scope.removePythonPart( model );
-		});
-
 		window.addEventListener( python.PYTHON_LOST_POINT , function (e) {
 			var bonus = e.detail.bonus;
 			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
@@ -181,20 +176,20 @@ class ThreejsRenderer {
 		this.scene.add( spotLight );
 
 		//CONTROLS
-		this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
-		this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-		this.controls.dampingFactor = 0.25;
-		this.controls.screenSpacePanning = false;
-		this.controls.minDistance = 10;
-		this.controls.maxDistance = 500;
-		this.controls.maxPolarAngle = Math.PI / 2;
-		window.addEventListener( 'resize', onWindowResize, false );
+		// this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
+		// this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+		// this.controls.dampingFactor = 0.25;
+		// this.controls.screenSpacePanning = false;
+		// this.controls.minDistance = 10;
+		// this.controls.maxDistance = 500;
+		// this.controls.maxPolarAngle = Math.PI / 2;
+		// window.addEventListener( 'resize', onWindowResize, false );
 
-		function onWindowResize() {
-			this.camera.aspect = window.innerWidth / window.innerHeight;
-			this.camera.updateProjectionMatrix();
-			this.renderer.setSize( window.innerWidth, window.innerHeight );
-		}
+		// function onWindowResize() {
+		// 	this.camera.aspect = window.innerWidth / window.innerHeight;
+		// 	this.camera.updateProjectionMatrix();
+		// 	this.renderer.setSize( window.innerWidth, window.innerHeight );
+		// }
 
 		this.startRendering();
 
@@ -234,7 +229,7 @@ class ThreejsRenderer {
    	function animate() {
 			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
 
-			scope.controls.update();
+			// scope.controls.update();
 
 			var python_body =  scope.python.python_body;
 
@@ -244,9 +239,9 @@ class ThreejsRenderer {
 			for ( var i = 0; i < python_body.length; i++ ) {
 				var python_part = python_body[i]._model;
 				if (python_part) {
-					python_part.position.x = python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta;
-					python_part.position.z = python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta;
 					if( i == python_body.length - 1  || i == 0) {
+						python_part.position.x = python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta;
+						python_part.position.z = python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta;
 						var prev_angle = python_body[i].prev_angle;
 						var dist = Math.abs(python_body[i].angle - prev_angle);
 						if( dist > Math.PI ){
@@ -259,6 +254,16 @@ class ThreejsRenderer {
 						python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 					}
 				}
+				if ( scope.body_parts ){
+					// console.log(scope.body_parts)
+					scope.body_parts.points[i - 1] = new THREE.Vector3(
+						python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta,
+						0,
+						python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta);
+				}
+			}
+			if (scope.snake_body) {
+				scope.updateSnakeBody(scope.body_parts);
 			}
 
 			// t += .02;
@@ -268,7 +273,6 @@ class ThreejsRenderer {
 			//
 			// camera.position.set( 0, 50 + Math.sin(t)*10, 20 );
 			// camera.lookAt( ZERO );
-
 			//
 			scope.renderer.render( scope.scene, scope.camera );
 		}
@@ -306,28 +310,49 @@ class ThreejsRenderer {
 			}
 	}
 
+	updateSnakeBody(points) {
+		var snake_geometry = new THREE.TubeBufferGeometry( points,  points.length + 2, .5, 16, false );
+		this.snake_body.geometry = snake_geometry;
+	}
+
 	updateSnake() {
 		var scope = this;
 
 		var snake_material = new THREE.MeshBasicMaterial( { map: this.snake_texture } );
 		var python_body = scope.python.python_body;
-		var points = [];
+		this.body_parts  = new THREE.CatmullRomCurve3();
 
 		for ( var i = 0; i < python_body.length; i++ ) {
 			if ( !python_body[i]._model ) {
-				if ( i == python_body.length - 1 ) {
-					var python_part = new THREE.Mesh( new THREE.CylinderGeometry( 0, .5, 1.5, 16 ), snake_material );
+				if ( i > 0 && i < python_body.length - 1) {
+					this.body_parts.points.push( new THREE.Vector3( python_body[i].x, 0, python_body[i].y) )
+				} else {
+					if ( i == python_body.length - 1 )  var python_part = new THREE.Mesh( new THREE.CylinderGeometry( 0, .5, 1.5, 16 ), snake_material );
+					else var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
+
 					python_part.rotation.x = python_body[i].angle;
-				} else var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
+					python_part.position.x = python_body[i].x;
+					python_part.position.z = python_body[i].y;
+					python_body[i]._model = python_part;
 
-				python_part.castShadow = true;
-				python_part.position.x = python_body[i].x;
-				python_part.position.z = python_body[i].y;
-				python_body[i]._model = python_part;
+					scope.snake_container.add(python_part);
 
-				scope.snake_container.add(python_part);
+				}
 			}
 		}
+		if (!this.snake_body ){
+
+			this.snake_geometry = new THREE.TubeBufferGeometry( this.body_parts,  2, .5, 16, false );
+			this.snake_body = new THREE.Mesh( this.snake_geometry, snake_material );
+			this.snake_container.add(this.snake_body)
+
+			// this.snake_geometry.dynamic = true;
+		} else {
+			this.updateSnakeBody(this.body_parts);	
+		}
+
+		// this.snake_geometry.verticesNeedUpdate = true;
+
 	}
 
 	updateBonuses() {
@@ -351,17 +376,21 @@ class ThreejsRenderer {
 	}
 
 	changeCameraPosition() {
-		var head = this.python.python_body[0];
-		this.camera.position.set( head.prev_x  - this.CELLS_HORIZONTAL / 2 , 20, head.prev_y - this.CELLS_VERTICAL / 2);
-		this.camera.lookAt( head );
+		var direction = this.python.python_direction;
+		var python_body = this.python.python_body;
+		var next_cell_x = python_body[0].x + direction.x;
+		var next_cell_y = python_body[0].y + direction.y;
+		console.log(next_cell_x, next_cell_y)
+		this.camera.position.set( python_body[0].x, 10, python_body[0].y );
+		this.camera.lookAt( new THREE.Vector3(next_cell_x, 1 ,next_cell_y) );
 	}
 
 	removePython() {
 		var python_body = this.python.python_body;
-		for ( var i = 0; i < python_body.length; i++ ) {
-			var python_part = python_body[i]._model;
-			this.removePythonPart(python_part);
-		}
+		this.removePythonPart(python_body[0]._model);
+		this.removePythonPart(python_body[python_body.length - 1]._model);
+		this.removePythonPart(this.snake_body);
+		this.snake_body = undefined;
 	}
 
 	removeBonuses() {
@@ -375,8 +404,13 @@ class ThreejsRenderer {
 	}
 
 	removePythonPart(part) {
+		console.log(part)
 		this.snake_container.remove(part);
 		part.geometry.dispose();
 		part.material.dispose();
+	}
+
+	removePythonBodyPart(part) {
+		this.body_parts.pop()
 	}
 } 

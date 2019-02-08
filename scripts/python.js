@@ -368,9 +368,10 @@ class Python {
 	frogMoving() {
 		var scope = this;
 		var frog = this.moving_frog;
+		var diap = [0,1, -1];
 		setInterval(function() {
-			frog.x = ~~( Math.random() * (scope.cells_horizontal - 2) + 1) ;
-			frog.y = ~~(Math.random() * (scope.cells_vertical - 2) + 1 );
+			frog.x +=diap[~~( Math.random() * (3 - 1) + 1)] ;
+			frog.y += diap[~~( Math.random() * (3 - 1) + 1)];
 			Utils.triggerCustomEvent(window, scope.REDRAW_BONUS, {bonus: frog})
 		}, 3000);
 	}
