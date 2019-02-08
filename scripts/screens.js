@@ -8,7 +8,8 @@ class Screens {
 		this.PAUSE = "screens: game paused";
 		this.PLAY = "screens: game playing";
 		this.TOGGLE_SOUND = "sound-manager:toggle_sound";
-		this.GAME_OVER = "screens:game-over"
+		this.GAME_OVER = "screens:game-over";
+		this.CHANGE_CAMERA_POSITION = "screens:change_camera_position";
 
 
 		//
@@ -240,6 +241,7 @@ class Screens {
 			<div class="screen  game-screen">
 				<div>Points: <span class="game-screen__points">0</span></div>
 				<button class="game-screen_pause-btn button" data-emit-event="${this.PAUSE}"  data-click-sound="" >Pause</button>
+				<button class="game-screen_camera_position-btn button" data-emit-event="${this.CHANGE_CAMERA_POSITION}"  data-click-sound="" >Change camera position</button>
 				<div class="game-screen__container"></div>
 			</div>
 
@@ -250,7 +252,7 @@ class Screens {
 
 		);
 		this.$game_screen = $('.game-screen');
-		
+
 
 	}
 

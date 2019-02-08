@@ -59,9 +59,22 @@ class ThreejsRenderer {
 
 		});
 
+		window.addEventListener( "renderer:change_camera_position", function() {
+			scope.logic_step_interval = python.logic_step_interval;
+			scope.onPythonMoved();	
+		});
+
 		window.addEventListener(python.PYTHON_MOVED, function() {
 			scope.logic_step_interval = python.logic_step_interval;
 			scope.onPythonMoved();	
+		});
+
+		window.addEventListener(python.PAUSE, function() {
+			cancelAnimationFrame( scope.requestAnimationFrame_id );
+		});
+
+		window.addEventListener(python.PLAY, function() {
+			scope.startRendering();
 		});
 
 		window.addEventListener(python.REDRAW_BONUS, function(e) {
