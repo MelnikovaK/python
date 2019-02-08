@@ -39,6 +39,9 @@ class ThreejsRenderer {
 		this.bonuses_type_color['rotten_apple'] = {
 			color: '#0E16C4',
 			shape: new THREE.SphereGeometry( this.BONUS_RADIUS, this.BONUS_SEGMENTS, this.BONUS_RINGS)};
+		this.bonuses_type_color['frog'] = {
+			color: '#69CA4E',
+			shape: new THREE.SphereGeometry( this.BONUS_RADIUS, this.BONUS_SEGMENTS, this.BONUS_RINGS)};
 		this.bonuses_type_color['stone'] = {
 			color:'#60604D',
 			shape: new THREE.BoxBufferGeometry( 1, 1, 1 )};
@@ -47,19 +50,23 @@ class ThreejsRenderer {
 			shape: new THREE.CylinderBufferGeometry( 0, .5, 1, 3, 1 )};
 
 		this.preloadTextures();
-		this.initScene();
-		this.initContainers();
-		this.initGameField();
-
+		
 		
 		window.addEventListener( "screens: start game" , function () {
 			scope.updateSnake();
 			scope.updateBonuses();
+			scope.startRendering();
+
 		});
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
 			scope.logic_step_interval = python.logic_step_interval;
 			scope.onPythonMoved();	
+		});
+
+		window.addEventListener(python.REDRAW_BONUS, function(e) {
+			var bonus = e.detail.bonus;
+			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
 		});
 
 		window.addEventListener( python.PYTHON_GET_POINT , function (e) {
@@ -100,6 +107,9 @@ class ThreejsRenderer {
 		var manager = new THREE.LoadingManager();
 
 		manager.onLoad = function() {
+			scope.initScene();
+			scope.initContainers();
+			scope.initGameField();
 
 		 	Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE );
 		};
@@ -140,9 +150,7 @@ class ThreejsRenderer {
 
 	onPythonMoved() {
 		var python_body =  this.python.python_body;
-		
 		this.logic_step_timestamp = Date.now();
-
 	}
 
 	initScene() {
@@ -187,10 +195,9 @@ class ThreejsRenderer {
 /*
 		var spotLightHelper = new THREE.SpotLightHelper( spotLight );
 		scene.add( spotLightHelper );*/
-
-
 		this.scene.add( spotLight );
 
+		//CONTROLS
 		this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
 		this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
 		this.controls.dampingFactor = 0.25;
@@ -206,13 +213,13 @@ class ThreejsRenderer {
 			this.renderer.setSize( window.innerWidth, window.innerHeight );
 		}
 
+		this.startRendering();
 
+	}
 
-
-
-		//
-		// var t = 0;
-		function animate() {
+	startRendering() {
+		var scope = this;
+   	function animate() {
 			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
 
 			scope.controls.update();
@@ -355,8 +362,4 @@ class ThreejsRenderer {
 		part.geometry.dispose();
 		part.material.dispose();
 	}
-
-
-
-
 } 

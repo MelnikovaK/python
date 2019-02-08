@@ -12,7 +12,8 @@ class Python {
 		this.PLAY = "python: pause inactive";
 		this.PLAY_SOUND = "sound-manager:play";
 		this.PAUSE_SOUND = "sound-manager:pause";
-		this.REMOVE_PYTHON_PART = "visualizer:remove_python_part"
+		this.REMOVE_PYTHON_PART = "visualizer:remove_python_part";
+		this.REDRAW_BONUS = "visualizer:redraw_bonus";
 
 
 		//
@@ -203,7 +204,7 @@ class Python {
 		this.points = 0;
 		this.removeBonuses();
 		this.initBonuses();
-
+		this.frogMoving();
 
 		this.inputController.enabled = true;
 
@@ -278,8 +279,7 @@ class Python {
 				// scope.addBodyPart();
 
 				//action
-				if ( bonus.action)  bonus.action(this, prev_prev_x, prev_prev_y );
-				console.log(this.logic_step_interval)
+				if ( bonus.action) bonus.action(this, prev_prev_x, prev_prev_y, bonus.point );
 				// trigger event
 				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
 				return;
@@ -288,14 +288,17 @@ class Python {
 
 	}
 
-	growPythonLength(scope, x, y) {
-		var last_index = scope.python_body.length - 1;
-		var copy = Object.assign({}, scope.python_body[last_index]);
-		var insert_element = copy;
-		insert_element._model = undefined;
-		scope.changePythonPartCoordinates(scope.python_body[last_index], scope.python_body[last_index].prev_x, scope.python_body[last_index].prev_y, x, y);
+	growPythonLength(scope, x, y, points) {
 
-		scope.python_body.splice(last_index, 0, insert_element);
+		for ( var i = 0; i < points; i++){
+			var last_index = scope.python_body.length - 1;
+			var copy = Object.assign({}, scope.python_body[last_index]);
+			var insert_element = copy;
+			insert_element._model = undefined;
+			scope.changePythonPartCoordinates(scope.python_body[last_index], scope.python_body[last_index].prev_x, scope.python_body[last_index].prev_y, x, y);
+
+			scope.python_body.splice(last_index, 0, insert_element);
+		} 
 	}
 
 	changePythonPartCoordinates(part, x, y, prev_x, prev_y) {
@@ -326,9 +329,8 @@ class Python {
 		var deleted_elem = scope.python_body[last_index - 1]._model;
 
 		scope.python_body[last_index - 1]._model = scope.python_body[last_index]._model;
-		scope.python_body.splice(last_index, 1);
+		scope.python_body.pop();
 
-		// console.log(scope.python_body)
 
 		Utils.triggerCustomEvent(window, scope.REMOVE_PYTHON_PART, {model: deleted_elem})
 
@@ -341,6 +343,7 @@ class Python {
 			scope.logic_step_interval *= 2;
 		}, 5000); 
 	}
+
 
 	removeBonuses() {
 		this.bonuses.length = 0;
@@ -362,6 +365,16 @@ class Python {
 		}
 	}
 
+	frogMoving() {
+		var scope = this;
+		var frog = this.moving_frog;
+		setInterval(function() {
+			frog.x = ~~( Math.random() * (scope.cells_horizontal - 2) + 1) ;
+			frog.y = ~~(Math.random() * (scope.cells_vertical - 2) + 1 );
+			Utils.triggerCustomEvent(window, scope.REDRAW_BONUS, {bonus: frog})
+		}, 10000);
+	}
+
 
 	addBonus( bonus_name ){
 		var offset = 1;
@@ -370,6 +383,7 @@ class Python {
 		bonus_data.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
 		bonus_data.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
 		this.bonuses.push( bonus_data );
+		return bonus_data;
 	}
 
 	initBonuses() {
@@ -394,13 +408,20 @@ class Python {
 				point: 0,
 				trigger_action_name: this.PYTHON_GET_ACCELERATION,
 				action: this.accelerateMoving
-			}
+			},
+			'frog': {
+				point: 2,
+				trigger_action_name: this.PYTHON_GET_POINT,
+				action: this.growPythonLength
+
+			},
 		}
 
 		this.addBonus( 'apple' );
 		this.addBonus( 'rotten_apple' );
 		this.addBonus( 'stone' );
 		this.addBonus( 'accelerator' );
+		this.moving_frog = this.addBonus( 'frog' );
 
 	}
 
