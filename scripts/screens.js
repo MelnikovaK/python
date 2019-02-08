@@ -247,8 +247,10 @@ class Screens {
 			function(){
 				Utils.triggerCustomEvent( window, this.START_GAME );
 			}.bind(this)
+
 		);
 		this.$game_screen = $('.game-screen');
+		
 
 	}
 
