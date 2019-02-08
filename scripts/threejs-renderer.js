@@ -7,6 +7,7 @@ class ThreejsRenderer {
 		this.SHOW_FINISH_SCREEN = "screens: show_finish_modal";
 
 		this.camera_on_head = false;
+		this.ZERO = new THREE.Vector3(0,0,0);
 
 		//
 		// this.logic_step_interval = python.logic_step_interval;
@@ -61,7 +62,9 @@ class ThreejsRenderer {
 		});
 
 		window.addEventListener( "renderer:change_camera_position", function() {
-			scope.camera_on_head = scope.camera_on_head ? false : true;
+			if (scope.camera_on_head) scope.camera_on_head = false;
+			else scope.camera_on_head = true
+		// 	scope.camera_on_head = scope.camera_on_head ? false : true;
 		});
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
@@ -233,7 +236,6 @@ class ThreejsRenderer {
 			// scope.controls.update();
 
 			var python_body =  scope.python.python_body;
-
 			var time_current = Date.now();
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
 
@@ -256,7 +258,6 @@ class ThreejsRenderer {
 					}
 				}
 				if ( scope.body_parts ){
-					// console.log(scope.body_parts)
 					scope.body_parts.points[i - 1] = new THREE.Vector3(
 						python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta,
 						0,
@@ -265,7 +266,7 @@ class ThreejsRenderer {
 			}
 			if (scope.snake_body) {
 				scope.updateSnakeBody(scope.body_parts);
-			}
+			} 
 
 			// t += .02;
 			// sphere.position.x = Math.sin(t) * 5;
@@ -276,6 +277,7 @@ class ThreejsRenderer {
 			// camera.lookAt( ZERO );
 			//
 			if (scope.camera_on_head) scope.changeCameraPosition(delta);
+
 
 			scope.renderer.render( scope.scene, scope.camera );
 		}
@@ -381,16 +383,12 @@ class ThreejsRenderer {
 	changeCameraPosition(delta) {
 		var direction = this.python.python_direction;
 		var python_body = this.python.python_body;
-		var x = python_body[0]._model.position.x - this.CELLS_HORIZONTAL / 2 + .5;
-		var z = python_body[0]._model.position.z - this.CELLS_VERTICAL / 2 + .5;
+		var head = python_body[0]._model;
 
-
-		var next_cell_x = python_body[0]._model.position.x + direction.x * delta;
-		var next_cell_y = python_body[0]._model.position.z + direction.y * delta;
-		// this.camera.rotation.y = -90 / 180 * Math.PI;
-		this.camera.rotation.x = python_body[0]._model.rotation.x * delta;
-		this.camera.position.set( x, 1, z);
-		this.camera.lookAt( new THREE.Vector3(x + direction.x, .5 ,z + direction.y) );
+		head.add(this.camera);
+		this.camera.position.set( 0, 0, 0);
+		this.camera.lookAt( new THREE.Vector3(direction.x, .5, direction.x) );
+		this.camera.rotation.y = head.rotation.y;
 	}
 
 	removePython() {
