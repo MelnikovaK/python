@@ -298,6 +298,7 @@ class ThreejsRenderer {
 					var mesh = new THREE.Mesh( geometry, cube_material );
 					mesh.position.x = i;
 					mesh.position.z= j;
+					mesh.rotation.set(THREE.Math.randFloatSpread(.3),THREE.Math.randFloatSpread(.3),THREE.Math.randFloatSpread(.3));
 					scope.game_field.add( mesh );
 					
 				}
@@ -351,7 +352,7 @@ class ThreejsRenderer {
 
 	changeCameraPosition() {
 		var head = this.python.python_body[0];
-		this.camera.position.set( head.prev_x - 10, 5, head.prev_y - 10);
+		this.camera.position.set( head.prev_x  - this.CELLS_HORIZONTAL / 2 , 20, head.prev_y - this.CELLS_VERTICAL / 2);
 		this.camera.lookAt( head );
 	}
 
