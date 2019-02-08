@@ -140,9 +140,9 @@ class ThreejsRenderer {
 		var scope = this;
 
 		var ZERO = new THREE.Vector3(0,0,0);
-		const VIEW_ANGLE = 50;
+		const VIEW_ANGLE = 90;
 		const ASPECT = this.FIELD_WIDTH / this.FIELD_HEIGHT;
-		const NEAR = 1;
+		const NEAR = .01;
 		const FAR = 500;
 
 		this.renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -154,7 +154,8 @@ class ThreejsRenderer {
 		        FAR
 		    );
 
-		camera.position.set( 0, 20, 20 );
+		// camera.position.set( 0, 20, 20 );
+		camera.position.set( 0, 20, 0 );
 		camera.lookAt( ZERO );
 
 		var scene = this.scene = new THREE.Scene();
@@ -195,7 +196,7 @@ class ThreejsRenderer {
 		// 	this.renderer.setSize( window.innerWidth, window.innerHeight );
 		// }
 
-		this.startRendering();
+		// this.startRendering();
 
 	}
 
@@ -229,41 +230,52 @@ class ThreejsRenderer {
 
 
 	startRendering() {
+		
 		var scope = this;
-   	function animate() {
-			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
 
+   	function animate() {
+			
+			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
 			// scope.controls.update();
 
 			var python_body =  scope.python.python_body;
+			if ( !python_body.length ) {
+				console.log(' python body is empty. skip render');
+				return;
+			}
+
 			var time_current = Date.now();
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
 
 			for ( var i = 0; i < python_body.length; i++ ) {
+
 				var python_part = python_body[i]._model;
-				if (python_part) {
-					if( i == python_body.length - 1  || i == 0) {
-						python_part.position.x = python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta;
-						python_part.position.z = python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta;
-						var prev_angle = python_body[i].prev_angle;
-						var dist = Math.abs(python_body[i].angle - prev_angle);
-						if( dist > Math.PI ){
-							if( prev_angle < python_body[i].angle ){
-								prev_angle += Utils.PI2;
-							}else{
-								prev_angle -= Utils.PI2;
-							}
+
+				if( python_part && (i == python_body.length - 1  || i == 0) ) {
+					python_part.position.x = python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta;
+					python_part.position.z = python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta;
+					var prev_angle = python_body[i].prev_angle;
+					var dist = Math.abs(python_body[i].angle - prev_angle);
+					if( dist > Math.PI ){
+						if( prev_angle < python_body[i].angle ){
+							prev_angle += Utils.PI2;
+						}else{
+							prev_angle -= Utils.PI2;
 						}
-						python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 					}
+					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 				}
-				if ( scope.body_parts ){
-					scope.body_parts.points[i - 1] = new THREE.Vector3(
-						python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta,
-						0,
-						python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta);
+
+				if ( scope.body_parts && i < python_body.length ) {
+
+				scope.body_parts.points[i] = new THREE.Vector3(
+					python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta,
+					0,
+					python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta);
 				}
+
 			}
+
 			if (scope.snake_body) {
 				scope.updateSnakeBody(scope.body_parts);
 			} 
@@ -329,11 +341,31 @@ class ThreejsRenderer {
 
 		for ( var i = 0; i < python_body.length; i++ ) {
 			if ( !python_body[i]._model ) {
-				if ( i > 0 && i < python_body.length - 1) {
+				if (i < python_body.length) {
 					this.body_parts.points.push( new THREE.Vector3( python_body[i].x, 0, python_body[i].y) )
-				} else {
-					if ( i == python_body.length - 1 )  var python_part = new THREE.Mesh( new THREE.CylinderGeometry( 0, .5, 1.5, 16 ), snake_material );
-					else var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
+				}
+				if ( i == 0 || i ==  python_body.length - 1) {
+
+					if ( i == python_body.length - 1 )  { // create tail
+						var geometry = new THREE.CylinderGeometry( 0, .5, 1.5, 16, 1, false );
+						var m = new THREE.Matrix4();
+                    // m.setRotationY((Math.PI * 2) * r);
+            m.makeTranslation(0, 1.5/2, 0);
+            geometry.applyMatrix(m);
+						var python_part = new THREE.Mesh( geometry, snake_material );
+
+					} else {// create head
+						var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
+
+						//
+						// var geometry = new THREE.CylinderGeometry( 0, .5, 1.5, 16, 1, false );
+						// var m = new THREE.Matrix4();
+      //               // m.setRotationY((Math.PI * 2) * r);
+      //       m.makeTranslation(0, -1.5/2, 0);
+      //       geometry.applyMatrix(m);
+						// var dummy = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: 0xffff00, wireframe: true } ) );
+						// python_part.add( dummy );
+					}
 
 					python_part.rotation.x = python_body[i].angle;
 					python_part.position.x = python_body[i].x;
@@ -341,8 +373,9 @@ class ThreejsRenderer {
 					python_body[i]._model = python_part;
 
 					scope.snake_container.add(python_part);
-
 				}
+
+				
 			}
 		}
 		if (!this.snake_body ){
@@ -385,10 +418,17 @@ class ThreejsRenderer {
 		var python_body = this.python.python_body;
 		var head = python_body[0]._model;
 
-		head.add(this.camera);
-		this.camera.position.set( 0, 0, 0);
-		this.camera.lookAt( new THREE.Vector3(direction.x, .5, direction.x) );
-		this.camera.rotation.y = head.rotation.y;
+		// head.add(this.camera);
+		// console.log(">", this.body_parts );
+		var camera_position = this.body_parts.points[1].clone();
+		this.snake_container.localToWorld( camera_position );
+		this.camera.position.copy( camera_position );
+		this.camera.position.y = 2;
+
+		var aim_position = this.snake_container.localToWorld( head.position.clone() );
+		aim_position.y = 1.5;
+		this.camera.lookAt( aim_position );
+		// this.camera.rotation.y = head.rotation.y;
 	}
 
 	removePython() {
