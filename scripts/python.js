@@ -128,8 +128,7 @@ class Python {
 
 		window.addEventListener( "renderer:change_camera_position", function() {
 			if (this.camera_third_person) this.camera_third_person = false;
-			else this.camera_third_person = true
-			// if ( !this.camera_third_person ) this.changeDirection();
+			else this.camera_third_person = true;
 		}.bind(this));
 
 	}
@@ -149,7 +148,7 @@ class Python {
 		  		var cur_direction = this.python_direction;
 		  		var prev_direction = this.getDirectionByIndex( cur_direction.x, cur_direction.y );
 		  		var new_direction = this.getDirectionByIndex( dir.x, dir.y );
-		  		
+
 					dir = this.third_person_directions[prev_direction][new_direction];
 		  	} else {
 			  	var difference_x = this.directions[details.name].x - this.python_direction.x;
@@ -500,7 +499,10 @@ class Python {
 		var python_head = this.python_body[0];
 
 		// check bounds
-		if( python_head.x < 1 || python_head.x >= this.cells_horizontal - 1 || python_head.y < 1 || python_head.y >= this.cells_vertical - 1 ) return true;
+		if( python_head.x < 1 || python_head.x >= this.cells_horizontal - 1 || python_head.y < 1 || python_head.y >= this.cells_vertical - 1 ) {
+			console.log(1)
+			return true;
+		}
 
 		//
 		for ( var i = 1; i < this.python_body.length; i++) {
