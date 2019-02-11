@@ -32,16 +32,29 @@ class Python {
 		this.UP = 'up';
 		this.DOWN = 'down';
 
+		this.direction_indexes = {
+			'10': this.RIGHT,
+			'-10': this.LEFT,
+			'0-1': this.UP,
+			'01': this.DOWN
+		};
+
 		this.directions = {};
 		this.directions[this.RIGHT] = this.directions['swipe-right'] = {x:1, y:0, rotation: 90 * window.Utils.DEG2RAD};
 		this.directions[this.LEFT] = this.directions['swipe-left'] = {x:-1, y:0, rotation: 270 * window.Utils.DEG2RAD};
 		this.directions[this.UP] = this.directions['swipe-up'] = {x:0, y:-1, rotation: 0};
 		this.directions[this.DOWN] = this.directions['swipe-down'] = {x:0, y:1, rotation: 180 * window.Utils.DEG2RAD};
 
+		this.third_person_directions = {};
+		this.third_person_directions[this.RIGHT] ={ 'left': this.directions[this.UP], 'right': this.directions[this.DOWN]};
+		this.third_person_directions[this.LEFT] ={ 'left': this.directions[this.DOWN], 'right': this.directions[this.UP]};
+		this.third_person_directions[this.UP] ={ 'left': this.directions[this.LEFT], 'right': this.directions[this.RIGHT]};
+		this.third_person_directions[this.DOWN] ={ 'left': this.directions[this.RIGHT], 'right': this.directions[this.LEFT]};
+
+
 		this.start_logic_step_interval = config.logic_step_interval;;
 		this.logic_step_interval = config.logic_step_interval;
 		
-
 		this.inputController_direction = '';
 
 
@@ -114,10 +127,9 @@ class Python {
 		}.bind(this));
 
 		window.addEventListener( "renderer:change_camera_position", function() {
-			if (scope.camera_third_person) scope.camera_third_person = false;
-			else scope.camera_third_person = true
-			if ( !scope.camera_third_person ) scope.changeDirection();
-		// 	scope.camera_third_person = scope.camera_third_person ? false : true;
+			if (this.camera_third_person) this.camera_third_person = false;
+			else this.camera_third_person = true
+			// if ( !this.camera_third_person ) this.changeDirection();
 		}.bind(this));
 
 	}
@@ -131,21 +143,26 @@ class Python {
 			}
 			var dir = this.directions[details.name];
 		  if( dir ) {
-		  	var difference_x = this.directions[details.name].x - this.python_direction.x;
-		  	var difference_y = this.directions[details.name].y - this.python_direction.y;
 		  	if ( difference_x == 0 || difference_y == 0 ) return;
+		  	if ( this.camera_third_person ) {
+
+		  		var cur_direction = this.python_direction;
+		  		var prev_direction = this.getDirectionByIndex( cur_direction.x, cur_direction.y );
+		  		var new_direction = this.getDirectionByIndex( dir.x, dir.y );
+		  		
+					dir = this.third_person_directions[prev_direction][new_direction];
+		  	} else {
+			  	var difference_x = this.directions[details.name].x - this.python_direction.x;
+			  	var difference_y = this.directions[details.name].y - this.python_direction.y;
+		  		
+		  	}
 				this.inputController_direction = dir;
-				console.log(this.inputController_direction);
 		  }
 		}
 	}
 
-	changeDirection() {
-		var direction = this.inputController_direction;
-		// if ( direction.x == 0 && direction.y == 0 ) {
-			
-		// }
-		// this.direction
+	getDirectionByIndex(x, y) {
+		return this.direction_indexes[x.toString() + y.toString()];
 	}
 
 	
