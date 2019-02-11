@@ -189,20 +189,20 @@ class ThreejsRenderer {
 
 
 		//CONTROLS
-		// this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
-		// this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-		// this.controls.dampingFactor = 0.25;
-		// this.controls.screenSpacePanning = false;
-		// this.controls.minDistance = 10;
-		// this.controls.maxDistance = 500;
-		// this.controls.maxPolarAngle = Math.PI / 2;
-		// window.addEventListener( 'resize', onWindowResize, false );
+		this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
+		this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+		this.controls.dampingFactor = 0.25;
+		this.controls.screenSpacePanning = false;
+		this.controls.minDistance = 10;
+		this.controls.maxDistance = 500;
+		this.controls.maxPolarAngle = Math.PI / 2;
+		window.addEventListener( 'resize', onWindowResize, false );
 
-		// function onWindowResize() {
-		// 	this.camera.aspect = window.innerWidth / window.innerHeight;
-		// 	this.camera.updateProjectionMatrix();
-		// 	this.renderer.setSize( window.innerWidth, window.innerHeight );
-		// }
+		function onWindowResize() {
+			this.camera.aspect = window.innerWidth / window.innerHeight;
+			this.camera.updateProjectionMatrix();
+			this.renderer.setSize( window.innerWidth, window.innerHeight );
+		}
 
 		// this.startRendering();
 
@@ -244,7 +244,7 @@ class ThreejsRenderer {
    	function animate() {
 			
 			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
-			// scope.controls.update();
+			scope.controls.update();
 
 			var python_body =  scope.python.python_body;
 			if ( !python_body.length ) {

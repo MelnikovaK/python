@@ -26,45 +26,33 @@ class ThreejsParticles {
 				value: THREE.ImageUtils.loadTexture( this.ASSETS_PATH + 'smokeparticle.png' ),
 				frames: new THREE.Vector2( 5, 5 ),
 				loop: 1
-			}
-			// depthTest: true,
-			// depthWrite: false,
-			// blending: THREE.AdditiveBlending,
-			// scale: 600
+			},
+			blending: THREE.AdditiveBlending,
+			scale: 100
 		});
 
-		var fireball = new SPE.Emitter( {
-			particleCount: 20,
-			type: SPE.distributions.SPHERE,
-			position: {
-				radius: 1
-			},
-			maxAge: { value: 2 },
-			// duration: 1,
-			activeMultiplier: 20,
-			velocity: {
-				value: new THREE.Vector3( 10 )
-			},
-			size: { value: [20, 100] },
-			color: {
-				value: [
-					new THREE.Color( 0.5, 0.1, 0.05 ),
-					new THREE.Color( 0.2, 0.2, 0.2 )
-				]
-			},
-			opacity: { value: [0.5, 0.35, 0.1, 0] }
-		});
+		var fireball = new SPE.Emitter( fire );
 
 		group.addEmitter( fireball );
 		this.scene.add( group.mesh );
 		var scope = this;
 
+
 		var clock = new THREE.Clock();
+		var stats = new Stats();
+		clock.getDelta();
 		function render() {
 			var dt = clock.getDelta();
 	    group.tick( );
-	    shockwaveGroup.tick( );
 	    scope.renderer.render( scope.scene, scope.camera );
+		}
+
+		function animate() {
+	    requestAnimationFrame( animate );
+	    stats.update();
+	    render();
 			}
+
+			animate();
 	}
 }
