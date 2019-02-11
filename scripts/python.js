@@ -491,6 +491,8 @@ class Python {
 			if (bonus == this.bonuses[i]) continue;
 			if (x == this.bonuses[i].x && y == this.bonuses[i].y ) return false;
 		}
+
+		if ( x > this.cells_horizontal || y > this.cells_vertical || x < 0 || y < 0 ) return false;
 		return true;
 	}
 

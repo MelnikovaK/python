@@ -93,4 +93,4 @@ let sound_manager = new PixiSoundManager(config, python);
 
 let renderer = new ThreejsRenderer($game_container, python, config );
 
-// let particles_manager = new PixiParticlesManager($game_container, renderer, config, python);
+let particles_manager = new ThreejsParticles($game_container, renderer, config, python);

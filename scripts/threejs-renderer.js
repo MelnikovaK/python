@@ -129,7 +129,7 @@ class ThreejsRenderer {
 			scope.initContainers();
 			scope.initGameField();
 
-		 	Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE );
+		 	Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE, {scene: scope.scene, camera: scope.camera, renderer: scope.renderer} );
 		};
 
 		manager.onProgress = function( item, loaded, total ) {
