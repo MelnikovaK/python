@@ -55,6 +55,7 @@ class ThreejsRenderer {
 		
 		
 		window.addEventListener( "screens: start game" , function () {
+			scope.resetCameraPosition(scope.camera);
 			scope.updateSnake();
 			scope.updateBonuses();
 			scope.startRendering();
@@ -64,6 +65,7 @@ class ThreejsRenderer {
 		window.addEventListener( "renderer:change_camera_position", function() {
 			if (scope.camera_on_head) scope.camera_on_head = false;
 			else scope.camera_on_head = true
+			if ( !scope.camera_on_head ) scope.resetCameraPosition(scope.camera);
 		// 	scope.camera_on_head = scope.camera_on_head ? false : true;
 		});
 
@@ -429,6 +431,11 @@ class ThreejsRenderer {
 		aim_position.y = 1.5;
 		this.camera.lookAt( aim_position );
 		// this.camera.rotation.y = head.rotation.y;
+	}
+
+	resetCameraPosition(camera) {
+		camera.position.set( 0, 20, 0 );
+		camera.lookAt( this.ZERO );
 	}
 
 	removePython() {
