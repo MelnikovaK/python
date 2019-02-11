@@ -72,7 +72,6 @@ class ThreejsRenderer {
 			if (scope.camera_on_head) scope.camera_on_head = false;
 			else scope.camera_on_head = true
 			if ( !scope.camera_on_head ) scope.resetCameraPosition(scope.camera);
-		// 	scope.camera_on_head = scope.camera_on_head ? false : true;
 		});
 
 		window.addEventListener(python.PYTHON_MOVED, function() {
@@ -80,13 +79,13 @@ class ThreejsRenderer {
 			scope.onPythonMoved();	
 		});
 
-		// window.addEventListener(python.PAUSE, function() {
-		// 	cancelAnimationFrame( scope.requestAnimationFrame_id );
-		// });
+		window.addEventListener(python.PAUSE, function() {
+			window.cancelAnimationFrame(scope.requestAnimationFrame_id);
+		});
 
-		// window.addEventListener(python.PLAY, function() {
-		// 	scope.startRendering();
-		// });
+		window.addEventListener(python.PLAY, function() {
+			scope.startRendering();
+		});
 
 		window.addEventListener(python.REDRAW_BONUS, function(e) {
 			var bonus = e.detail.bonus;
@@ -163,7 +162,6 @@ class ThreejsRenderer {
 		        FAR
 		    );
 
-		// camera.position.set( 0, 20, 20 );
 		camera.position.set( 0, 20, 0 );
 		camera.lookAt( ZERO );
 
@@ -382,13 +380,9 @@ class ThreejsRenderer {
 			this.snake_geometry = new THREE.TubeBufferGeometry( this.body_parts,  2, .5, 16, false );
 			this.snake_body = new THREE.Mesh( this.snake_geometry, snake_material );
 			this.snake_container.add(this.snake_body)
-
-			// this.snake_geometry.dynamic = true;
 		} else {
 			this.updateSnakeBody(this.body_parts);	
 		}
-
-		// this.snake_geometry.verticesNeedUpdate = true;
 
 	}
 
@@ -402,8 +396,7 @@ class ThreejsRenderer {
 
 		for ( var i = 0; i < bonuses.length; i++ ) {
 			if ( !bonuses[i]._model ) {
-				const bonus_material = new THREE.MeshLambertMaterial({ color: this.bonuses_type_color[bonuses[i].type].color});
-				var bonus = new THREE.Mesh( this.bonuses_type_color[bonuses[i].type].shape, bonus_material);
+				var bonus = this.AM.pullAsset( bonuses[i].type );
 				bonus.position.x = bonuses[i].x;
 				bonus.position.z = bonuses[i].y;
 				bonuses[i]._model = bonus;
@@ -446,10 +439,7 @@ class ThreejsRenderer {
 	removeBonuses() {
 		var bonuses = this.python.bonuses;
 		for ( var i = 0; i < bonuses.length; i++ ) {
-			var model = bonuses[i]._model;
-			this.GO_container.remove(model)
-			model.geometry.dispose();
-			model.material.dispose();
+			this.AM.putAsset( bonuses[i]._model )
 		}
 	}
 
@@ -480,8 +470,29 @@ class ThreejsRenderer {
 		var tail = function() {return	new THREE.Mesh( geometry, snake_material )};
 		this.AM.addAsset('python_tail', tail, 3);
 
+		//BODY
+		// var body_parts  = new THREE.CatmullRomCurve3();
+
+		// var body_geometry = new THREE.TubeBufferGeometry( body_parts,  2, .5, 16, false );
+		// var body = new THREE.Mesh( body_geometry, snake_material );
+		// this.AM.addAsset('python_body', body, 3);
+
+
 		//BONUSES
+		this.addBonusToAssetManager('apple');
+		this.addBonusToAssetManager('rotten_apple');
+		this.addBonusToAssetManager('stone');
+		this.addBonusToAssetManager('frog');
+		this.addBonusToAssetManager('accelerator');
 		
+	}
+
+
+	addBonusToAssetManager(bonus_name) {
+		var scope = this;
+		const bonus_material = new THREE.MeshLambertMaterial({ color: this.bonuses_type_color[bonus_name].color});
+		var bonus = function() {return new THREE.Mesh( scope.bonuses_type_color[bonus_name].shape, bonus_material)};
+		this.AM.addAsset(bonus_name, bonus, 3);
 
 	}
 } 

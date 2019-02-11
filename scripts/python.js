@@ -47,6 +47,7 @@ class Python {
 
 		this.pause = false;
 		this.is_game_over = false;
+		this.camera_third_person = false;
 
 		this.bonuses = [];
 
@@ -70,10 +71,10 @@ class Python {
 
 		//
 		this.python_directions = {};
-		this.python_directions[1] = { angle: 180 * window.Utils.DEG2RAD, name: 'down'};//tail down
-		this.python_directions[2] = { angle: 90 * window.Utils.DEG2RAD, name: 'right'};//tail right
-		this.python_directions[4] = { angle: 270 * window.Utils.DEG2RAD, name: 'left'};//tail left
-		this.python_directions[8] = { angle: 0, name: 'up'};//tail up
+		this.python_directions[1] = { angle: 180 * window.Utils.DEG2RAD, name: 'down'};
+		this.python_directions[2] = { angle: 90 * window.Utils.DEG2RAD, name: 'right'};
+		this.python_directions[4] = { angle: 270 * window.Utils.DEG2RAD, name: 'left'};
+		this.python_directions[8] = { angle: 0, name: 'up'};
 
 		
 
@@ -112,6 +113,13 @@ class Python {
 		  this.setPause( false );
 		}.bind(this));
 
+		window.addEventListener( "renderer:change_camera_position", function() {
+			if (scope.camera_third_person) scope.camera_third_person = false;
+			else scope.camera_third_person = true
+			if ( !scope.camera_third_person ) scope.changeDirection();
+		// 	scope.camera_third_person = scope.camera_third_person ? false : true;
+		}.bind(this));
+
 	}
 
 	initInputControllerEvent(details) {
@@ -127,8 +135,17 @@ class Python {
 		  	var difference_y = this.directions[details.name].y - this.python_direction.y;
 		  	if ( difference_x == 0 || difference_y == 0 ) return;
 				this.inputController_direction = dir;
+				console.log(this.inputController_direction);
 		  }
 		}
+	}
+
+	changeDirection() {
+		var direction = this.inputController_direction;
+		// if ( direction.x == 0 && direction.y == 0 ) {
+			
+		// }
+		// this.direction
 	}
 
 	
@@ -307,6 +324,7 @@ class Python {
 		part.prev_x = prev_x;
 		part.prev_y = prev_y;
 	}
+
 
 	updatePartDirection( part, target_part ){
 		
