@@ -372,7 +372,8 @@ class Python {
 		setInterval(function() {
 			frog.x +=diap[~~( Math.random() * (3 - 1) + 1)] ;
 			frog.y += diap[~~( Math.random() * (3 - 1) + 1)];
-			if ( !scope.checkBonusCoordinatesCorrect(frog.x, frog.y, frog) ) scope.frogMoving();
+			if ( !scope.checkBonusCoordinatesCorrect(frog.x, frog.y, frog) ) return scope.frogMoving();
+
 			Utils.triggerCustomEvent(window, scope.REDRAW_BONUS, {bonus: frog})
 		}, 3000);
 	}
@@ -436,26 +437,26 @@ class Python {
 		
 	}
 
-	checkBonusCoordinatesCorrect( x, y, bonus ) {
-		for ( var i = 0; i < this.python_body.length; i++ ) {
-			var python_part = this.python_body[i];
-			if (python_part.x == x && python_part.y == y ) return false;
+	checkBonusCoordinatesCorrect( x, y, bonus) {
+		for (var i = 0; i < this.python_body.length; i++ ) {
+			if ( i == 0 ) { //3 клетки от головы
+				var head_x = this.python_body[i].x + 3 * this.python_direction.x;
+				var head_y = this.python_body[i].y + 3 * this.python_direction.y;
 
+				if ( x <= head_x && x >= this.python_body[i].x &&  y <= head_y && y >= this.python_body[i].y) return false;
+			}
+
+			var less_than_x = this.python_body[i].x - 1;
+			var less_than_y = this.python_body[i].y - 1;
+			var bigger_than_x = this.python_body[i].x + 1;
+			var bigger_than_y = this.python_body[i].y + 1; 
+
+			// if (less_than_x <= x && less_than_y <= y && bigger_than_x >= x && bigger_than_y >= y) return false;
 		}
-
-		var head = this.python_body[0];
-		var head_x = head.x + 3;
-		var head_y = head.y + 3;
-
-		if ( x <= head_x && y <= head_y && x > head.x && y > head.y) return false;
-
-		for ( var i = 0; i < this.bonuses.length; i++ ) {
+		for (var i = 0; i < this.bonuses.length; i++) {
 			if (bonus == this.bonuses[i]) continue;
 			if (x == this.bonuses[i].x && y == this.bonuses[i].y ) return false;
 		}
-
-		if ( x > this.cells_horizontal || y > this.cells_vertical || x < 0 || y < 0 ) return false;
-
 		return true;
 	}
 

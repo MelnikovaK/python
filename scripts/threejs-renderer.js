@@ -33,6 +33,10 @@ class ThreejsRenderer {
 		this.BONUS_SEGMENTS = 16;
 		this.BONUS_RINGS = 16;
 
+		//ASSETS MANAGER
+		this.AM = new AssetManager(this);
+
+
 
 		this.bonuses_type_color = {};
 		this.bonuses_type_color['apple'] = {
@@ -51,7 +55,9 @@ class ThreejsRenderer {
 			color:'#FFFC29',
 			shape: new THREE.CylinderBufferGeometry( 0, .5, 1, 3, 1 )};
 
+
 		this.preloadTextures();
+		this.createAssets();
 		
 		
 		window.addEventListener( "screens: start game" , function () {
@@ -182,6 +188,7 @@ class ThreejsRenderer {
 		var spotLightHelper = new THREE.SpotLightHelper( spotLight );
 		scene.add( spotLightHelper );*/
 		this.scene.add( spotLight );
+
 
 		//CONTROLS
 		// this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
@@ -328,6 +335,8 @@ class ThreejsRenderer {
 				}
 				
 			}
+		this.renderer.render( this.scene, this.camera );
+
 	}
 
 	updateSnakeBody(points) {
@@ -350,24 +359,11 @@ class ThreejsRenderer {
 				if ( i == 0 || i ==  python_body.length - 1) {
 
 					if ( i == python_body.length - 1 )  { // create tail
-						var geometry = new THREE.CylinderGeometry( 0, .5, 1.5, 16, 1, false );
-						var m = new THREE.Matrix4();
-                    // m.setRotationY((Math.PI * 2) * r);
-            m.makeTranslation(0, 1.5/2, 0);
-            geometry.applyMatrix(m);
-						var python_part = new THREE.Mesh( geometry, snake_material );
-
+						var python_part = this.AM.pullAsset( 'python_tail' );
+						
 					} else {// create head
-						var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
-
-						//
-						// var geometry = new THREE.CylinderGeometry( 0, .5, 1.5, 16, 1, false );
-						// var m = new THREE.Matrix4();
-      //               // m.setRotationY((Math.PI * 2) * r);
-      //       m.makeTranslation(0, -1.5/2, 0);
-      //       geometry.applyMatrix(m);
-						// var dummy = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { color: 0xffff00, wireframe: true } ) );
-						// python_part.add( dummy );
+						var python_part = this.AM.pullAsset( 'python_head' );
+						// var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
 					}
 
 					python_part.rotation.x = python_body[i].angle;
@@ -458,7 +454,6 @@ class ThreejsRenderer {
 	}
 
 	removePythonPart(part) {
-		console.log(part)
 		this.snake_container.remove(part);
 		part.geometry.dispose();
 		part.material.dispose();
@@ -466,5 +461,27 @@ class ThreejsRenderer {
 
 	removePythonBodyPart(part) {
 		this.body_parts.pop()
+	}
+
+
+	createAssets() {
+		var snake_material = new THREE.MeshBasicMaterial( { map: this.snake_texture } );
+
+		//HEAD
+		var head = function() {return new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material)};
+		this.AM.addAsset('python_head', head, 3);
+
+		//TAIL
+		var geometry = new THREE.CylinderGeometry( 0, .5, 1.5, 16, 1, false );
+		var m = new THREE.Matrix4();
+    m.makeTranslation(0, 1.5/2, 0);
+    geometry.applyMatrix(m);
+
+		var tail = function() {return	new THREE.Mesh( geometry, snake_material )};
+		this.AM.addAsset('python_tail', tail, 3);
+
+		//BONUSES
+		
+
 	}
 } 
