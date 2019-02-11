@@ -108,6 +108,7 @@ class ThreejsRenderer {
 		window.addEventListener( python.GAME_OVER , function () {
 			scope.removePython();
 			scope.removeBonuses();
+			window.cancelAnimationFrame(scope.requestAnimationFrame_id);
 			Utils.triggerCustomEvent( window, scope.SHOW_FINISH_SCREEN );
 
 		});
