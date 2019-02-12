@@ -64,6 +64,7 @@ class Python {
 		this.pause = false;
 		this.is_game_over = false;
 		this.camera_third_person = false;
+		this.accelerated_moving = false;
 
 		this.bonuses = [];
 
@@ -225,7 +226,10 @@ class Python {
 		if(!this.gameStep){
 
 			this.gameStep = function(){				
-
+				if ( scope.accelerated_moving ) {
+					scope.logic_step_interval /= 2; 
+					scope.accelerated_moving = false;
+				}
 				// schedule the next game step
 				scope.game_timeout = setTimeout( scope.gameStep, scope.logic_step_interval );
 				if ( scope.pause ) return;
@@ -392,7 +396,7 @@ class Python {
 
 	accelerateMoving(scope) {
 		if ( scope.logic_step_interval != scope.start_logic_step_interval ) return;
-		scope.logic_step_interval /= 2;
+		scope.accelerated_moving = true;
 		setTimeout( function() {
 			scope.logic_step_interval *= 2;
 		}, 5000); 
@@ -530,7 +534,6 @@ class Python {
 			return true;
 		}
 
-		//
 		for ( var i = 1; i < this.python_body.length; i++) {
 			var part = this.python_body[i];
 			if ( python_head.x == part.x && python_head.y == part.y ) {
