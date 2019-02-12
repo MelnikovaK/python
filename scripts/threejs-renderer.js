@@ -7,6 +7,7 @@ class ThreejsRenderer {
 		this.SHOW_FINISH_SCREEN = "screens: show_finish_modal";
 
 		this.camera_on_head = false;
+		this.full_screen = false;
 		this.ZERO = new THREE.Vector3(0,0,0);
 
 		//
@@ -87,6 +88,12 @@ class ThreejsRenderer {
 			scope.startRendering();
 		});
 
+		window.addEventListener(python.PYTHON_SHOW_FULL_SCREEN, function() {
+			if (scope.full_screen) scope.full_screen = false;
+			else scope.full_screen = true
+			scope.changeScreen();
+		});
+
 		window.addEventListener(python.REDRAW_BONUS, function(e) {
 			var bonus = e.detail.bonus;
 			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
@@ -107,7 +114,6 @@ class ThreejsRenderer {
 			var bonus = e.detail.bonus;
 			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
 			scope.updateSnake();
-
 		});
 
 		window.addEventListener( python.GAME_OVER , function () {
@@ -129,7 +135,8 @@ class ThreejsRenderer {
 			scope.initContainers();
 			scope.initGameField();
 
-		 	Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE, {scene: scope.scene, camera: scope.camera, renderer: scope.renderer, game_container: scope.game_field} );
+		 	Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE, {scene: scope.scene, camera: scope.camera, 
+		 														renderer: scope.renderer, game_container: scope.game_field} );
 		};
 
 		manager.onProgress = function( item, loaded, total ) {
@@ -182,9 +189,6 @@ class ThreejsRenderer {
 		
 		var spotLight = new THREE.SpotLight( 0xffffff, 1, 0, 30 / 180 * Math.PI );
 		spotLight.position.set( 10/2, 100/2, 50/2 );
-/*
-		var spotLightHelper = new THREE.SpotLightHelper( spotLight );
-		scene.add( spotLightHelper );*/
 		this.scene.add( spotLight );
 
 
@@ -199,7 +203,7 @@ class ThreejsRenderer {
 		window.addEventListener( 'resize', onWindowResize, false );
 
 		function onWindowResize() {
-			this.camera.aspect = window.innerWidth / window.innerHeight;
+			this.camera.aspect = this.FIELD_WIDTH / this.FIELD_HEIGHT;
 			this.camera.updateProjectionMatrix();
 			this.renderer.setSize( window.innerWidth, window.innerHeight );
 		}
@@ -407,8 +411,6 @@ class ThreejsRenderer {
 		var python_body = this.python.python_body;
 		var head = python_body[0]._model;
 
-		// head.add(this.camera);
-		// console.log(">", this.body_parts );
 		var camera_position = this.body_parts.points[1].clone();
 		this.snake_container.localToWorld( camera_position );
 		this.camera.position.copy( camera_position );
@@ -416,8 +418,14 @@ class ThreejsRenderer {
 
 		var aim_position = this.snake_container.localToWorld( head.position.clone() );
 		aim_position.y = 1.5;
-		this.camera.lookAt( aim_position );
-		// this.camera.rotation.y = head.rotation.y;
+		this.camera.lookAt( aim_position );	}
+
+	changeScreen() {
+		if ( this.full_screen ){
+		this.renderer.setSize( window.innerWidth, window.innerHeight );
+		} else {
+			this.renderer.setSize( this.FIELD_WIDTH, this.FIELD_HEIGHT );
+		}
 	}
 
 	resetCameraPosition(camera) {

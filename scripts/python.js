@@ -15,6 +15,7 @@ class Python {
 		this.REMOVE_PYTHON_PART = "visualizer:remove_python_part";
 		this.REDRAW_BONUS = "visualizer:redraw_bonus";
 		this.PYTHON_CHANGE_CAMERA_POSITION = "renderer:change_camera_position";
+		this.PYTHON_SHOW_FULL_SCREEN = "renderer:show_full_screen";
 
 
 		//
@@ -112,6 +113,10 @@ class Python {
 					this.changeCameraPosition();
 					Utils.triggerCustomEvent( window, this.PYTHON_CHANGE_CAMERA_POSITION );
 				break;
+
+				case "full_screen":
+					Utils.triggerCustomEvent( window, this.PYTHON_SHOW_FULL_SCREEN );
+				break;
 					
 			}
 
@@ -161,8 +166,8 @@ class Python {
 
 					dir = this.third_person_directions[prev_direction][new_direction];
 		  	}
-		  	var difference_x = this.directions[details.name].x - this.python_direction.x;
-		  	var difference_y = this.directions[details.name].y - this.python_direction.y;
+		  	var difference_x = dir.x - this.python_direction.x;
+		  	var difference_y = dir.y - this.python_direction.y;
 		  	if ( difference_x == 0 || difference_y == 0 ) return;
 		  		
 				this.inputController_direction = dir;
@@ -502,7 +507,7 @@ class Python {
 			if (x == this.bonuses[i].x && y == this.bonuses[i].y ) return false;
 		}
 
-		if ( x > this.cells_horizontal || y > this.cells_vertical || x < 0 || y < 0 ) return false;
+		if ( x > this.cells_horizontal - 1 || y > this.cells_vertical - 1 || x < 0 || y < 0 ) return false;
 		return true;
 	}
 

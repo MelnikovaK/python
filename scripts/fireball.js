@@ -6,17 +6,12 @@ var fire = {
 				value: new THREE.Vector3( 0,.5,0 )
 			},
 			maxAge: {
-				value: 2,
+				value: .8,
 				spread: 0
 			},
 			activeMultiplier: 100,
 			velocity: {
 				spread : new THREE.Vector3( 3 )
-			},
-			rotation: {
-				axis: new THREE.Vector3( 1, 0, 0 ),
-				angle: Math.PI * 0.5,
-				static: true
 			},
 			size: { value: 4 },
 			color: {

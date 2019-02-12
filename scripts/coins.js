@@ -5,7 +5,7 @@ coin = {
         		position: {
                     value: new THREE.Vector3( 0,.5,0 ),
                     radius: 1,
-                    spread: new THREE.Vector3( 1, 1, 1 ),
+                    spread: new THREE.Vector3( 2, 2, 2 ),
                 },
         		acceleration: {
                     value: new THREE.Vector3( 0,.5,0 ),

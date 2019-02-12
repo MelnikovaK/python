@@ -1,5 +1,6 @@
 class ThreejsParticles {
 	constructor($container, renderer, config, python) {
+
 		this.ASSETS_PATH = config.ASSETS_PATH;
 
 		this.python = python;
@@ -18,7 +19,6 @@ class ThreejsParticles {
 			this.camera = e.detail.camera;
 			this.renderer = e.detail.renderer;
 			this.game_container = e.detail.game_container;
-
 			this.initEmitter();
 		}.bind(this));
 
@@ -71,7 +71,8 @@ class ThreejsParticles {
 
 	updateEmitterGroup( emitter_group ) {
 		var head = this.python.python_body[0];
-    emitter_group.triggerPoolEmitter( 1, (new THREE.Vector3( head.x, .5, head.y )) );
+		console.log(head.x, head.y)
+    emitter_group.triggerPoolEmitter( 1, (new THREE.Vector3( head.x, 0, head.y )) );
 	}
 
 }

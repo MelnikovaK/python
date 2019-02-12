@@ -50,6 +50,9 @@ var config = {
 			"change_camera": {
 				keys: [82],
 			},
+			"full_screen": {
+				keys: [81]
+			},
 
 			"swipe-left": { // название активности
 				gesture: ['swipe-left'],
