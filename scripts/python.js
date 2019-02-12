@@ -260,7 +260,6 @@ class Python {
 
 		this.points = 0;
 		this.removeBonuses();
-		this.initBonuses();
 		this.frogMoving();
 
 		this.inputController.enabled = true;
@@ -270,6 +269,7 @@ class Python {
 		this.python_direction = this.inputController_direction;
 
 		this.resetPyhon();
+		this.initBonuses();
 
 		if ( this.game_timeout ) clearTimeout(this.game_timeout);
 		this.gameStep();
@@ -446,7 +446,7 @@ class Python {
 		bonus_data.type = bonus_name;
 		bonus_data.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
 		bonus_data.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
-		// if ( !this.checkBonusCoordinatesCorrect(bonus_data.x, bonus_data.y, bonus_data) ) this.addBonus( bonus_name );
+		if ( !this.checkBonusCoordinatesCorrect(bonus_data.x, bonus_data.y, bonus_data) ) this.addBonus( bonus_name );
 		this.bonuses.push( bonus_data );
 		return bonus_data;
 	}
