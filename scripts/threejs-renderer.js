@@ -122,7 +122,7 @@ class ThreejsRenderer {
 				scope.removePython();
 				scope.removeBonuses();
 				Utils.triggerCustomEvent( window, scope.SHOW_FINISH_SCREEN );
-			}, 3500);
+			}, 3000);
 		});
 	}
 	
@@ -169,6 +169,9 @@ class ThreejsRenderer {
 		        NEAR,
 		        FAR
 		    );
+
+    camera.position.set( 0, 16, 0 );
+		camera.lookAt( this.ZERO );
 
 		var scene = this.scene = new THREE.Scene();
 		this.scene.add(this.camera);

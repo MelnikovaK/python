@@ -423,7 +423,7 @@ class Python {
 		var scope = this;
 		var frog = this.moving_frog;
 		var diap = [0,1, -1];
-		setInterval(function() {
+		this.frog_interval = setInterval(function() {
 			var copy = Object.assign({}, frog);
 			var x = copy.x + diap[~~( Math.random() * (4 - 1))] ;
 			var y = copy.y + diap[~~( Math.random() * (4 - 1))];
@@ -442,6 +442,7 @@ class Python {
 		bonus_data.type = bonus_name;
 		bonus_data.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
 		bonus_data.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
+		// if ( !this.checkBonusCoordinatesCorrect(bonus_data.x, bonus_data.y, bonus_data) ) this.addBonus( bonus_name );
 		this.bonuses.push( bonus_data );
 		return bonus_data;
 	}
@@ -508,7 +509,7 @@ class Python {
 			var bigger_than_x = this.python_body[i].x + 1;
 			var bigger_than_y = this.python_body[i].y + 1; 
 
-			// if (less_than_x <= x && less_than_y <= y && bigger_than_x >= x && bigger_than_y >= y) return false;
+			if (less_than_x <= x && less_than_y <= y && bigger_than_x >= x && bigger_than_y >= y) return false;
 		}
 		for (var i = 0; i < this.bonuses.length; i++) {
 			if (bonus == this.bonuses[i]) continue;
@@ -543,6 +544,7 @@ class Python {
 	gameOver(){
 
 		clearTimeout( this.game_timeout );
+		clearInterval( this.frog_interval );
 		this.inputController.enabled = false;
 
 		Utils.triggerCustomEvent( window, this.GAME_OVER );
