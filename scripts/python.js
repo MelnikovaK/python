@@ -419,12 +419,15 @@ class Python {
 		var frog = this.moving_frog;
 		var diap = [0,1, -1];
 		setInterval(function() {
-			frog.x +=diap[~~( Math.random() * (3 - 1) + 1)] ;
-			frog.y += diap[~~( Math.random() * (3 - 1) + 1)];
-			if ( !scope.checkBonusCoordinatesCorrect(frog.x, frog.y, frog) ) return scope.frogMoving();
-
-			Utils.triggerCustomEvent(window, scope.REDRAW_BONUS, {bonus: frog})
-		}, 3000);
+			var copy = Object.assign({}, frog);
+			var x = copy.x + diap[~~( Math.random() * (4 - 1))] ;
+			var y = copy.y + diap[~~( Math.random() * (4 - 1))];
+			if ( scope.checkBonusCoordinatesCorrect(x, y, frog) ) {
+				frog.x = x;
+				frog.y = y;
+				Utils.triggerCustomEvent(window, scope.REDRAW_BONUS, {bonus: frog})
+			}
+		}, 2000);
 	}
 
 
@@ -507,7 +510,8 @@ class Python {
 			if (x == this.bonuses[i].x && y == this.bonuses[i].y ) return false;
 		}
 
-		if ( x > this.cells_horizontal - 1 || y > this.cells_vertical - 1 || x < 0 || y < 0 ) return false;
+		if ( x > this.cells_horizontal - 2 || y > this.cells_vertical - 2 || x < 1 || y < 1 ) return false;
+		
 		return true;
 	}
 
