@@ -16,6 +16,7 @@ class Python {
 		this.REDRAW_BONUS = "visualizer:redraw_bonus";
 		this.PYTHON_CHANGE_CAMERA_POSITION = "renderer:change_camera_position";
 		this.PYTHON_SHOW_FULL_SCREEN = "renderer:show_full_screen";
+		this.PYTHON_HIDE_FULL_SCREEN = "renderer:hide_full_screen";
 
 
 		//
@@ -114,8 +115,11 @@ class Python {
 					Utils.triggerCustomEvent( window, this.PYTHON_CHANGE_CAMERA_POSITION );
 				break;
 
-				case "full_screen":
+				case "full_screen_on":
 					Utils.triggerCustomEvent( window, this.PYTHON_SHOW_FULL_SCREEN );
+				break;
+				case "full_screen_off":
+					Utils.triggerCustomEvent( window, this.PYTHON_HIDE_FULL_SCREEN );
 				break;
 					
 			}
@@ -162,13 +166,14 @@ class Python {
 
 		  		var prev_direction = this.getDirectionByIndex( this.python_direction.x, this.python_direction.y );
 		  		var new_direction = this.getDirectionByIndex( dir.x, dir.y );
-		  		console.log(prev_direction, new_direction)
 
 					dir = this.third_person_directions[prev_direction][new_direction];
 		  	}
-		  	var difference_x = dir.x - this.python_direction.x;
-		  	var difference_y = dir.y - this.python_direction.y;
-		  	if ( difference_x == 0 || difference_y == 0 ) return;
+		  	if ( dir ){
+			  	var difference_x = dir.x - this.python_direction.x;
+			  	var difference_y = dir.y - this.python_direction.y;
+			  	if ( difference_x == 0 || difference_y == 0 ) return;
+		  	}
 		  		
 				this.inputController_direction = dir;
 		  }

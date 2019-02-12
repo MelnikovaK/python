@@ -37,8 +37,6 @@ class ThreejsRenderer {
 		//ASSETS MANAGER
 		this.AM = new AssetManager(this);
 
-
-
 		this.bonuses_type_color = {};
 		this.bonuses_type_color['apple'] = {
 			color: '#940000',
@@ -89,9 +87,11 @@ class ThreejsRenderer {
 		});
 
 		window.addEventListener(python.PYTHON_SHOW_FULL_SCREEN, function() {
-			if (scope.full_screen) scope.full_screen = false;
-			else scope.full_screen = true
-			scope.changeScreen();
+				scope.changeScreen(window.innerWidth, window.innerHeight);
+		});
+
+		window.addEventListener(python.PYTHON_HIDE_FULL_SCREEN, function() {
+				scope.changeScreen( scope.FIELD_WIDTH, scope.FIELD_HEIGHT);
 		});
 
 		window.addEventListener(python.REDRAW_BONUS, function(e) {
@@ -117,11 +117,12 @@ class ThreejsRenderer {
 		});
 
 		window.addEventListener( python.GAME_OVER , function () {
-			scope.removePython();
-			scope.removeBonuses();
 			window.cancelAnimationFrame(scope.requestAnimationFrame_id);
-			Utils.triggerCustomEvent( window, scope.SHOW_FINISH_SCREEN );
-
+			setTimeout( function() {
+				scope.removePython();
+				scope.removeBonuses();
+				Utils.triggerCustomEvent( window, scope.SHOW_FINISH_SCREEN );
+			}, 3500);
 		});
 	}
 	
@@ -169,9 +170,6 @@ class ThreejsRenderer {
 		        FAR
 		    );
 
-		camera.position.set( 0, 20, 0 );
-		camera.lookAt( ZERO );
-
 		var scene = this.scene = new THREE.Scene();
 		this.scene.add(this.camera);
 		this.scene.background = new THREE.Color( 0xcce0ff );
@@ -203,7 +201,7 @@ class ThreejsRenderer {
 		window.addEventListener( 'resize', onWindowResize, false );
 
 		function onWindowResize() {
-			this.camera.aspect = this.FIELD_WIDTH / this.FIELD_HEIGHT;
+			this.camera.aspect = window.innerWidth / window.innerHeight;
 			this.camera.updateProjectionMatrix();
 			this.renderer.setSize( window.innerWidth, window.innerHeight );
 		}
@@ -224,6 +222,15 @@ class ThreejsRenderer {
 
 		this.snake_container = new THREE.Group();
 		this.game_field.add(this.snake_container);
+
+		// this.camera_container = new THREE.Group();
+		// this.camera_container.position.x = 0;
+		// this.camera_container.position.y = 0;
+		// this.camera_container.position.z = 0;
+		// this.game_field.add(this.camera_container);
+		// this.camera_container.add(this.camera)
+
+
 
 
 		this.GO_container = new THREE.Group();
@@ -248,7 +255,7 @@ class ThreejsRenderer {
    	function animate() {
 			
 			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
-			scope.controls.update();
+			// scope.controls.update();
 
 			var python_body =  scope.python.python_body;
 			if ( !python_body.length ) return;
@@ -296,9 +303,11 @@ class ThreejsRenderer {
 			//
 			// camera.position.set( 0, 50 + Math.sin(t)*10, 20 );
 			// camera.lookAt( ZERO );
-			//
-			if (scope.camera_on_head) scope.changeCameraPosition(delta);
 
+			var head_x = python_body[0]._model.position.x;
+			var head_z = python_body[0]._model.position.z;
+			if (scope.camera_on_head) scope.changeCameraPosition(delta);
+			else scope.moveCamera(head_x, head_z);
 
 			scope.renderer.render( scope.scene, scope.camera );
 		}
@@ -420,16 +429,22 @@ class ThreejsRenderer {
 		aim_position.y = 1.5;
 		this.camera.lookAt( aim_position );	}
 
-	changeScreen() {
-		if ( this.full_screen ){
-		this.renderer.setSize( window.innerWidth, window.innerHeight );
-		} else {
-			this.renderer.setSize( this.FIELD_WIDTH, this.FIELD_HEIGHT );
-		}
+	changeScreen(width, height) {
+		this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+		this.renderer.setSize( width, height );
+	}
+
+	moveCamera(x, z) {
+		// if ( Math.abs(x) > Math.abs(z) ) this.camera.position.set(x, 16, 0)
+		// else this.camera.position.set(0, 16, z)
+		// this.camera_container.position.set(x, 0, z);
+		this.camera.position.set(0, 16, z);
+		this.camera.lookAt( new THREE.Vector3(0, 0, 0))
 	}
 
 	resetCameraPosition(camera) {
-		camera.position.set( 0, 20, 0 );
+		camera.position.set( 0, 16, 0 );
 		camera.lookAt( this.ZERO );
 	}
 
@@ -444,7 +459,7 @@ class ThreejsRenderer {
 	removeBonuses() {
 		var bonuses = this.python.bonuses;
 		for ( var i = 0; i < bonuses.length; i++ ) {
-			this.AM.putAsset( bonuses[i]._model )
+			this.AM.putAsset( bonuses[i]._model );
 		}
 	}
 
@@ -455,7 +470,7 @@ class ThreejsRenderer {
 	}
 
 	removePythonBodyPart(part) {
-		this.body_parts.pop()
+		this.body_parts.pop();
 	}
 
 
