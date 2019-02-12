@@ -260,7 +260,6 @@ class Python {
 
 		this.points = 0;
 		this.removeBonuses();
-		this.frogMoving();
 
 		this.inputController.enabled = true;
 
@@ -270,6 +269,7 @@ class Python {
 
 		this.resetPyhon();
 		this.initBonuses();
+		this.frogMoving();
 
 		if ( this.game_timeout ) clearTimeout(this.game_timeout);
 		this.gameStep();

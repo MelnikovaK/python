@@ -306,7 +306,6 @@ class ThreejsRenderer {
 			//
 			// camera.position.set( 0, 50 + Math.sin(t)*10, 20 );
 			// camera.lookAt( ZERO );
-
 			var head_x = python_body[0]._model.position.x;
 			var head_z = python_body[0]._model.position.z;
 			if (scope.camera_on_head) scope.changeCameraPosition(delta);
@@ -442,7 +441,7 @@ class ThreejsRenderer {
 		// if ( Math.abs(x) > Math.abs(z) ) this.camera.position.set(x, 16, 0)
 		// else this.camera.position.set(0, 16, z)
 		// this.camera_container.position.set(x, 0, z);
-		this.camera.position.set(0, 16, z);
+		this.camera.position.set(0, 16, z/2);
 		this.camera.lookAt( new THREE.Vector3(0, 0, 0))
 	}
 
