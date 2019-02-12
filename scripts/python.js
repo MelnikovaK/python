@@ -163,7 +163,7 @@ class Python {
 		  	}
 		  	var difference_x = this.directions[details.name].x - this.python_direction.x;
 		  	var difference_y = this.directions[details.name].y - this.python_direction.y;
-		  	// if ( difference_x == 0 || difference_y == 0 ) return;
+		  	if ( difference_x == 0 || difference_y == 0 ) return;
 		  		
 				this.inputController_direction = dir;
 		  }
