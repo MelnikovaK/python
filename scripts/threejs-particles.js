@@ -2,6 +2,8 @@ class ThreejsParticles {
 	constructor($container, renderer, config, python) {
 		this.ASSETS_PATH = config.ASSETS_PATH;
 
+		this.head = python.python_body[0];
+
 
 		window.addEventListener( python.GAME_OVER , function () {
 			// this.updateEmitter(this.game_over_emitter);
@@ -21,7 +23,7 @@ class ThreejsParticles {
 
 	}
 	initEmitter() {
-		var group = new SPE.Group({
+		this.group = new SPE.Group({
 			texture: {
 				value: THREE.ImageUtils.loadTexture( this.ASSETS_PATH + 'smokeparticle.png' ),
 				frames: new THREE.Vector2( 5, 5 ),
@@ -31,28 +33,36 @@ class ThreejsParticles {
 			scale: 100
 		});
 
-		var fireball = new SPE.Emitter( fire );
+		this.fireball = new SPE.Emitter( fire );
 
-		group.addEmitter( fireball );
-		this.scene.add( group.mesh );
+		this.group.addEmitter( this.fireball );
+		this.scene.add( this.group.mesh );
 		var scope = this;
 
 
 		var clock = new THREE.Clock();
 		var stats = new Stats();
-		clock.getDelta();
-		function render() {
-			var dt = clock.getDelta();
-	    group.tick( );
+		var dt = clock.getDelta();
+		function render(dt) {
+
+			// scope.group.tick( dt );
 	    scope.renderer.render( scope.scene, scope.camera );
 		}
 
 		function animate() {
 	    requestAnimationFrame( animate );
+	    render( clock.getDelta() );
 	    stats.update();
-	    render();
 			}
 
 			animate();
+		document.addEventListener( 'mousedown', createExplosion, false )
+
+		function createExplosion() {
+	    var num = 150;
+	    // scope.group.triggerPoolEmitter( 1, (new THREE.Vector3( scope.head.x, .5, scope.head.y )) );
+	    // scope.fireball.enable()
+	  }
 	}
+
 }

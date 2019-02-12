@@ -14,6 +14,7 @@ class Python {
 		this.PAUSE_SOUND = "sound-manager:pause";
 		this.REMOVE_PYTHON_PART = "visualizer:remove_python_part";
 		this.REDRAW_BONUS = "visualizer:redraw_bonus";
+		this.PYTHON_CHANGE_CAMERA_POSITION = "renderer:change_camera_position";
 
 
 		//
@@ -106,6 +107,12 @@ class Python {
 				case "pause":
 					this.setPause( true );
 					break;
+
+				case "change_camera":
+					this.changeCameraPosition();
+					Utils.triggerCustomEvent( window, this.PYTHON_CHANGE_CAMERA_POSITION );
+				break;
+					
 			}
 
 		}.bind(this));
@@ -127,10 +134,14 @@ class Python {
 		}.bind(this));
 
 		window.addEventListener( "renderer:change_camera_position", function() {
-			if (this.camera_third_person) this.camera_third_person = false;
-			else this.camera_third_person = true;
+			this.changeCameraPosition();
 		}.bind(this));
 
+	}
+
+	changeCameraPosition() {
+		if (this.camera_third_person) this.camera_third_person = false;
+		else this.camera_third_person = true;
 	}
 
 	initInputControllerEvent(details) {
@@ -142,19 +153,18 @@ class Python {
 			}
 			var dir = this.directions[details.name];
 		  if( dir ) {
-		  	if ( difference_x == 0 || difference_y == 0 ) return;
 		  	if ( this.camera_third_person ) {
 
-		  		var cur_direction = this.python_direction;
-		  		var prev_direction = this.getDirectionByIndex( cur_direction.x, cur_direction.y );
+		  		var prev_direction = this.getDirectionByIndex( this.python_direction.x, this.python_direction.y );
 		  		var new_direction = this.getDirectionByIndex( dir.x, dir.y );
+		  		console.log(prev_direction, new_direction)
 
 					dir = this.third_person_directions[prev_direction][new_direction];
-		  	} else {
-			  	var difference_x = this.directions[details.name].x - this.python_direction.x;
-			  	var difference_y = this.directions[details.name].y - this.python_direction.y;
-		  		
 		  	}
+		  	var difference_x = this.directions[details.name].x - this.python_direction.x;
+		  	var difference_y = this.directions[details.name].y - this.python_direction.y;
+		  	// if ( difference_x == 0 || difference_y == 0 ) return;
+		  		
 				this.inputController_direction = dir;
 		  }
 		}
@@ -467,7 +477,7 @@ class Python {
 		bonus.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
 		bonus.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
 
-		if ( !this.checkBonusCoordinatesCorrect(bonus.x, bonus.y, bonus) ) this.resetBonus();
+		if ( !this.checkBonusCoordinatesCorrect(bonus.x, bonus.y, bonus) ) this.resetBonus(bonus);
 		
 	}
 
@@ -502,7 +512,6 @@ class Python {
 
 		// check bounds
 		if( python_head.x < 1 || python_head.x >= this.cells_horizontal - 1 || python_head.y < 1 || python_head.y >= this.cells_vertical - 1 ) {
-			console.log(1)
 			return true;
 		}
 
@@ -510,6 +519,7 @@ class Python {
 		for ( var i = 1; i < this.python_body.length; i++) {
 			var part = this.python_body[i];
 			if ( python_head.x == part.x && python_head.y == part.y ) {
+				console.log(this.python_body);
 				return true;
 			}
 		}

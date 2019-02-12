@@ -247,10 +247,7 @@ class ThreejsRenderer {
 			scope.controls.update();
 
 			var python_body =  scope.python.python_body;
-			if ( !python_body.length ) {
-				console.log(' python body is empty. skip render');
-				return;
-			}
+			if ( !python_body.length ) return;
 
 			var time_current = Date.now();
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;

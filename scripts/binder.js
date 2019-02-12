@@ -47,6 +47,9 @@ var config = {
 			"play": {
 				keys: [27],
 			},
+			"change_camera": {
+				keys: [82],
+			},
 
 			"swipe-left": { // название активности
 				gesture: ['swipe-left'],
