@@ -11,7 +11,7 @@ var fire = {
 			},
 			activeMultiplier: 100,
 			velocity: {
-				spread : new THREE.Vector3( 3 )
+				spread : new THREE.Vector3( 4 )
 			},
 			size: { value: 4 },
 			color: {
