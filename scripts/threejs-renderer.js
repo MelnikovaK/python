@@ -273,8 +273,7 @@ class ThreejsRenderer {
 						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1;
 							// var angle = scope.getSmallestAngle(0, rad);
 							scope.eyes.forEach(function(x) {
-								x.model.rotation.z = rad;
-
+								x.model.lookAt( new THREE.Vector3(scope.apple.position.x,scope.apple.position.y,scope.apple.position.z) );
 							});
 						}
 					}
@@ -490,8 +489,8 @@ class ThreejsRenderer {
 		this.AM.putAsset(python_body[0]._model);
 		this.AM.putAsset(python_body[python_body.length - 1]._model);
 		this.AM.putAsset(this.snake_body);
-		for ( var i = 0; i < this.additional_materials.length; i++ ){
-			this.AM.putAsset(this.additional_materials[i]);
+		for ( var i = 0; i < this.eyes.length; i++ ){
+			this.AM.putAsset(this.eyes[i].model);
 		}
 		this.snake_body = undefined;
 	}
