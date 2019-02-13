@@ -43,6 +43,7 @@ class ThreejsParticles {
 
 		var dt = clock.getDelta();
 		function render(dt) {
+			
 			scope.coin_group.tick( dt );
 			scope.explode_group.tick( dt );
 	    scope.renderer.render( scope.scene, scope.camera );

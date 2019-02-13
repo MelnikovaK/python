@@ -2,8 +2,9 @@ var fire = {
 			particleCount: 600,
 			type: SPE.distributions.DISC,
 			position: {
-				radius: 1,
-				value: new THREE.Vector3( 0,0,0 )
+				radius: .4,
+				value: new THREE.Vector3( 0,0,0 ),
+				spread: new THREE.Vector3( 2, 2, 2 ),
 			},
 			maxAge: {
 				value: 1.3,

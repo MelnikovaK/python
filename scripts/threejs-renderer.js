@@ -388,6 +388,11 @@ class ThreejsRenderer {
 				
 			}
 		}
+
+		// var head = python_body[0]._model;
+		// var python_eye_1 = this.AM.pullAsset( 'python_eye' );
+		// var python_eye_2 = this.AM.pullAsset( 'python_eye' );
+		// head.add(python_eye_2);
 		if (!this.snake_body ){
 			this.snake_geometry = new THREE.TubeBufferGeometry( this.body_parts,  2, .5, 16, false );
 			this.snake_body = new THREE.Mesh( this.snake_geometry, snake_material );
@@ -482,6 +487,11 @@ class ThreejsRenderer {
 		//HEAD
 		var head = function() {return new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material)};
 		this.AM.addAsset('python_head', head, 3);
+
+		//EYES
+		var eye = function() {return new THREE.Mesh( new THREE.CircleGeometry( .2, 16 )),new THREE.MeshBasicMaterial( { color: '#FFFFFF' } )};;
+		this.AM.addAsset('python_eye', eye, 4);
+
 
 		//TAIL
 		var geometry = new THREE.CylinderGeometry( 0, .5, 1.5, 16, 1, false );
