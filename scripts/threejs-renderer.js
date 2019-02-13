@@ -225,14 +225,6 @@ class ThreejsRenderer {
 		this.snake_container = new THREE.Group();
 		this.game_field.add(this.snake_container);
 
-		// this.camera_container = new THREE.Group();
-		// this.camera_container.position.x = 0;
-		// this.camera_container.position.y = 0;
-		// this.camera_container.position.z = 0;
-		// this.game_field.add(this.camera_container);
-		// this.camera_container.add(this.camera)
-
-
 		this.GO_container = new THREE.Group();
 		this.game_field.add(this.GO_container);
 	}
@@ -268,25 +260,25 @@ class ThreejsRenderer {
 				var python_part = python_body[i]._model;
 
 				if( python_part && (i == python_body.length - 1  || i == 0) ) {
+
 					python_part.position.x = python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta;
 					python_part.position.z = python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta;
-
 					var prev_angle = scope.getSmallestAngle(python_body[i].angle, python_body[i].prev_angle);
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
+
 					if ( i == 0) {
 						var x = python_part.position.x;
 						var z = python_part.position.z;
 						if ( scope.apple ) {
-						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z);
-							var rot = (rad * Utils.RAD2DEG * -1) + 180;
-							var prev_angle = scope.getSmallestAngle(rot, scope.eyes[0].prev_angle);
+						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1;
+							// var angle = scope.getSmallestAngle(0, rad);
 							scope.eyes.forEach(function(x) {
-								x.model.rotation.z = prev_angle + (scope.eyes[0].angle - scope.eyes[0].prev_angle ) * delta;
+								x.model.rotation.z = rad;
+
 							});
 						}
 					}
 				}
-
 				if ( scope.body_parts && i < python_body.length ) {
 
 				scope.body_parts.points[i] = new THREE.Vector3(
@@ -414,21 +406,22 @@ class ThreejsRenderer {
 		var python_body = this.python.python_body;
 		var first_eye = this.AM.pullAsset( 'python_eye' );
 		var second_eye = this.AM.pullAsset( 'python_eye' );
-		this.eyes = [{model: first_eye, angle: python_body[0].prev_angle, prev_angle: python_body[0].prev_angle},
-								 {model: second_eye, angle: python_body[0].prev_angle, prev_angle: python_body[0].prev_angle}];
+		this.eyes = [{model: first_eye, angle: 0, prev_angle: 0},
+								 {model: second_eye, angle: 0, prev_angle: 0}];
+		console.log(first_eye, second_eye)
 
-		var first_pupil = this.first_pupil = this.AM.pullAsset( 'python_pupil' );
-		var second_pupil = this.second_pupil = this.AM.pullAsset( 'python_pupil' );
-		this.additional_materials = [first_eye,second_eye,first_pupil,second_pupil];
+		// var first_pupil = this.first_pupil = this.AM.pullAsset( 'python_pupil' );
+		// var second_pupil = this.second_pupil = this.AM.pullAsset( 'python_pupil' );
+		// this.additional_materials = [first_eye,second_eye,first_pupil,second_pupil];
 
-		first_eye.add(first_pupil);
-		second_eye.add(second_pupil);
+		// first_eye.add(first_pupil);
+		// second_eye.add(second_pupil);
 
 		head.add(first_eye, second_eye);
 	 	this.setCoordinates(first_eye, -.2, -.2);
 	 	this.setCoordinates(second_eye, .2, -.2 );
-	 	this.setCoordinates(first_pupil, -.1, -.2, -.13 );
-	 	this.setCoordinates(second_pupil, .1, -.2, -.13 );
+	 	// this.setCoordinates(first_pupil, -.1, -.2, -.13 );
+	 	// this.setCoordinates(second_pupil, .1, -.2, -.13 );
 	}
 
 	setCoordinates( model, x,z,y) {
@@ -512,6 +505,7 @@ class ThreejsRenderer {
 
 
 	createAssets() {
+		var scope = this;
 		var snake_material = new THREE.MeshBasicMaterial( { map: this.snake_texture } );
 
 		//HEAD
@@ -520,11 +514,17 @@ class ThreejsRenderer {
 
 		//EYES
 
-		var eye = function() {return new THREE.Mesh( new THREE.SphereGeometry( .3, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}))};
+		var eye = function() {
+			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .3, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
+			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .1, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
+	 		scope.setCoordinates(pupil, .1, -.2, -.13 );	
+			apple_eye.add(pupil);
+			return apple_eye;
+		};
 		this.AM.addAsset('python_eye', eye, 4);
 
-		var pupil = function() {return new THREE.Mesh( new THREE.SphereGeometry( .1, 16), new THREE.MeshLambertMaterial({ color: 'black'}))};
-		this.AM.addAsset('python_pupil', pupil, 4);
+		// var pupil = function() {return new THREE.Mesh( new THREE.SphereGeometry( .1, 16), new THREE.MeshLambertMaterial({ color: 'black'}))};
+		// this.AM.addAsset('python_pupil', pupil, 4);
 
 
 		//TAIL
