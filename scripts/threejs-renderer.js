@@ -259,7 +259,7 @@ class ThreejsRenderer {
    	function animate() {
 			
 			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
-			// scope.controls.update();
+			scope.controls.update();
 
 			var python_body =  scope.python.python_body;
 			if ( !python_body.length ) return;
@@ -442,7 +442,7 @@ class ThreejsRenderer {
 		// if ( Math.abs(x) > Math.abs(z) ) this.camera.position.set(x, 16, 0)
 		// else this.camera.position.set(0, 16, z)
 		// this.camera_container.position.set(x, 0, z);
-		this.camera.position.set(0, 16, z/2);
+		this.camera.position.set( 0, 16, z/2 );
 		this.camera.lookAt( new THREE.Vector3(0, 0, 0))
 	}
 

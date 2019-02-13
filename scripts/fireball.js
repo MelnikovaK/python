@@ -6,7 +6,7 @@ var fire = {
 				value: new THREE.Vector3( 0,0,0 )
 			},
 			maxAge: {
-				value: .8,
+				value: 1.3,
 				spread: 0
 			},
 			activeMultiplier: 100,
