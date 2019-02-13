@@ -6,14 +6,6 @@ class ThreejsRenderer {
 		this.PRELOAD_COMPLETE = "screens:preload_complete";
 		this.SHOW_FINISH_SCREEN = "screens: show_finish_modal";
 
-		this.camera_on_head = false;
-		this.full_screen = false;
-		this.ZERO = new THREE.Vector3(0,0,0);
-
-		//
-		// this.logic_step_interval = python.logic_step_interval;
-
-
 		var scope = this;
 		this.container = document.getElementsByClassName('game-screen__container')[0];
 
@@ -33,6 +25,12 @@ class ThreejsRenderer {
 		this.BONUS_RADIUS = .5;
 		this.BONUS_SEGMENTS = 16;
 		this.BONUS_RINGS = 16;
+
+		this.camera_on_head = false;
+		this.full_screen = false;
+		this.ZERO = new THREE.Vector3(0,0,0);
+		this.CENTER = new THREE.Vector3( this.CELLS_HORIZONTAL / 2, 0, this.CELLS_VERTICAL / 2 );
+
 
 		//ASSETS MANAGER
 		this.AM = new AssetManager(this);
@@ -363,6 +361,9 @@ class ThreejsRenderer {
 		var python_body = scope.python.python_body;
 		this.body_parts  = new THREE.CatmullRomCurve3();
 
+		var first_eye = this.AM.pullAsset( 'python_eye' );
+		var second_eye = this.AM.pullAsset( 'python_eye' );
+
 		for ( var i = 0; i < python_body.length; i++ ) {
 			if ( !python_body[i]._model ) {
 				if (i < python_body.length) {
@@ -374,10 +375,15 @@ class ThreejsRenderer {
 						var python_part = this.AM.pullAsset( 'python_tail' );
 						
 					} else {// create head
-						// this.head_container.add(this.AM.pullAsset( 'python_head' ))
-						// this.head_container.add(this.AM.pullAsset( 'python_eye' ));
-						// var python_part = this.head_container;
-						var python_part = this.AM.pullAsset( 'python_head' );
+						// this.head_container.add(this.AM.pullAsset( 'python_head' ));
+					 	this.head_container.add(first_eye, second_eye);
+					 	console.log(this.head_container)
+						first_eye.position.z = 1;
+						first_eye.position.x = 1;
+						second_eye.position.z = 0;
+						second_eye.position.x = 0;
+						var python_part = this.head_container;
+						// var python_part = this.AM.pullAsset( 'python_head' );
 						// var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
 					}
 
@@ -443,11 +449,11 @@ class ThreejsRenderer {
 	}
 
 	moveCamera(x, z) {
-		// if ( Math.abs(x) > Math.abs(z) ) this.camera.position.set(x, 16, 0)
-		// else this.camera.position.set(0, 16, z)
-		// this.camera_container.position.set(x, 0, z);
-		// console.log(x,z);
-		this.camera.position.set( 0, 13, z/2 );
+		// if ( x > z ) this.camera.position.set(x/8, 13, this.camera_z)
+		// this.game_field.add(this.camera)
+		this.camera.position.set(( x - 10) /20, 13, z/2)
+		// this.camera_x = x;
+		// this.camera_z = z
 		this.camera.lookAt( this.ZERO );
 	}
 
@@ -480,7 +486,8 @@ class ThreejsRenderer {
 		this.AM.addAsset('python_head', head, 3);
 
 		//EYES
-		var eye = function() {return new THREE.Mesh( new THREE.CircleGeometry( .2, 16 )),new THREE.MeshBasicMaterial( { color: '#FFFFFF' } )};;
+
+		var eye = function() {return new THREE.Mesh( new THREE.SphereGeometry( .3, 16), new THREE.MeshLambertMaterial({ color: 'white'}))};
 		this.AM.addAsset('python_eye', eye, 4);
 
 
