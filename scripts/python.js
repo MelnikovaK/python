@@ -246,7 +246,6 @@ class Python {
 				var nearest_bonus = scope.calculateNearestBonus();
 
 				// redraw
-
 				Utils.triggerCustomEvent( window,scope.PYTHON_MOVED, {nearest_bonus: nearest_bonus} );
 			};
 		}

@@ -11,6 +11,7 @@ class ThreejsRenderer {
 
 		this.python = python;
 
+
 		this.PATH = config.ASSETS_PATH;
 		//FIELD
 		this.FIELD_WIDTH = config.field_width;
@@ -74,7 +75,8 @@ class ThreejsRenderer {
 
 		window.addEventListener(python.PYTHON_MOVED, function(e) {
 			scope.logic_step_interval = python.logic_step_interval;
-			var bonus = e.detail.nearest_bonus;
+			this.nearest_bonus = e.detail.nearest_bonus;
+			// console.log(this.nearest_bonus)
 			scope.onPythonMoved();	
 		});
 
@@ -268,18 +270,20 @@ class ThreejsRenderer {
 				if( python_part && (i == python_body.length - 1  || i == 0) ) {
 					python_part.position.x = python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta;
 					python_part.position.z = python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta;
-					var prev_angle = python_body[i].prev_angle;
-					var dist = Math.abs(python_body[i].angle - prev_angle);
-					if( dist > Math.PI ){
-						if( prev_angle < python_body[i].angle ){
-							prev_angle += Utils.PI2;
-						}else{
-							prev_angle -= Utils.PI2;
-						}
-					}
-					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
-					if ( i == 0 ) {
 
+					var prev_angle = scope.getSmallestAngle(python_body[i].angle, python_body[i].prev_angle);
+					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
+					if ( i == 0) {
+						var x = python_part.position.x;
+						var z = python_part.position.z;
+						if ( scope.apple ) {
+						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z);
+							var rot = (rad * Utils.RAD2DEG * -1) + 180;
+							var prev_angle = scope.getSmallestAngle(rot, scope.eyes[0].prev_angle);
+							scope.eyes.forEach(function(x) {
+								x.model.rotation.z = prev_angle + (scope.eyes[0].angle - scope.eyes[0].prev_angle ) * delta;
+							});
+						}
 					}
 				}
 
@@ -316,6 +320,17 @@ class ThreejsRenderer {
 
 	}
 
+	getSmallestAngle(angle, prev_angle) {
+		var dist = Math.abs(angle - prev_angle);
+		if( dist > Math.PI ){
+			if( prev_angle < angle ){
+				prev_angle += Utils.PI2;
+			}else{
+				prev_angle -= Utils.PI2;
+			}
+		}
+		return prev_angle;
+	}
 
 	initGameField() {
 		var scope = this;
@@ -353,23 +368,12 @@ class ThreejsRenderer {
 	}
 
 	updateSnake() {
-		var scope = this;
 
-		var snake_material = new THREE.MeshBasicMaterial( { map: this.snake_texture } );
-		var python_body = scope.python.python_body;
+		var python_body = this.python.python_body;
+
 		this.body_parts  = new THREE.CatmullRomCurve3();
 
-		var first_eye = this.AM.pullAsset( 'python_eye' );
-		var second_eye = this.AM.pullAsset( 'python_eye' );
-
-		var first_pupil = this.first_pupil = this.AM.pullAsset( 'python_pupil' );
-		var second_pupil = this.second_pupil = this.AM.pullAsset( 'python_pupil' );
-
-		this.additional_materials = [first_eye,second_eye,first_pupil,second_pupil];
-
-		first_eye.add(first_pupil);
-		second_eye.add(second_pupil);
-
+		
 		for ( var i = 0; i < python_body.length; i++ ) {
 			if ( !python_body[i]._model ) {
 				if (i < python_body.length ) {
@@ -382,18 +386,14 @@ class ThreejsRenderer {
 						
 					} else {// create head
 						var python_part = this.AM.pullAsset( 'python_head' )
-					 	python_part.add(first_eye, second_eye);
-					 	this.setCoordinates(first_eye, -.2, -.2);
-					 	this.setCoordinates(second_eye, .2, -.2 );
-					 	this.setCoordinates(first_pupil, -.1, -.2, -.13 );
-					 	this.setCoordinates(second_pupil, .1, -.2, -.13 );
+					 	this.initEyes(python_part);
 					}
 					python_part.rotation.x = python_body[i].angle;
 					python_part.position.x = python_body[i].x;
 					python_part.position.z = python_body[i].y;
 					python_body[i]._model = python_part;
 
-					scope.snake_container.add(python_part);
+					this.snake_container.add(python_part);
 				}
 
 				
@@ -408,6 +408,27 @@ class ThreejsRenderer {
 			this.updateSnakeBody(this.body_parts);	
 		}
 
+	}
+
+	initEyes(head) {
+		var python_body = this.python.python_body;
+		var first_eye = this.AM.pullAsset( 'python_eye' );
+		var second_eye = this.AM.pullAsset( 'python_eye' );
+		this.eyes = [{model: first_eye, angle: python_body[0].prev_angle, prev_angle: python_body[0].prev_angle},
+								 {model: second_eye, angle: python_body[0].prev_angle, prev_angle: python_body[0].prev_angle}];
+
+		var first_pupil = this.first_pupil = this.AM.pullAsset( 'python_pupil' );
+		var second_pupil = this.second_pupil = this.AM.pullAsset( 'python_pupil' );
+		this.additional_materials = [first_eye,second_eye,first_pupil,second_pupil];
+
+		first_eye.add(first_pupil);
+		second_eye.add(second_pupil);
+
+		head.add(first_eye, second_eye);
+	 	this.setCoordinates(first_eye, -.2, -.2);
+	 	this.setCoordinates(second_eye, .2, -.2 );
+	 	this.setCoordinates(first_pupil, -.1, -.2, -.13 );
+	 	this.setCoordinates(second_pupil, .1, -.2, -.13 );
 	}
 
 	setCoordinates( model, x,z,y) {
@@ -431,6 +452,7 @@ class ThreejsRenderer {
 				bonus.position.x = bonuses[i].x;
 				bonus.position.z = bonuses[i].y;
 				bonuses[i]._model = bonus;
+				if ( bonuses[i].type == 'apple') this.apple = bonus;
 				scope.GO_container.add(bonus);
 			}
 		}		
