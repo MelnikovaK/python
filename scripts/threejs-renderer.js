@@ -119,6 +119,7 @@ class ThreejsRenderer {
 		});
 
 		window.addEventListener( python.GAME_OVER , function () {
+			scope.shakeScreen();
 			window.cancelAnimationFrame(scope.requestAnimationFrame_id);
 			setTimeout( function() {
 				scope.removePython();
@@ -267,10 +268,16 @@ class ThreejsRenderer {
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
 					if ( i == 0) {
-						var x = python_part.position.x;
-						var z = python_part.position.z;
+
+					  // var rad = Math.atan2(event.pageX - x, event.pageY - y);
+					  // var rot = (rad * (180 / Math.PI) * -1) + 180;
+
+
+						var x = python_part.position.x + .5;
+						var z = python_part.position.z + .5;
 						if ( scope.apple ) {
 						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1;
+							// console.log(rad)
 							// var angle = scope.getSmallestAngle(0, rad);
 							scope.eyes.forEach(function(x) {
 								// x.model.lookAt( new THREE.Vector3(scope.apple.position.x,scope.apple.position.y, scope.apple.position.z) );
@@ -469,7 +476,7 @@ class ThreejsRenderer {
 	moveCamera(x, z) {
 		// if ( x > z ) this.camera.position.set(x/8, 13, this.camera_z)
 		// this.game_field.add(this.camera)
-		this.camera.position.set(( x - 10) /20, 13, z/2)
+		this.camera.position.set(/*( x - 10) /20*/0, 13, z/2)
 		// this.camera_x = x;
 		// this.camera_z = z
 		this.camera.lookAt( this.ZERO );
@@ -554,4 +561,34 @@ class ThreejsRenderer {
 		this.AM.addAsset(bonus_name, bonus, 3);
 
 	}
+
+	shakeScreen() {
+		var scope = this;
+
+		var canvas = document.getElementsByTagName('canvas')[0];
+
+		var top = parseInt(getComputedStyle(canvas).top);
+
+		var x = 0;
+		var t = 0;
+		var amp = 10;
+
+		var interval_id = setInterval(function(){
+		  if (amp < 1) {
+		  	Utils.triggerCustomEvent( window, scope.SHOW_FINISH_SCREEN );
+		  	clearInterval(interval_id);
+		  }
+		  t += .1;
+		  if (scope.python.python_direction.x == 0) {
+		  	x = Math.cos(t)*amp;
+		  	canvas.style.top = top + amp + x + "px";
+		  }
+		  else {
+		  	x = Math.sin(t)*amp;
+		  	canvas.style.left = amp + x + "px";
+		  }
+		  amp -= .05;
+		}, 5);
+	}
+
 } 
