@@ -123,7 +123,7 @@ class ThreejsRenderer {
 				scope.removePython();
 				scope.removeBonuses();
 				Utils.triggerCustomEvent( window, scope.SHOW_FINISH_SCREEN );
-			}, 3000);
+			}, 2000);
 		});
 	}
 	
@@ -389,7 +389,6 @@ class ThreejsRenderer {
 			}
 		}
 		if (!this.snake_body ){
-
 			this.snake_geometry = new THREE.TubeBufferGeometry( this.body_parts,  2, .5, 16, false );
 			this.snake_body = new THREE.Mesh( this.snake_geometry, snake_material );
 			this.snake_container.add(this.snake_body)
