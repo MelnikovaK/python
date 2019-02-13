@@ -243,16 +243,18 @@ class Python {
 					return;
 				}
 
+				var nearest_bonus = scope.calculateNearestBonus();
+
 				// redraw
 
-				Utils.triggerCustomEvent( window,scope.PYTHON_MOVED );
+				Utils.triggerCustomEvent( window,scope.PYTHON_MOVED, {nearest_bonus: nearest_bonus} );
 			};
 		}
 
 		Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "music", loop: true} );
 
 		this.is_game_over = false;
-		
+
 		this.camera_third_person = false;
 		this.accelerated_moving = false;
 
@@ -522,6 +524,29 @@ class Python {
 		
 		return true;
 	}
+
+	calculateNearestBonus() {
+		var head = this.python_body[0]._model;
+		if ( !head ) return;
+		var min = {
+			x: this.cells_horizontal,
+			y: this.cells_vertical
+		};
+		var nearest_bonus;
+		for ( var i = 0; i < this.bonuses.length; i++ ) {
+			var bonus = this.bonuses[i];
+
+			var diff_x = Math.abs(head.position.x - bonus.x);
+			var diff_y = Math.abs(head.position.y - bonus.y);
+			if ( diff_x < min.x && diff_y < min.y ) {
+				min.x = diff_x;
+				min.y = diff_y;
+				nearest_bonus = bonus;
+			}
+		}
+		return nearest_bonus;
+	}
+
 
 	isGameOver() {
 
