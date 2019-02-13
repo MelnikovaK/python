@@ -232,10 +232,6 @@ class ThreejsRenderer {
 		// this.game_field.add(this.camera_container);
 		// this.camera_container.add(this.camera)
 
-
-		this.head_container = new THREE.Group();
-		this.game_field.add(this.head_container);
-
 		this.GO_container = new THREE.Group();
 		this.game_field.add(this.GO_container);
 	}
@@ -366,7 +362,7 @@ class ThreejsRenderer {
 
 		for ( var i = 0; i < python_body.length; i++ ) {
 			if ( !python_body[i]._model ) {
-				if (i < python_body.length) {
+				if (i < python_body.length ) {
 					this.body_parts.points.push( new THREE.Vector3( python_body[i].x, 0, python_body[i].y) )
 				}
 				if ( i == 0 || i ==  python_body.length - 1) {
@@ -376,13 +372,11 @@ class ThreejsRenderer {
 						
 					} else {// create head
 						// this.head_container.add(this.AM.pullAsset( 'python_head' ));
-					 	this.head_container.add(first_eye, second_eye);
-					 	console.log(this.head_container)
-						first_eye.position.z = 1;
-						second_eye.position.z = 0;
-						var python_part = this.head_container;
-						// var python_part = this.AM.pullAsset( 'python_head' );
-						// var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
+						var python_part = this.AM.pullAsset( 'python_head' )
+					 	python_part.add(first_eye, second_eye);
+						first_eye.position.z = -.2;
+						second_eye.position.z = -.2;
+						first_eye.position.x = -.2;
 					}
 
 					python_part.rotation.x = python_body[i].angle;
