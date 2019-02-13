@@ -379,9 +379,7 @@ class ThreejsRenderer {
 					 	this.head_container.add(first_eye, second_eye);
 					 	console.log(this.head_container)
 						first_eye.position.z = 1;
-						first_eye.position.x = 1;
 						second_eye.position.z = 0;
-						second_eye.position.x = 0;
 						var python_part = this.head_container;
 						// var python_part = this.AM.pullAsset( 'python_head' );
 						// var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
@@ -436,7 +434,7 @@ class ThreejsRenderer {
 		var camera_position = this.body_parts.points[1].clone();
 		this.snake_container.localToWorld( camera_position );
 		this.camera.position.copy( camera_position );
-		this.camera.position.y = 4;
+		this.camera.position.y = 2;
 
 		var aim_position = this.snake_container.localToWorld( head.position.clone() );
 		aim_position.y = 1.5;
