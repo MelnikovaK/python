@@ -273,7 +273,8 @@ class ThreejsRenderer {
 						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1;
 							// var angle = scope.getSmallestAngle(0, rad);
 							scope.eyes.forEach(function(x) {
-								x.model.lookAt( new THREE.Vector3(scope.apple.position.x,scope.apple.position.y,scope.apple.position.z) );
+								// x.model.lookAt( new THREE.Vector3(scope.apple.position.x,scope.apple.position.y, scope.apple.position.z) );
+								x.model.rotation.z = rad;
 							});
 						}
 					}
@@ -345,12 +346,9 @@ class ThreejsRenderer {
 					mesh.position.z= j;
 					mesh.rotation.set(THREE.Math.randFloatSpread(.3),THREE.Math.randFloatSpread(.3),THREE.Math.randFloatSpread(.3));
 					scope.game_field.add( mesh );
-					
 				}
-				
 			}
 		this.renderer.render( this.scene, this.camera );
-
 	}
 
 	updateSnakeBody(points) {
@@ -386,8 +384,6 @@ class ThreejsRenderer {
 
 					this.snake_container.add(python_part);
 				}
-
-				
 			}
 		}
 
