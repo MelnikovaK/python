@@ -232,6 +232,7 @@ class ThreejsRenderer {
 		// this.game_field.add(this.camera_container);
 		// this.camera_container.add(this.camera)
 
+
 		this.GO_container = new THREE.Group();
 		this.game_field.add(this.GO_container);
 	}
@@ -360,6 +361,12 @@ class ThreejsRenderer {
 		var first_eye = this.AM.pullAsset( 'python_eye' );
 		var second_eye = this.AM.pullAsset( 'python_eye' );
 
+		var first_pupil = this.AM.pullAsset( 'python_pupil' );
+		var second_pupil = this.AM.pullAsset( 'python_pupil' );
+
+		first_eye.add(first_pupil);
+		second_eye.add(second_pupil);
+
 		for ( var i = 0; i < python_body.length; i++ ) {
 			if ( !python_body[i]._model ) {
 				if (i < python_body.length ) {
@@ -371,12 +378,16 @@ class ThreejsRenderer {
 						var python_part = this.AM.pullAsset( 'python_tail' );
 						
 					} else {// create head
-						// this.head_container.add(this.AM.pullAsset( 'python_head' ));
 						var python_part = this.AM.pullAsset( 'python_head' )
 					 	python_part.add(first_eye, second_eye);
 						first_eye.position.z = -.2;
 						second_eye.position.z = -.2;
 						first_eye.position.x = -.2;
+						second_eye.position.x = .2;
+						first_pupil.z = -.5;
+						first_pupil.x = .5;
+						// first_pupil.y = -.5;
+
 					}
 
 					python_part.rotation.x = python_body[i].angle;
@@ -401,6 +412,28 @@ class ThreejsRenderer {
 
 	}
 
+	calculateNearestBonus() {
+		var python_body = this.python.python_body;
+		var head = python_body[0]._model;
+		var min = {
+			x: this.CELLS_HORIZONTAL,
+			y: this.CELLS_VERTICAL
+		};
+		var nearest_bonus;
+		for ( var i = 0; i < this.bonuses.length; i++ ) {
+			var bonus = this.bonuses[i];
+
+			var diff_x = Math.abs(head.position.x - bonus.x);
+			var diff_y = Math.abs(head.position.y - bonus.y);
+			if ( diff_x < min.x && diff_y < min.y ) {
+				min.x = diff_x;
+				min.y = diff.y;
+				nearest_bonus = bonus;
+			}
+		}
+		return nearest_bonus;
+	}
+
 	updateBonuses() {
 		var scope = this;
 		var bonuses = this.python.bonuses;
@@ -412,6 +445,7 @@ class ThreejsRenderer {
 		for ( var i = 0; i < bonuses.length; i++ ) {
 			if ( !bonuses[i]._model ) {
 				var bonus = this.AM.pullAsset( bonuses[i].type );
+				bonus.add(this.AM.pullAsset( 'python_pupil' ))
 				bonus.position.x = bonuses[i].x;
 				bonus.position.z = bonuses[i].y;
 				bonuses[i]._model = bonus;
@@ -479,8 +513,11 @@ class ThreejsRenderer {
 
 		//EYES
 
-		var eye = function() {return new THREE.Mesh( new THREE.SphereGeometry( .3, 16), new THREE.MeshLambertMaterial({ color: 'white'}))};
+		var eye = function() {return new THREE.Mesh( new THREE.SphereGeometry( .3, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}))};
 		this.AM.addAsset('python_eye', eye, 4);
+
+		var pupil = function() {return new THREE.Mesh( new THREE.CircleGeometry( .3, 16), new THREE.MeshLambertMaterial({ color: 'black'}))};
+		this.AM.addAsset('python_pupil', pupil, 4);
 
 
 		//TAIL
