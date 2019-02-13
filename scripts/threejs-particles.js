@@ -71,7 +71,6 @@ class ThreejsParticles {
 
 	updateEmitterGroup( emitter_group ) {
 		var head = this.python.python_body[0];
-		console.log(head.x, head.y)
     emitter_group.triggerPoolEmitter( 1, (new THREE.Vector3( head.x, 0, head.y )) );
 	}
 

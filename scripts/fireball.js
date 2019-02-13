@@ -3,7 +3,7 @@ var fire = {
 			type: SPE.distributions.DISC,
 			position: {
 				radius: 1,
-				value: new THREE.Vector3( 0,.5,0 )
+				value: new THREE.Vector3( 0,0,0 )
 			},
 			maxAge: {
 				value: .8,

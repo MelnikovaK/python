@@ -60,6 +60,7 @@ class ThreejsRenderer {
 		
 		
 		window.addEventListener( "screens: start game" , function () {
+			scope.camera_on_head = false;
 			scope.resetCameraPosition(scope.camera);
 			scope.updateSnake();
 			scope.updateBonuses();

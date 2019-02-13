@@ -110,7 +110,7 @@ class Python {
 				case "pause":
 					this.setPause( true );
 					break;
-				
+
 				case "full_screen_on":
 					Utils.triggerCustomEvent( window, this.PYTHON_SHOW_FULL_SCREEN );
 				break;
@@ -252,6 +252,9 @@ class Python {
 		Utils.triggerCustomEvent( window, this.PLAY_SOUND, {sound_id: "music", loop: true} );
 
 		this.is_game_over = false;
+		
+		this.camera_third_person = false;
+		this.accelerated_moving = false;
 
 		this.points = 0;
 		this.removeBonuses();
