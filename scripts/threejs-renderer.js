@@ -280,7 +280,9 @@ class ThreejsRenderer {
 							// console.log(rad)
 							// var angle = scope.getSmallestAngle(0, rad);
 							scope.eyes.forEach(function(x) {
-								// x.model.lookAt( new THREE.Vector3(scope.apple.position.x,scope.apple.position.y, scope.apple.position.z) );
+		// var aim_position = this.snake_container.localToWorld( head.position.clone() );
+
+								// x.model.lookAt( scope.eyes[0].model.localToWorld( scope.apple.position.clone()) );
 								x.model.rotation.z = rad;
 							});
 						}
@@ -410,7 +412,6 @@ class ThreejsRenderer {
 		var second_eye = this.AM.pullAsset( 'python_eye' );
 		this.eyes = [{model: first_eye, angle: 0, prev_angle: 0},
 								 {model: second_eye, angle: 0, prev_angle: 0}];
-		console.log(first_eye, second_eye)
 
 		// var first_pupil = this.first_pupil = this.AM.pullAsset( 'python_pupil' );
 		// var second_pupil = this.second_pupil = this.AM.pullAsset( 'python_pupil' );
@@ -418,6 +419,7 @@ class ThreejsRenderer {
 
 		// first_eye.add(first_pupil);
 		// second_eye.add(second_pupil);
+
 
 		head.add(first_eye, second_eye);
 	 	this.setCoordinates(first_eye, -.2, -.2);
@@ -456,14 +458,12 @@ class ThreejsRenderer {
 	changeCameraPosition(delta) {
 		var direction = this.python.python_direction;
 		var python_body = this.python.python_body;
-		var head = python_body[0]._model;
 
 		var camera_position = this.body_parts.points[1].clone();
 		this.snake_container.localToWorld( camera_position );
 		this.camera.position.copy( camera_position );
 		this.camera.position.y = 2;
 
-		var aim_position = this.snake_container.localToWorld( head.position.clone() );
 		aim_position.y = 1.5;
 		this.camera.lookAt( aim_position );	}
 
