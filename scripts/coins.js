@@ -12,10 +12,10 @@ coin = {
                     spread: new THREE.Vector3( 1, .5,0 )
                 },
                 color: {
-                    value: [ new THREE.Color('yellow'), new THREE.Color('red') ]
+                    value: [ new THREE.Color('yellow') ]
                 },
                 size: {
                     value: 1
                 },
-        		particleCount: 100
+        		particleCount: 80
 		}

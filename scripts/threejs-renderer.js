@@ -235,7 +235,8 @@ class ThreejsRenderer {
 		// this.camera_container.add(this.camera)
 
 
-
+		this.head_container = new THREE.Group();
+		this.game_field.add(this.head_container);
 
 		this.GO_container = new THREE.Group();
 		this.game_field.add(this.GO_container);
@@ -373,6 +374,9 @@ class ThreejsRenderer {
 						var python_part = this.AM.pullAsset( 'python_tail' );
 						
 					} else {// create head
+						// this.head_container.add(this.AM.pullAsset( 'python_head' ))
+						// this.head_container.add(this.AM.pullAsset( 'python_eye' ));
+						// var python_part = this.head_container;
 						var python_part = this.AM.pullAsset( 'python_head' );
 						// var python_part = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material);
 					}
@@ -390,9 +394,6 @@ class ThreejsRenderer {
 		}
 
 		// var head = python_body[0]._model;
-		// var python_eye_1 = this.AM.pullAsset( 'python_eye' );
-		// var python_eye_2 = this.AM.pullAsset( 'python_eye' );
-		// head.add(python_eye_2);
 		if (!this.snake_body ){
 			this.snake_geometry = new THREE.TubeBufferGeometry( this.body_parts,  2, .5, 16, false );
 			this.snake_body = new THREE.Mesh( this.snake_geometry, snake_material );
@@ -447,7 +448,7 @@ class ThreejsRenderer {
 		// else this.camera.position.set(0, 16, z)
 		// this.camera_container.position.set(x, 0, z);
 		this.camera.position.set( 0, 16, z/2 );
-		this.camera.lookAt( new THREE.Vector3(0, 0, 0))
+		this.camera.lookAt( this.ZERO )
 	}
 
 	resetCameraPosition(camera) {
