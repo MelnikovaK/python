@@ -110,12 +110,7 @@ class Python {
 				case "pause":
 					this.setPause( true );
 					break;
-
-				case "change_camera":
-					this.changeCameraPosition();
-					Utils.triggerCustomEvent( window, this.PYTHON_CHANGE_CAMERA_POSITION );
-				break;
-
+				
 				case "full_screen_on":
 					Utils.triggerCustomEvent( window, this.PYTHON_SHOW_FULL_SCREEN );
 				break;

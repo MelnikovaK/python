@@ -47,9 +47,6 @@ var config = {
 			"play": {
 				keys: [27],
 			},
-			"change_camera": {
-				keys: [82],
-			},
 			"full_screen_on": {
 				keys: [81]
 			},
