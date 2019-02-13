@@ -395,8 +395,7 @@ class ThreejsRenderer {
 
 		// var head = python_body[0]._model;
 		if (!this.snake_body ){
-			this.snake_geometry = new THREE.TubeBufferGeometry( this.body_parts,  2, .5, 16, false );
-			this.snake_body = new THREE.Mesh( this.snake_geometry, snake_material );
+			this.snake_body = this.AM.pullAsset( 'python_body' );
 			this.snake_container.add(this.snake_body)
 		} else {
 			this.updateSnakeBody(this.body_parts);	
@@ -431,7 +430,7 @@ class ThreejsRenderer {
 		var camera_position = this.body_parts.points[1].clone();
 		this.snake_container.localToWorld( camera_position );
 		this.camera.position.copy( camera_position );
-		this.camera.position.y = 2;
+		this.camera.position.y = 4;
 
 		var aim_position = this.snake_container.localToWorld( head.position.clone() );
 		aim_position.y = 1.5;
@@ -447,21 +446,21 @@ class ThreejsRenderer {
 		// if ( Math.abs(x) > Math.abs(z) ) this.camera.position.set(x, 16, 0)
 		// else this.camera.position.set(0, 16, z)
 		// this.camera_container.position.set(x, 0, z);
-		this.camera.position.set( 0, 16, z/2 );
-		// this.camera.rotation.x = 0;
+		// console.log(x,z);
+		this.camera.position.set( 0, 13, z/2 );
 		this.camera.lookAt( this.ZERO );
 	}
 
 	resetCameraPosition(camera) {
-		camera.position.set( 0, 16, 0 );
+		camera.position.set( 0, 13, 0 );
 		camera.lookAt( this.ZERO );
 	}
 
 	removePython() {
 		var python_body = this.python.python_body;
-		this.removePythonPart(python_body[0]._model);
-		this.removePythonPart(python_body[python_body.length - 1]._model);
-		this.removePythonPart(this.snake_body);
+		this.AM.putAsset(python_body[0]._model);
+		this.AM.putAsset(python_body[python_body.length - 1]._model);
+		this.AM.putAsset(this.snake_body);
 		this.snake_body = undefined;
 	}
 
@@ -470,16 +469,6 @@ class ThreejsRenderer {
 		for ( var i = 0; i < bonuses.length; i++ ) {
 			this.AM.putAsset( bonuses[i]._model );
 		}
-	}
-
-	removePythonPart(part) {
-		this.snake_container.remove(part);
-		part.geometry.dispose();
-		part.material.dispose();
-	}
-
-	removePythonBodyPart(part) {
-		this.body_parts.pop();
 	}
 
 
@@ -505,9 +494,9 @@ class ThreejsRenderer {
 		this.AM.addAsset('python_tail', tail, 3);
 
 		//BODY
-		// var body_parts  = new THREE.CatmullRomCurve3();
-		// var body = function() {return new THREE.Mesh(  new THREE.TubeBufferGeometry( body_parts,  2, .5, 16, false ), snake_material)};
-		// this.AM.addAsset('python_body', body, 3);
+		var body_parts  = new THREE.CatmullRomCurve3([this.ZERO,this.ZERO,]);
+		var body = function() {return new THREE.Mesh(  new THREE.TubeBufferGeometry( body_parts,  2, .5, 16, false ), snake_material)};
+		this.AM.addAsset('python_body', body, 3);
 
 
 		//BONUSES
