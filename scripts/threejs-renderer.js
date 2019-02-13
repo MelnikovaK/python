@@ -448,7 +448,8 @@ class ThreejsRenderer {
 		// else this.camera.position.set(0, 16, z)
 		// this.camera_container.position.set(x, 0, z);
 		this.camera.position.set( 0, 16, z/2 );
-		this.camera.lookAt( this.ZERO )
+		// this.camera.rotation.x = 0;
+		this.camera.lookAt( this.ZERO );
 	}
 
 	resetCameraPosition(camera) {
@@ -505,9 +506,7 @@ class ThreejsRenderer {
 
 		//BODY
 		// var body_parts  = new THREE.CatmullRomCurve3();
-
-		// var body_geometry = new THREE.TubeBufferGeometry( body_parts,  2, .5, 16, false );
-		// var body = new THREE.Mesh( body_geometry, snake_material );
+		// var body = function() {return new THREE.Mesh(  new THREE.TubeBufferGeometry( body_parts,  2, .5, 16, false ), snake_material)};
 		// this.AM.addAsset('python_body', body, 3);
 
 
