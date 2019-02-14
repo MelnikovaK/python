@@ -17,6 +17,7 @@ class Python {
 		this.PYTHON_CHANGE_CAMERA_POSITION = "renderer:change_camera_position";
 		this.PYTHON_SHOW_FULL_SCREEN = "renderer:show_full_screen";
 		this.PYTHON_HIDE_FULL_SCREEN = "renderer:hide_full_screen";
+		this.BONUS_IS_EATEN = "renderer:bonus_is_eaten";
 
 
 		//
@@ -315,6 +316,7 @@ class Python {
 			var bonus = this.bonuses[i];
 
 			if ( head.x == bonus.x && head.y == bonus.y ) {
+
 				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
 				this.points += bonus.point;
 
@@ -330,11 +332,14 @@ class Python {
 				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
 						//action
 				if ( bonus.action) bonus.action(this, prev_prev_x, prev_prev_y, bonus.point );
+
+				Utils.triggerCustomEvent(window, this.BONUS_IS_EATEN, {logic_step_interval: scope.logic_step_interval});
+
 			}
 
 			if (head.prev_x == bonus.x && head.prev_y == bonus.y) {
 				this.resetBonus(bonus);
-				Utils.triggerCustomEvent(window, scope.REDRAW_BONUS, {bonus: bonus})
+				Utils.triggerCustomEvent(window, this.REDRAW_BONUS, {bonus: bonus})
 			}
 				
 		}

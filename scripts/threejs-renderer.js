@@ -271,8 +271,9 @@ class ThreejsRenderer {
 					if ( i == 0) {
 						if ( scope.bonus_is_eaten ) {
 							var upper_head = python_part.children[0];
-							if ( delta < .5) upper_head.position.z -= delta;
-							else upper_head.position.z += delta - .5;
+							console.log(upper_head.position.z, delta)
+							if ( delta < .5) upper_head.position.z = -.5;
+							// else upper_head.position.z += (delta - .5) / 4;
 						}
 						var x = python_part.position.x + .5;
 						var z = python_part.position.z + .5;
@@ -377,9 +378,12 @@ class ThreejsRenderer {
 						var python_part = this.AM.pullAsset( 'python_tail' );
 						
 					} else {// create head
-						var python_part = this.AM.pullAsset( 'python_head' );
-						console.log(python_part)
-					 	this.initEyes(python_part);
+						var head = new THREE.Group();
+						var lower_head = this.AM.pullAsset( 'python_lower_head' );
+						var upper_head = this.AM.pullAsset( 'python_upper_head' );
+						head.add(upper_head,lower_head);
+						var python_part = head;
+					 	this.initEyes(upper_head);
 					}
 					python_part.rotation.x = python_body[i].angle;
 					python_part.position.x = python_body[i].x;
@@ -470,14 +474,16 @@ class ThreejsRenderer {
 	}
 
 	removePython() {
+		var scope = this;
 		var python_body = this.python.python_body;
-		this.AM.putAsset(python_body[0]._model);
+		python_body[0]._model.children.forEach(function(x) {
+			scope.AM.putAsset(x);
+		})
 		this.AM.putAsset(python_body[python_body.length - 1]._model);
 		this.AM.putAsset(this.snake_body);
 		for ( var i = 0; i < this.eyes.length; i++ ){
 			this.AM.putAsset(this.eyes[i].model);
 		}
-		// this.snake_body = undefined;
 	}
 
 	removeBonuses() {
@@ -493,14 +499,18 @@ class ThreejsRenderer {
 		var snake_material = new THREE.MeshBasicMaterial( { map: this.snake_texture } );
 
 		//HEAD
-		var head = function() {
-			var upper_head = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI), snake_material);
-			var lower_head = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI), snake_material);
-			var whole_head = new THREE.Group();
-			whole_head.add(upper_head,lower_head);
-			return whole_head;
-		};
-		this.AM.addAsset('python_head', head, 3);
+		var upper_head = function() {return new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI), snake_material);};
+		var lower_head = function() {return new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI), snake_material);}; 
+		this.AM.addAsset('python_upper_head', upper_head, 3);
+		this.AM.addAsset('python_lower_head', lower_head, 3);
+		// var head = function() {
+		// 	var upper_head = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI), snake_material);
+		// 	var lower_head = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI), snake_material);
+		// 	var whole_head = new THREE.Group();
+		// 	whole_head.add(upper_head,lower_head);
+		// 	return whole_head;
+		// };
+		// this.AM.addAsset('python_head', head, 3);
 
 		//EYES
 
