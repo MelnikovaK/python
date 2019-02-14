@@ -264,27 +264,23 @@ class ThreejsRenderer {
 
 					python_part.position.x = python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta;
 					python_part.position.z = python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta;
-					var prev_angle = scope.getSmallestAngle(python_body[i].angle, python_body[i].prev_angle);
+					var prev_angle = scope.getSmallestAngle( python_body[i].angle, python_body[i].prev_angle, Math.PI );
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
 					if ( i == 0) {
-						// var x = (eye.offset().left) + (eye.width() / 2);
-					 //  var y = (eye.offset().top) + (eye.height() / 2);
-					 //  var rad = Math.atan2(event.pageX - x, event.pageY - y);
-					 //  var rot = (rad * (180 / Math.PI) * -1) + 180;
 
 						var x = python_part.position.x + .5;
 						var z = python_part.position.z + .5;
 						if ( scope.apple ) {
-						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1 + 180 * Utils.DEG2RAD;
-							console.log(rad * Utils.RAD2DEG);
-							// var angle = scope.getSmallestAngle(0, rad);
-							scope.eyes.forEach(function(x) {
-								// var aim_position = this.snake_container.localToWorld( head.position.clone() );
+						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1 + 180 * Utils.DEG2RAD - python_part.rotation.z;
+						 	if ( rad * Utils.RAD2DEG <= 90 ) {
 
-								// x.model.lookAt( scope.eyes[0].model.localToWorld( scope.apple.position.clone()) );
-								x.model.rotation.z = rad - python_part.rotation.z;
-							});
+								scope.eyes.forEach(function(x) {
+									x.model.rotation.z = rad ;
+									
+								});
+						 	}
+						 	// var finish_rad = scope.getSmallestAngle( rad, python_part.rotation.z, Math.PI/2 );
 						}
 					}
 				}
@@ -320,9 +316,9 @@ class ThreejsRenderer {
 
 	}
 
-	getSmallestAngle(angle, prev_angle) {
+	getSmallestAngle(angle, prev_angle, max_angle, decr_angle) {
 		var dist = Math.abs(angle - prev_angle);
-		if( dist > Math.PI ){
+		if( dist > max_angle ){
 			if( prev_angle < angle ){
 				prev_angle += Utils.PI2;
 			}else{
@@ -507,7 +503,7 @@ class ThreejsRenderer {
 		var eye = function() {
 			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .3, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
 			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .1, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
-	 		scope.setCoordinates(pupil, .1, -.2, -.13 );	
+	 		scope.setCoordinates(pupil, 0, -.2, -.13 );	
 			apple_eye.add(pupil);
 			return apple_eye;
 		};
