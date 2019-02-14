@@ -315,14 +315,14 @@ class Python {
 			
 			var bonus = this.bonuses[i];
 
-			if (head.x == bonus.x && head.y == bonus.y) {
+			if (head.prev_x == bonus.x && head.prev_y == bonus.y) {
 
-				this.resetBonus(bonus);				
 
 				//play sound
 				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
 
 				this.points += bonus.point;
+				this.resetBonus(bonus);
 
 				if( this.points < 0 ) { // game over
 					this.points = 0;

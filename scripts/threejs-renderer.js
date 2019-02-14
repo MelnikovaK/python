@@ -273,14 +273,13 @@ class ThreejsRenderer {
 						var z = python_part.position.z + .5;
 						if ( scope.apple ) {
 						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1 + 180 * Utils.DEG2RAD - python_part.rotation.z;
-						 	if ( rad * Utils.RAD2DEG <= 90 ) {
-
+					 		// var finish_rad = scope.getSmallestAngle( rad, python_part.rotation.z, Math.PI/2 );
+						 	// if ( rad * Utils.RAD2DEG <= 90 ) {
 								scope.eyes.forEach(function(x) {
 									x.model.rotation.z = rad ;
 									
 								});
-						 	}
-						 	// var finish_rad = scope.getSmallestAngle( rad, python_part.rotation.z, Math.PI/2 );
+						 	// }
 						}
 					}
 				}
@@ -378,7 +377,7 @@ class ThreejsRenderer {
 						var python_part = this.AM.pullAsset( 'python_tail' );
 						
 					} else {// create head
-						var python_part = this.AM.pullAsset( 'python_head' )
+						var python_part = this.AM.pullAsset( 'python_head' );
 					 	this.initEyes(python_part);
 					}
 					python_part.rotation.x = python_body[i].angle;
@@ -460,10 +459,11 @@ class ThreejsRenderer {
 	moveCamera(x, z) {
 		// if ( x > z ) this.camera.position.set(x/8, 13, this.camera_z)
 		// this.game_field.add(this.camera)
-		this.camera.position.set(/*( x - 10) /20*/0, 13, z/2)
+		// this.camera.position
+		this.camera.position.set(0, 13, z/2);
 		// this.camera_x = x;
 		// this.camera_z = z
-		this.camera.lookAt( this.ZERO );
+		this.camera.lookAt(new THREE.Vector3(/*( x - 10) /20*/0,0,0));
 	}
 
 	resetCameraPosition(camera) {
@@ -495,7 +495,13 @@ class ThreejsRenderer {
 		var snake_material = new THREE.MeshBasicMaterial( { map: this.snake_texture } );
 
 		//HEAD
-		var head = function() {return new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16), snake_material)};
+		var head = function() {
+			var upper_head = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI), snake_material);
+			var lower_head = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI), snake_material);
+			var whole_head = new THREE.Group();
+			whole_head.add(upper_head,lower_head);
+			return whole_head;
+		};
 		this.AM.addAsset('python_head', head, 3);
 
 		//EYES
