@@ -11,7 +11,6 @@ class ThreejsRenderer {
 
 		this.python = python;
 
-
 		this.PATH = config.ASSETS_PATH;
 		//FIELD
 		this.FIELD_WIDTH = config.field_width;
@@ -75,9 +74,7 @@ class ThreejsRenderer {
 
 		window.addEventListener(python.PYTHON_MOVED, function(e) {
 			scope.logic_step_interval = python.logic_step_interval;
-			this.nearest_bonus = e.detail.nearest_bonus;
-			// console.log(this.nearest_bonus)
-			scope.onPythonMoved();	
+			scope.logic_step_timestamp = Date.now();	
 		});
 
 		window.addEventListener(python.PAUSE, function() {
@@ -196,21 +193,21 @@ class ThreejsRenderer {
 		this.scene.add( spotLight );
 
 
-		//CONTROLS
-		this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
-		this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-		this.controls.dampingFactor = 0.25;
-		this.controls.screenSpacePanning = false;
-		this.controls.minDistance = 10;
-		this.controls.maxDistance = 500;
-		this.controls.maxPolarAngle = Math.PI / 2;
-		window.addEventListener( 'resize', onWindowResize, false );
+		// //CONTROLS
+		// this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
+		// this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+		// this.controls.dampingFactor = 0.25;
+		// this.controls.screenSpacePanning = false;
+		// this.controls.minDistance = 10;
+		// this.controls.maxDistance = 500;
+		// this.controls.maxPolarAngle = Math.PI / 2;
+		// window.addEventListener( 'resize', onWindowResize, false );
 
-		function onWindowResize() {
-			this.camera.aspect = window.innerWidth / window.innerHeight;
-			this.camera.updateProjectionMatrix();
-			this.renderer.setSize( window.innerWidth, window.innerHeight );
-		}
+		// function onWindowResize() {
+		// 	this.camera.aspect = window.innerWidth / window.innerHeight;
+		// 	this.camera.updateProjectionMatrix();
+		// 	this.renderer.setSize( window.innerWidth, window.innerHeight );
+		// }
 	}
 
 	initContainers() {
@@ -235,12 +232,6 @@ class ThreejsRenderer {
 		bonus.position.z = y;
 	}
 
-	onPythonMoved() {
-		var python_body =  this.python.python_body;
-		this.logic_step_timestamp = Date.now();
-	}
-
-
 	startRendering() {
 		
 		var scope = this;
@@ -248,7 +239,7 @@ class ThreejsRenderer {
    	function animate() {
 			
 			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
-			scope.controls.update();
+			// scope.controls.update();
 
 			var python_body =  scope.python.python_body;
 			if ( !python_body.length ) return;
@@ -268,7 +259,9 @@ class ThreejsRenderer {
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
 					if ( i == 0) {
+						if ( scope.bonus_is_eaten ) {
 
+						}
 						var x = python_part.position.x + .5;
 						var z = python_part.position.z + .5;
 						if ( scope.apple ) {
@@ -276,8 +269,7 @@ class ThreejsRenderer {
 					 		// var finish_rad = scope.getSmallestAngle( rad, python_part.rotation.z, Math.PI/2 );
 						 	// if ( rad * Utils.RAD2DEG <= 90 ) {
 								scope.eyes.forEach(function(x) {
-									x.model.rotation.z = rad ;
-									
+									x.model.rotation.z = rad;
 								});
 						 	// }
 						}
@@ -296,13 +288,6 @@ class ThreejsRenderer {
 				scope.updateSnakeBody(scope.body_parts);
 			} 
 
-			// t += .02;
-			// sphere.position.x = Math.sin(t) * 5;
-			// sphere.position.z = Math.cos(t/2) * 5;
-
-			//
-			// camera.position.set( 0, 50 + Math.sin(t)*10, 20 );
-			// camera.lookAt( ZERO );
 			var head_x = python_body[0]._model.position.x;
 			var head_z = python_body[0]._model.position.z;
 			if (scope.camera_on_head) scope.changeCameraPosition(delta);
@@ -378,6 +363,7 @@ class ThreejsRenderer {
 						
 					} else {// create head
 						var python_part = this.AM.pullAsset( 'python_head' );
+						console.log(python_part)
 					 	this.initEyes(python_part);
 					}
 					python_part.rotation.x = python_body[i].angle;
@@ -407,8 +393,8 @@ class ThreejsRenderer {
 								 {model: second_eye, angle: 0, prev_angle: 0}];
 
 		head.add(first_eye, second_eye);
-	 	this.setCoordinates(first_eye, -.2, -.2);
-	 	this.setCoordinates(second_eye, .2, -.2 );
+	 	this.setCoordinates(first_eye, -.2, -.3);
+	 	this.setCoordinates(second_eye, .2, -.3);
 	}
 
 	setCoordinates( model, x,z,y) {
@@ -441,12 +427,14 @@ class ThreejsRenderer {
 	changeCameraPosition(delta) {
 		var direction = this.python.python_direction;
 		var python_body = this.python.python_body;
+		var head = python_body[0]._model;
 
 		var camera_position = this.body_parts.points[1].clone();
 		this.snake_container.localToWorld( camera_position );
 		this.camera.position.copy( camera_position );
 		this.camera.position.y = 2;
 
+    var aim_position = this.snake_container.localToWorld( head.position.clone() );
 		aim_position.y = 1.5;
 		this.camera.lookAt( aim_position );	}
 
@@ -457,12 +445,7 @@ class ThreejsRenderer {
 	}
 
 	moveCamera(x, z) {
-		// if ( x > z ) this.camera.position.set(x/8, 13, this.camera_z)
-		// this.game_field.add(this.camera)
-		// this.camera.position
 		this.camera.position.set(0, 13, z/2);
-		// this.camera_x = x;
-		// this.camera_z = z
 		this.camera.lookAt(new THREE.Vector3(/*( x - 10) /20*/0,0,0));
 	}
 
@@ -479,7 +462,7 @@ class ThreejsRenderer {
 		for ( var i = 0; i < this.eyes.length; i++ ){
 			this.AM.putAsset(this.eyes[i].model);
 		}
-		this.snake_body = undefined;
+		// this.snake_body = undefined;
 	}
 
 	removeBonuses() {
@@ -514,10 +497,6 @@ class ThreejsRenderer {
 			return apple_eye;
 		};
 		this.AM.addAsset('python_eye', eye, 4);
-
-		// var pupil = function() {return new THREE.Mesh( new THREE.SphereGeometry( .1, 16), new THREE.MeshLambertMaterial({ color: 'black'}))};
-		// this.AM.addAsset('python_pupil', pupil, 4);
-
 
 		//TAIL
 		var geometry = new THREE.CylinderGeometry( 0, .5, 1.5, 16, 1, false );
