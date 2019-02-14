@@ -312,34 +312,31 @@ class Python {
 		// check if bonus is eaten
 		
 		for (var i = 0; i < this.bonuses.length; i++ ) {
-			
 			var bonus = this.bonuses[i];
 
-			if (head.prev_x == bonus.x && head.prev_y == bonus.y) {
-
-
-				//play sound
+			if ( head.x == bonus.x && head.y == bonus.y ) {
 				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
-
 				this.points += bonus.point;
-				this.resetBonus(bonus);
 
 				if( this.points < 0 ) { // game over
 					this.points = 0;
 					this.is_game_over = true;
-					// this.python_body.pop();
-					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
+					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: true});
+
 					return;
 				}
 
-				// scope.addBodyPart();
-
-				//action
-				if ( bonus.action) bonus.action(this, prev_prev_x, prev_prev_y, bonus.point );
 				// trigger event
 				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
-				return;
+						//action
+				if ( bonus.action) bonus.action(this, prev_prev_x, prev_prev_y, bonus.point );
 			}
+
+			if (head.prev_x == bonus.x && head.prev_y == bonus.y) {
+				this.resetBonus(bonus);
+				Utils.triggerCustomEvent(window, scope.REDRAW_BONUS, {bonus: bonus})
+			}
+				
 		}
 
 	}
