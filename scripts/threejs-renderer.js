@@ -11,6 +11,8 @@ class ThreejsRenderer {
 
 		this.python = python;
 
+		this.bonus_is_eaten = false;
+
 		this.PATH = config.ASSETS_PATH;
 		//FIELD
 		this.FIELD_WIDTH = config.field_width;
@@ -102,6 +104,14 @@ class ThreejsRenderer {
 			var bonus = e.detail.bonus;
 			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
 			scope.updateSnake();
+		});
+
+		window.addEventListener( python.BONUS_IS_EATEN , function (e) {
+			var interval = e.detail.logic_step_interval;
+			scope.bonus_is_eaten = true;	
+			setTimeout( function() {
+				scope.bonus_is_eaten = false;
+			}, interval);
 		});
 
 		window.addEventListener( python.PYTHON_GET_ACCELERATION , function (e) {
@@ -259,6 +269,11 @@ class ThreejsRenderer {
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
 					if ( i == 0) {
+						if ( scope.bonus_is_eaten ) {
+							var upper_head = python_part.children[0];
+							if ( delta < .5) upper_head.position.z -= delta;
+							else upper_head.position.z += delta - .5;
+						}
 						var x = python_part.position.x + .5;
 						var z = python_part.position.z + .5;
 						if ( scope.apple ) {
@@ -492,7 +507,7 @@ class ThreejsRenderer {
 		var eye = function() {
 			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .3, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
 			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .1, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
-	 		scope.setCoordinates(pupil, 0, -.2, -.13 );	
+	 		scope.setCoordinates(pupil, 0, -.2, -.18 );	
 			apple_eye.add(pupil);
 			return apple_eye;
 		};
