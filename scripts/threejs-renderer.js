@@ -259,19 +259,16 @@ class ThreejsRenderer {
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
 					if ( i == 0) {
-						if ( scope.bonus_is_eaten ) {
-
-						}
 						var x = python_part.position.x + .5;
 						var z = python_part.position.z + .5;
 						if ( scope.apple ) {
 						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1 + 180 * Utils.DEG2RAD - python_part.rotation.z;
-					 		// var finish_rad = scope.getSmallestAngle( rad, python_part.rotation.z, Math.PI/2 );
-						 	// if ( rad * Utils.RAD2DEG <= 90 ) {
+						 	if ( Math.abs( rad * Utils.RAD2DEG ) >= 90 ){
+						 		rad = 90 * Utils.DEG2RAD * Math.sign(rad);
+						 	}
 								scope.eyes.forEach(function(x) {
 									x.model.rotation.z = rad;
 								});
-						 	// }
 						}
 					}
 				}
@@ -300,13 +297,14 @@ class ThreejsRenderer {
 
 	}
 
-	getSmallestAngle(angle, prev_angle, max_angle, decr_angle) {
+	getSmallestAngle(angle, prev_angle, max_angle) {
 		var dist = Math.abs(angle - prev_angle);
+		var changing_angle = max_angle * 2 
 		if( dist > max_angle ){
 			if( prev_angle < angle ){
-				prev_angle += Utils.PI2;
+				prev_angle += changing_angle;
 			}else{
-				prev_angle -= Utils.PI2;
+				prev_angle -= changing_angle;
 			}
 		}
 		return prev_angle;
