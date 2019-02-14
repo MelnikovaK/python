@@ -140,7 +140,7 @@ class ThreejsRenderer {
 			scope.initGameField();
 
 		 	Utils.triggerCustomEvent( window, scope.PRELOAD_COMPLETE, {scene: scope.scene, camera: scope.camera, 
-		 														renderer: scope.renderer, game_container: scope.game_field} );
+		 														renderer: scope.renderer, game_container: scope.game_field});
 		};
 
 		manager.onProgress = function( item, loaded, total ) {
@@ -268,22 +268,22 @@ class ThreejsRenderer {
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
 					if ( i == 0) {
-
-					  // var rad = Math.atan2(event.pageX - x, event.pageY - y);
-					  // var rot = (rad * (180 / Math.PI) * -1) + 180;
-
+						// var x = (eye.offset().left) + (eye.width() / 2);
+					 //  var y = (eye.offset().top) + (eye.height() / 2);
+					 //  var rad = Math.atan2(event.pageX - x, event.pageY - y);
+					 //  var rot = (rad * (180 / Math.PI) * -1) + 180;
 
 						var x = python_part.position.x + .5;
 						var z = python_part.position.z + .5;
 						if ( scope.apple ) {
-						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1;
-							// console.log(rad)
+						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1 + 180 * Utils.DEG2RAD;
+							console.log(rad * Utils.RAD2DEG);
 							// var angle = scope.getSmallestAngle(0, rad);
 							scope.eyes.forEach(function(x) {
-		// var aim_position = this.snake_container.localToWorld( head.position.clone() );
+								// var aim_position = this.snake_container.localToWorld( head.position.clone() );
 
 								// x.model.lookAt( scope.eyes[0].model.localToWorld( scope.apple.position.clone()) );
-								x.model.rotation.z = rad;
+								x.model.rotation.z = rad - python_part.rotation.z;
 							});
 						}
 					}
@@ -295,7 +295,6 @@ class ThreejsRenderer {
 					0,
 					python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta);
 				}
-
 			}
 
 			if (scope.snake_body) {
@@ -407,25 +406,14 @@ class ThreejsRenderer {
 	}
 
 	initEyes(head) {
-		var python_body = this.python.python_body;
 		var first_eye = this.AM.pullAsset( 'python_eye' );
 		var second_eye = this.AM.pullAsset( 'python_eye' );
 		this.eyes = [{model: first_eye, angle: 0, prev_angle: 0},
 								 {model: second_eye, angle: 0, prev_angle: 0}];
 
-		// var first_pupil = this.first_pupil = this.AM.pullAsset( 'python_pupil' );
-		// var second_pupil = this.second_pupil = this.AM.pullAsset( 'python_pupil' );
-		// this.additional_materials = [first_eye,second_eye,first_pupil,second_pupil];
-
-		// first_eye.add(first_pupil);
-		// second_eye.add(second_pupil);
-
-
 		head.add(first_eye, second_eye);
 	 	this.setCoordinates(first_eye, -.2, -.2);
 	 	this.setCoordinates(second_eye, .2, -.2 );
-	 	// this.setCoordinates(first_pupil, -.1, -.2, -.13 );
-	 	// this.setCoordinates(second_pupil, .1, -.2, -.13 );
 	}
 
 	setCoordinates( model, x,z,y) {
