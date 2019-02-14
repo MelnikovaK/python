@@ -465,7 +465,19 @@ class ThreejsRenderer {
 	}
 
 	moveCamera(x, z) {
-		this.camera.position.set(0, 13, z/2);
+		// this.game_container.rotation.x = (x - this.CELLS_HORIZONTAL/2) / this.CELLS_HORIZONTAL/2 * 0.8;
+		// this.game_container.rotation.z = (z - this.CELLS_VERTICAL/2) / this.CELLS_VERTICAL/2 * 0.8;
+		// if ( x > z ){
+		// this.camera.eulerOrder = "ZYX";
+		// this.camera.position.set(x/2, 13, this.camera.position.z);
+			
+		// } else {
+		// 	this.camera.eulerOrder = "XYZ";
+		// 	this.camera.position.set(this.camera.position.x, 13, z / 2);
+		// }
+
+
+		this.camera.position.set(0, 13, z / 2);
 		this.camera.lookAt(new THREE.Vector3(/*( x - 10) /20*/0,0,0));
 	}
 
@@ -504,17 +516,9 @@ class ThreejsRenderer {
 		var lower_head = function() {return new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI), snake_material);}; 
 		this.AM.addAsset('python_upper_head', upper_head, 3);
 		this.AM.addAsset('python_lower_head', lower_head, 3);
-		// var head = function() {
-		// 	var upper_head = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI), snake_material);
-		// 	var lower_head = new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI), snake_material);
-		// 	var whole_head = new THREE.Group();
-		// 	whole_head.add(upper_head,lower_head);
-		// 	return whole_head;
-		// };
-		// this.AM.addAsset('python_head', head, 3);
+
 
 		//EYES
-
 		var eye = function() {
 			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .3, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
 			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .1, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
