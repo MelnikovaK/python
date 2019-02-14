@@ -263,12 +263,14 @@ class ThreejsRenderer {
 						var z = python_part.position.z + .5;
 						if ( scope.apple ) {
 						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1 + 180 * Utils.DEG2RAD - python_part.rotation.z;
-						 	if ( Math.abs( rad * Utils.RAD2DEG ) >= 90 ){
+							rad = scope.getSmallestAngle( 0, rad, Math.PI );
+
+						 	if ( Math.abs( rad * Utils.RAD2DEG ) > 90 ){
 						 		rad = 90 * Utils.DEG2RAD * Math.sign(rad);
 						 	}
-								scope.eyes.forEach(function(x) {
-									x.model.rotation.z = rad;
-								});
+							scope.eyes.forEach(function(x) {
+								x.model.rotation.z = rad;
+							});
 						}
 					}
 				}
