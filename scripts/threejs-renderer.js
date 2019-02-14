@@ -269,12 +269,13 @@ class ThreejsRenderer {
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
 					if ( i == 0) {
-						if ( scope.bonus_is_eaten ) {
 							var upper_head = python_part.children[0];
-							console.log(upper_head.position.z, delta)
-							if ( delta < .5) upper_head.position.z = -.5;
-							// else upper_head.position.z += (delta - .5) / 4;
+						if ( scope.bonus_is_eaten ) {
+							console.log(upper_head.position.z)
+							if ( delta < .6) upper_head.position.z = -delta - .2;
+							else upper_head.position.z = (delta - .8);
 						}
+						else upper_head.position.z = 0;
 						var x = python_part.position.x + .5;
 						var z = python_part.position.z + .5;
 						if ( scope.apple ) {
