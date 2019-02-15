@@ -24,6 +24,8 @@ class ThreejsRenderer {
 		this.CELLS_HORIZONTAL = config.cells_horizontal;
 		this.CELLS_VERTICAL = config.cells_vertical;
 
+		this.MOUTH_OPENING_ANGLE = 120 * window.Utils.DEG2RAD;
+
 		this.BONUS_RADIUS = .5;
 		this.BONUS_SEGMENTS = 16;
 		this.BONUS_RINGS = 16;
@@ -202,6 +204,9 @@ class ThreejsRenderer {
 		spotLight.position.set( 10/2, 100/2, 50/2 );
 		this.scene.add( spotLight );
 
+		// var helper = new THREE.CameraHelper( camera );
+		// scene.add( helper );
+
 
 		// //CONTROLS
 		// this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
@@ -269,8 +274,8 @@ class ThreejsRenderer {
 					if ( i == 0) { //head
 						var upper_head = python_part.children[0];
 						if ( scope.bonus_is_eaten ) {
-							if ( delta < .5) upper_head.rotation.x = upper_head.rotation.z + (100 * window.Utils.DEG2RAD - upper_head.rotation.z) * delta;
-							else upper_head.rotation.x = upper_head.rotation.y + (100 * window.Utils.DEG2RAD - upper_head.rotation.z) * (1 - delta);
+							if ( delta < .5) upper_head.rotation.x = upper_head.rotation.z + (scope.MOUTH_OPENING_ANGLE - upper_head.rotation.z) * delta;
+							else upper_head.rotation.x = upper_head.rotation.y + (scope.MOUTH_OPENING_ANGLE - upper_head.rotation.z) * (1 - delta);
 						}
 						else upper_head.rotation.x = 0;
 
@@ -297,9 +302,7 @@ class ThreejsRenderer {
 
 			scope.renderer.render( scope.scene, scope.camera );
 		}
-		
 		animate();
-
 	}
 
 
@@ -479,18 +482,10 @@ class ThreejsRenderer {
 	}
 
 	moveCamera(x, z) {
-		// this.game_container.rotation.x = (x - this.CELLS_HORIZONTAL/2) / this.CELLS_HORIZONTAL/2 * 0.8;
-		// this.game_container.rotation.z = (z - this.CELLS_VERTICAL/2) / this.CELLS_VERTICAL/2 * 0.8;
-		// if ( x > z ){
-		// this.camera.eulerOrder = "ZYX";
-		// this.camera.position.set(x/2, 13, this.camera.position.z);
-			
-		// } else {
-		// 	this.camera.eulerOrder = "XYZ";
-		// 	this.camera.position.set(this.camera.position.x, 13, z / 2);
-		// }
+		this.game_container.add(this.camera)
+		this.camera.rotation.order = "YXZ";
 
-		this.camera.position.set(0, 13, z / 2);
+		this.camera.position.set(/*( x - 8 )/10*/0 , 13, z / 2);
 		this.camera.lookAt(new THREE.Vector3(/*( x - 10) /20*/0,0,0));
 	}
 
@@ -546,7 +541,7 @@ class ThreejsRenderer {
 		var eye = function() {
 			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .25, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
 			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .08, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
-	 		scope.setCoordinates(pupil, 0, -.2, -.18 );	
+	 		scope.setCoordinates(pupil, 0, -.2, -.16 );	
 			apple_eye.add(pupil);
 			return apple_eye;
 		};
