@@ -319,6 +319,7 @@ class Python {
 
 				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
 				this.points += bonus.point;
+				Utils.triggerCustomEvent(window, this.BONUS_IS_EATEN, {logic_step_interval: scope.logic_step_interval});
 
 				if( this.points < 0 ) { // game over
 					this.points = 0;
@@ -333,7 +334,6 @@ class Python {
 						//action
 				if ( bonus.action) bonus.action(this, prev_prev_x, prev_prev_y, bonus.point );
 
-				Utils.triggerCustomEvent(window, this.BONUS_IS_EATEN, {logic_step_interval: scope.logic_step_interval});
 
 			}
 
