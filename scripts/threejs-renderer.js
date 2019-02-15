@@ -251,7 +251,6 @@ class ThreejsRenderer {
 
 				if( python_part && (i == python_body.length - 1  || i == 0) ) {
 					scope.changePythonPartPosition(python_part, python_body[i].x, python_body[i].prev_x, python_body[i].y, python_body[i].prev_y, delta);
-
 					var prev_angle = scope.getSmallestAngle( python_body[i].angle, python_body[i].prev_angle, Math.PI );
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
@@ -266,13 +265,12 @@ class ThreejsRenderer {
 						scope.moveEyes(python_part, scope.apple);
 					}
 				}
-				if ( scope.body_parts && i < python_body.length ) {//body
-
+				//body
 				scope.body_parts.points[i] = new THREE.Vector3(
 					scope.getPositionValue( python_body[i].x, python_body[i].prev_x, delta),
 					0,
-					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta))
-				}
+					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta)
+				)
 			}
 
 			if (scope.snake_body) {
@@ -293,15 +291,12 @@ class ThreejsRenderer {
 	initGameField() {
 		var scope = this;
 		
-		var textureLoader = new THREE.TextureLoader();
-
 		var groundMaterial = new THREE.MeshLambertMaterial( { color: 0xffffff, map: this.ground_texture });
 		var ground_plane = new THREE.Mesh( new THREE.PlaneBufferGeometry( scope.CELLS_HORIZONTAL, scope.CELLS_VERTICAL ), groundMaterial );
 		ground_plane.rotation.x = -90 / 180 * Math.PI;
 		ground_plane.receiveShadow = true;
 		scope.game_container.add( ground_plane );
 		
-
 		var cube_material = new THREE.MeshBasicMaterial( { map: this.wall_texture } );
 		var geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );	
 		for ( var i = 0; i < scope.CELLS_HORIZONTAL; i++ )
@@ -365,6 +360,7 @@ class ThreejsRenderer {
 		if (!this.snake_body ){
 			this.snake_body = this.AM.pullAsset( 'python_body' );
 			this.snake_container.add(this.snake_body)
+
 		} else {
 			this.updateSnakeBody(this.body_parts);	
 		}
