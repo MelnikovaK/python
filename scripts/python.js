@@ -399,7 +399,7 @@ class Python {
 		if ( scope.logic_step_interval != scope.start_logic_step_interval ) return;
 		scope.accelerated_moving = true;
 		setTimeout( function() {
-			scope.logic_step_interval *= 2;
+			scope.logic_step_interval = scope.start_logic_step_interval;
 		}, 5000); 
 	}
 
