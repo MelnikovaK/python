@@ -180,7 +180,7 @@ class ThreejsRenderer {
 		        FAR
 		    );
 
-    camera.position.set( 0, 16, 0 );
+    camera.position.set( 0, 13, 0 );
 		camera.lookAt( this.ZERO );
 
 		var scene = this.scene = new THREE.Scene();
@@ -258,7 +258,6 @@ class ThreejsRenderer {
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
 
 			for ( var i = 0; i < python_body.length; i++ ) {
-
 				var python_part = python_body[i]._model;
 
 				if( python_part && (i == python_body.length - 1  || i == 0) ) {
@@ -269,17 +268,17 @@ class ThreejsRenderer {
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
 					if ( i == 0) { //head
-							var upper_head = python_part.children[0];
+						var upper_head = python_part.children[0];
 						if ( scope.bonus_is_eaten ) {
-							if ( delta < .6) upper_head.position.z = -delta - .2;
-							else upper_head.position.z = (delta - .8);
+							if ( delta < .5) upper_head.rotation.x = upper_head.rotation.z + (100 * window.Utils.DEG2RAD - upper_head.rotation.z) * delta;
+							else upper_head.rotation.x = upper_head.rotation.y + (100 * window.Utils.DEG2RAD - upper_head.rotation.z) * (1 - delta);
 						}
-						else upper_head.position.z = 0;
+						else upper_head.rotation.x = 0;
 
 						scope.moveEyes(python_part, scope.apple);
 					}
 				}
-				if ( scope.body_parts && i < python_body.length ) {
+				if ( scope.body_parts && i < python_body.length ) {//body
 
 				scope.body_parts.points[i] = new THREE.Vector3(
 					python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta,
@@ -387,6 +386,11 @@ class ThreejsRenderer {
 						var lower_head = this.AM.pullAsset( 'python_lower_head' );
 						var upper_head = this.AM.pullAsset( 'python_upper_head' );
 						head.add(upper_head,lower_head);
+						// var m = new THREE.Matrix4();
+						// head.rotateZ = -1;
+					  // m.makeTranslation(0, 0, 1);
+
+					  // head.applyMatrix(m);
 						var python_part = head;
 					 	this.initEyes(upper_head);
 					}
@@ -400,7 +404,6 @@ class ThreejsRenderer {
 			}
 		}
 
-		// var head = python_body[0]._model;
 		if (!this.snake_body ){
 			this.snake_body = this.AM.pullAsset( 'python_body' );
 			this.snake_container.add(this.snake_body)
@@ -498,7 +501,7 @@ class ThreejsRenderer {
 		this.AM.putAsset(python_body[python_body.length - 1]._model);
 		this.AM.putAsset(this.snake_body);
 		for ( var i = 0; i < this.eyes.length; i++ ){
-			this.AM.putAsset(this.eyes[i].model);
+			this.AM.putAsset(this.eyes[i]);
 		}
 	}
 
@@ -517,6 +520,9 @@ class ThreejsRenderer {
 		//HEAD
 		var upper_head_geometry = new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI);
 		var lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
+
+		// upper_head_geometry.translate( 0, -.5, 0 )
+		// lower_head_geometry.translate( 0, -.5, 0 )
 		// var m = new THREE.Matrix4();
   //   m.makeTranslation(0, -1, 0);
 
@@ -560,7 +566,6 @@ class ThreejsRenderer {
 		this.addBonusToAssetManager('stone');
 		this.addBonusToAssetManager('frog');
 		this.addBonusToAssetManager('accelerator');
-		
 	}
 
 
