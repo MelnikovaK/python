@@ -268,27 +268,15 @@ class ThreejsRenderer {
 					var prev_angle = scope.getSmallestAngle( python_body[i].angle, python_body[i].prev_angle, Math.PI );
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
-					if ( i == 0) {
+					if ( i == 0) { //head
 							var upper_head = python_part.children[0];
 						if ( scope.bonus_is_eaten ) {
-							console.log(upper_head.position.z)
 							if ( delta < .6) upper_head.position.z = -delta - .2;
 							else upper_head.position.z = (delta - .8);
 						}
 						else upper_head.position.z = 0;
-						var x = python_part.position.x + .5;
-						var z = python_part.position.z + .5;
-						if ( scope.apple ) {
-						 	var rad = Math.atan2(scope.apple.position.x - x, scope.apple.position.z - z) * -1 + 180 * Utils.DEG2RAD - python_part.rotation.z;
-							rad = scope.getSmallestAngle( 0, rad, Math.PI );
 
-						 	if ( Math.abs( rad * Utils.RAD2DEG ) > 90 ){
-						 		rad = 90 * Utils.DEG2RAD * Math.sign(rad);
-						 	}
-							scope.eyes.forEach(function(x) {
-								x.model.rotation.z = rad;
-							});
-						}
+						scope.moveEyes(python_part, scope.apple);
 					}
 				}
 				if ( scope.body_parts && i < python_body.length ) {
@@ -314,6 +302,22 @@ class ThreejsRenderer {
 		
 		animate();
 
+	}
+
+
+	moveEyes(head, observed_object) {
+		var x = head.position.x + .5;
+		var z = head.position.z + .5;
+		if ( observed_object ) {
+		 	var rad = Math.atan2(observed_object.position.x - x, observed_object.position.z - z) * -1 + 180 * Utils.DEG2RAD - head.rotation.z;
+			rad = this.getSmallestAngle( 0, rad, Math.PI );
+		 	if ( Math.abs( rad * Utils.RAD2DEG ) > 90 ){
+		 		rad = 90 * Utils.DEG2RAD * Math.sign(rad);
+		 	}
+			this.eyes.forEach(function(x) {
+				x.rotation.z = rad;
+			});
+		}
 	}
 
 	getSmallestAngle(angle, prev_angle, max_angle) {
@@ -409,8 +413,7 @@ class ThreejsRenderer {
 	initEyes(head) {
 		var first_eye = this.AM.pullAsset( 'python_eye' );
 		var second_eye = this.AM.pullAsset( 'python_eye' );
-		this.eyes = [{model: first_eye, angle: 0, prev_angle: 0},
-								 {model: second_eye, angle: 0, prev_angle: 0}];
+		this.eyes = [first_eye,second_eye];
 
 		head.add(first_eye, second_eye);
 	 	this.setCoordinates(first_eye, -.2, -.3);
@@ -512,8 +515,16 @@ class ThreejsRenderer {
 		var snake_material = new THREE.MeshBasicMaterial( { map: this.snake_texture } );
 
 		//HEAD
-		var upper_head = function() {return new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI), snake_material);};
-		var lower_head = function() {return new THREE.Mesh( new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI), snake_material);}; 
+		var upper_head_geometry = new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI);
+		var lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
+		// var m = new THREE.Matrix4();
+  //   m.makeTranslation(0, -1, 0);
+
+  //   upper_head_geometry.applyMatrix(m);
+  //   lower_head_geometry.applyMatrix(m);
+
+		var upper_head = function() {return new THREE.Mesh( upper_head_geometry, snake_material);};
+		var lower_head = function() {return new THREE.Mesh( lower_head_geometry, snake_material);}; 
 		this.AM.addAsset('python_upper_head', upper_head, 3);
 		this.AM.addAsset('python_lower_head', lower_head, 3);
 
