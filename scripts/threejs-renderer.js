@@ -181,7 +181,7 @@ class ThreejsRenderer {
 		        NEAR,
 		        FAR
 		    );
-
+		camera.rotation.order = 'YXZ'
     camera.position.set( 0, 13, 0 );
 		camera.lookAt( this.ZERO );
 
@@ -322,7 +322,6 @@ class ThreejsRenderer {
 		var python_body = this.python.python_body;
 
 		this.body_parts  = new THREE.CatmullRomCurve3();
-
 		
 		for ( var i = 0; i < python_body.length; i++ ) {
 			if ( !python_body[i]._model ) {
@@ -367,22 +366,6 @@ class ThreejsRenderer {
 
 	}
 
-	initEyes(head) {
-		var first_eye = this.AM.pullAsset( 'python_eye' );
-		var second_eye = this.AM.pullAsset( 'python_eye' );
-		this.eyes = [first_eye,second_eye];
-
-		head.add(first_eye, second_eye);
-	 	this.setCoordinates(first_eye, -.2, -.3);
-	 	this.setCoordinates(second_eye, .2, -.3);
-	}
-
-	setCoordinates( model, x,z,y) {
-		if ( x ) model.position.x = x;
-		if ( z ) model.position.z = z;
-		if ( y ) model.position.y = y;
-	}
-
 	changePythonPartPosition(python_part, x, prev_x, z, prev_z, delta) {
 		python_part.position.x = this.getPositionValue(x, prev_x, delta);
 		python_part.position.z = this.getPositionValue(z, prev_z, delta);
@@ -392,6 +375,15 @@ class ThreejsRenderer {
 		return prev_value + (value - prev_value) * delta
 	}
 
+	initEyes(head) {
+		var first_eye = this.AM.pullAsset( 'python_eye' );
+		var second_eye = this.AM.pullAsset( 'python_eye' );
+		this.eyes = [first_eye,second_eye];
+
+		head.add(first_eye, second_eye);
+	 	this.setCoordinates(first_eye, -.2, -.3);
+	 	this.setCoordinates(second_eye, .2, -.3);
+	}
 
 	moveEyes(head, observed_object) {
 		var x = head.position.x + .5;
@@ -406,6 +398,12 @@ class ThreejsRenderer {
 				x.rotation.z = rad;
 			});
 		}
+	}
+
+	setCoordinates( model, x,z,y) {
+		if ( x ) model.position.x = x;
+		if ( z ) model.position.z = z;
+		if ( y ) model.position.y = y;
 	}
 
 	getSmallestAngle(angle, prev_angle, max_angle) {
@@ -425,10 +423,6 @@ class ThreejsRenderer {
 		var scope = this;
 		var bonuses = this.python.bonuses;
 
-		const RADIUS = .5;
-		const SEGMENTS = 16;
-		const RINGS = 16;
-
 		for ( var i = 0; i < bonuses.length; i++ ) {
 			if ( !bonuses[i]._model ) {
 				var bonus = this.AM.pullAsset( bonuses[i].type );
@@ -442,7 +436,6 @@ class ThreejsRenderer {
 	}
 
 	changeCameraPosition(delta) {
-		var direction = this.python.python_direction;
 		var python_body = this.python.python_body;
 		var head = python_body[0]._model;
 
@@ -463,9 +456,9 @@ class ThreejsRenderer {
 
 	moveCamera(x, z) {
 		// this.camera_container.position.set(x - this.CELLS_HORIZONTAL / 2, 0, 0);
-		// this.camera.rotation.order = "YXZ";
+		this.camera.rotation.order = "YZX";
 
-		this.camera.position.set(/*( x - 8 )/10*/0 , 13, z / 2);
+		this.camera.position.set(( x - 8 )/ 30 , 13, z / 2);
 		this.camera.lookAt(new THREE.Vector3(/*( x - 10) /20*/0,0,0));
 	}
 
@@ -520,7 +513,7 @@ class ThreejsRenderer {
 		var eye = function() {
 			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .25, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
 			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .08, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
-	 		scope.setCoordinates(pupil, 0, -.18, -.18 );	
+	 		scope.setCoordinates(pupil, 0, -.18, -.16 );	
 			apple_eye.add(pupil);
 			return apple_eye;
 		};
