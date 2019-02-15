@@ -19,7 +19,7 @@ class ThreejsParticles {
 		}.bind(this));
 
 		window.addEventListener( python.PYTHON_GET_ACCELERATION , function () {
-			this.updateEmitterGroup(this.coin_group);
+			this.updateEmitterGroup(this.accel_group);
 		}.bind(this));
 
 		window.addEventListener( "screens:preload_complete" , function (e) {
@@ -41,12 +41,14 @@ class ThreejsParticles {
 		this.explode_group = this.createGroup('smokeparticle.png');
 		this.coin_group = this.createGroup('coin.png');
 		this.smoke_group = this.createGroup('cloudSml.png');
+		this.accel_group = this.createGroup('smokeparticle.png');
 
 		this.explode_group.addPool(10, new SPE.Emitter( fire ), false);
 		this.coin_group.addPool(10, new SPE.Emitter( coin ), false);
 		this.smoke_group.addPool(10, new SPE.Emitter( smoke ), false);
+		this.accel_group.addPool(10, new SPE.Emitter( accel ), false);
 
-		this.game_container.add( this.explode_group.mesh, this.coin_group.mesh, this.smoke_group.mesh );
+		this.game_container.add( this.explode_group.mesh, this.coin_group.mesh, this.smoke_group.mesh, this.accel_group.mesh );
 		
 		var scope = this;
 
@@ -56,6 +58,7 @@ class ThreejsParticles {
 			scope.coin_group.tick( dt );
 			scope.explode_group.tick( dt );
 			scope.smoke_group.tick( dt );
+			scope.accel_group.tick( dt );
 	    scope.renderer.render( scope.scene, scope.camera );
 		}
 
@@ -81,9 +84,8 @@ class ThreejsParticles {
 	} 
 
 	updateEmitterGroup( emitter_group ) {
-		console.log(emitter_group)
 		var head = this.python.python_body[0];
-    emitter_group.triggerPoolEmitter( 1, (new THREE.Vector3( head.x, 0, head.y )) );
+    	emitter_group.triggerPoolEmitter( 1, (new THREE.Vector3( head.x, 0, head.y )) );
 	}
 
 }
