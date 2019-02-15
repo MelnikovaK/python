@@ -26,7 +26,7 @@ class ThreejsRenderer {
 
 		this.MOUTH_OPENING_ANGLE = 120 * window.Utils.DEG2RAD;
 
-		this.BONUS_RADIUS = .5;
+		this.BONUS_RADIUS = .45;
 		this.BONUS_SEGMENTS = 16;
 		this.BONUS_RINGS = 16;
 
@@ -203,26 +203,6 @@ class ThreejsRenderer {
 		var spotLight = new THREE.SpotLight( 0xffffff, 1, 0, 30 / 180 * Math.PI );
 		spotLight.position.set( 10/2, 100/2, 50/2 );
 		this.scene.add( spotLight );
-
-		// var helper = new THREE.CameraHelper( camera );
-		// scene.add( helper );
-
-
-		// //CONTROLS
-		// this.controls = new THREE.OrbitControls( camera, this.renderer.domElement );
-		// this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-		// this.controls.dampingFactor = 0.25;
-		// this.controls.screenSpacePanning = false;
-		// this.controls.minDistance = 10;
-		// this.controls.maxDistance = 500;
-		// this.controls.maxPolarAngle = Math.PI / 2;
-		// window.addEventListener( 'resize', onWindowResize, false );
-
-		// function onWindowResize() {
-		// 	this.camera.aspect = window.innerWidth / window.innerHeight;
-		// 	this.camera.updateProjectionMatrix();
-		// 	this.renderer.setSize( window.innerWidth, window.innerHeight );
-		// }
 	}
 
 	initContainers() {
@@ -234,6 +214,10 @@ class ThreejsRenderer {
 		this.game_field.position.x = - this.CELLS_HORIZONTAL / 2 + .5;
 		this.game_field.position.z = - this.CELLS_VERTICAL / 2 + .5;
 		this.game_container.add(this.game_field);
+
+		this.camera_container = new THREE.Group();
+		this.game_container.add(this.camera_container);
+		this.camera_container.add(this.camera);
 
 		this.snake_container = new THREE.Group();
 		this.game_field.add(this.snake_container);
@@ -482,8 +466,8 @@ class ThreejsRenderer {
 	}
 
 	moveCamera(x, z) {
-		this.game_container.add(this.camera)
-		this.camera.rotation.order = "YXZ";
+		// this.camera_container.position.set(x - this.CELLS_HORIZONTAL / 2, 0, 0);
+		// this.camera.rotation.order = "YXZ";
 
 		this.camera.position.set(/*( x - 8 )/10*/0 , 13, z / 2);
 		this.camera.lookAt(new THREE.Vector3(/*( x - 10) /20*/0,0,0));
@@ -522,7 +506,6 @@ class ThreejsRenderer {
 		//HEAD
 		var upper_head_geometry = new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI);
 		var lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
-
 		// upper_head_geometry.translate( 0, -.5, 0 )
 		// lower_head_geometry.translate( 0, -.5, 0 )
 		// var m = new THREE.Matrix4();
@@ -541,7 +524,7 @@ class ThreejsRenderer {
 		var eye = function() {
 			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .25, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
 			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .08, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
-	 		scope.setCoordinates(pupil, 0, -.2, -.16 );	
+	 		scope.setCoordinates(pupil, 0, -.18, -.18 );	
 			apple_eye.add(pupil);
 			return apple_eye;
 		};
