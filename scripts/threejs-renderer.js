@@ -261,9 +261,8 @@ class ThreejsRenderer {
 				var python_part = python_body[i]._model;
 
 				if( python_part && (i == python_body.length - 1  || i == 0) ) {
+					scope.changePythonPartPosition(python_part, python_body[i].x, python_body[i].prev_x, python_body[i].y, python_body[i].prev_y, delta);
 
-					python_part.position.x = python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta;
-					python_part.position.z = python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta;
 					var prev_angle = scope.getSmallestAngle( python_body[i].angle, python_body[i].prev_angle, Math.PI );
 					python_part.rotation.z = prev_angle + (python_body[i].angle - prev_angle) * delta;
 
@@ -281,9 +280,9 @@ class ThreejsRenderer {
 				if ( scope.body_parts && i < python_body.length ) {//body
 
 				scope.body_parts.points[i] = new THREE.Vector3(
-					python_body[i].prev_x + (python_body[i].x - python_body[i].prev_x) * delta,
+					scope.getPositionValue( python_body[i].x, python_body[i].prev_x, delta),
 					0,
-					python_body[i].prev_y + (python_body[i].y - python_body[i].prev_y) * delta);
+					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta))
 				}
 			}
 
@@ -303,34 +302,6 @@ class ThreejsRenderer {
 
 	}
 
-
-	moveEyes(head, observed_object) {
-		var x = head.position.x + .5;
-		var z = head.position.z + .5;
-		if ( observed_object ) {
-		 	var rad = Math.atan2(observed_object.position.x - x, observed_object.position.z - z) * -1 + 180 * Utils.DEG2RAD - head.rotation.z;
-			rad = this.getSmallestAngle( 0, rad, Math.PI );
-		 	if ( Math.abs( rad * Utils.RAD2DEG ) > 90 ){
-		 		rad = 90 * Utils.DEG2RAD * Math.sign(rad);
-		 	}
-			this.eyes.forEach(function(x) {
-				x.rotation.z = rad;
-			});
-		}
-	}
-
-	getSmallestAngle(angle, prev_angle, max_angle) {
-		var dist = Math.abs(angle - prev_angle);
-		var changing_angle = max_angle * 2 
-		if( dist > max_angle ){
-			if( prev_angle < angle ){
-				prev_angle += changing_angle;
-			}else{
-				prev_angle -= changing_angle;
-			}
-		}
-		return prev_angle;
-	}
 
 	initGameField() {
 		var scope = this;
@@ -429,6 +400,43 @@ class ThreejsRenderer {
 		if ( y ) model.position.y = y;
 	}
 
+	changePythonPartPosition(python_part, x, prev_x, z, prev_z, delta) {
+		python_part.position.x = this.getPositionValue(x, prev_x, delta);
+		python_part.position.z = this.getPositionValue(z, prev_z, delta);
+	}
+
+	getPositionValue(value, prev_value, delta) {
+		return prev_value + (value - prev_value) * delta
+	}
+
+
+	moveEyes(head, observed_object) {
+		var x = head.position.x + .5;
+		var z = head.position.z + .5;
+		if ( observed_object ) {
+		 	var rad = Math.atan2(observed_object.position.x - x, observed_object.position.z - z) * -1 + 180 * Utils.DEG2RAD - head.rotation.z;
+			rad = this.getSmallestAngle( 0, rad, Math.PI );
+		 	if ( Math.abs( rad * Utils.RAD2DEG ) > 90 ){
+		 		rad = 90 * Utils.DEG2RAD * Math.sign(rad);
+		 	}
+			this.eyes.forEach(function(x) {
+				x.rotation.z = rad;
+			});
+		}
+	}
+
+	getSmallestAngle(angle, prev_angle, max_angle) {
+		var dist = Math.abs(angle - prev_angle);
+		var changing_angle = max_angle * 2 
+		if( dist > max_angle ){
+			if( prev_angle < angle ){
+				prev_angle += changing_angle;
+			}else{
+				prev_angle -= changing_angle;
+			}
+		}
+		return prev_angle;
+	}
 	
 	updateBonuses() {
 		var scope = this;
@@ -481,7 +489,6 @@ class ThreejsRenderer {
 		// 	this.camera.eulerOrder = "XYZ";
 		// 	this.camera.position.set(this.camera.position.x, 13, z / 2);
 		// }
-
 
 		this.camera.position.set(0, 13, z / 2);
 		this.camera.lookAt(new THREE.Vector3(/*( x - 10) /20*/0,0,0));
@@ -537,8 +544,8 @@ class ThreejsRenderer {
 
 		//EYES
 		var eye = function() {
-			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .3, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
-			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .1, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
+			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .25, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
+			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .08, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
 	 		scope.setCoordinates(pupil, 0, -.2, -.18 );	
 			apple_eye.add(pupil);
 			return apple_eye;
