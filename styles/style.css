@@ -4,9 +4,9 @@ canvas {
 	border: 2px solid black;
  	/*width: 400px;*/
  	/*height: 400px;*/
- 	position: absolute;
-  top: 60px;
-  left: 0;
+ 	position: relative;
+  	top: 0;
+  	left: 0;
 }
 
 #game_field {
@@ -99,4 +99,27 @@ h1 {
 
 .game_container {
 	outline-offset: 5px;
+}
+
+.game-screen_pause-btn {
+	left:45%;
+	width: 80px;
+	height: 40px;
+	font-size: 20px;
+	position: absolute;
+	z-index: 15;
+}
+.game-screen_camera_position-btn {
+	left:50%;
+	width: 240px;
+	height: 40px;
+	font-size: 20px;
+	position: absolute;
+	z-index: 15;
+}
+.game-screen_points_container {
+	position: absolute;
+	font-size: 30px;
+	padding: 20px;
+	z-index: 15;	
 }

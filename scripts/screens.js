@@ -239,7 +239,7 @@ class Screens {
 		var $screen = this.addScreenTemplate( 'game-screen',
 		`
 			<div class="screen  game-screen">
-				<div>Points: <span class="game-screen__points">0</span></div>
+				<div class="game-screen_points_container">Points: <span class="game-screen__points">0</span></div>
 				<button class="game-screen_pause-btn button" data-emit-event="${this.PAUSE}"  data-click-sound="" >Pause</button>
 				<button class="game-screen_camera_position-btn button" data-emit-event="${this.CHANGE_CAMERA_POSITION}"  data-click-sound="" >Change camera position</button>
 				<div class="game-screen__container"></div>

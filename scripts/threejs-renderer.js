@@ -197,7 +197,6 @@ class ThreejsRenderer {
 
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.container.appendChild(this.renderer.domElement);
-
 		var textureLoader = new THREE.TextureLoader();
 		
 		var spotLight = new THREE.SpotLight( 0xffffff, 1, 0, 30 / 180 * Math.PI );
@@ -338,6 +337,9 @@ class ThreejsRenderer {
 						var lower_head = this.AM.pullAsset( 'python_lower_head' );
 						var upper_head = this.AM.pullAsset( 'python_upper_head' );
 						head.add(upper_head,lower_head);
+						// head.matrix.makeTranslation(0, -.5, 0);
+						// head.matrixWorldNeedsUpdate = true;
+						// head.translate( 0, -.5, 0 )
 						// var m = new THREE.Matrix4();
 						// head.rotateZ = -1;
 					  // m.makeTranslation(0, 0, 1);
@@ -456,7 +458,6 @@ class ThreejsRenderer {
 
 	moveCamera(x, z) {
 		// this.camera_container.position.set(x - this.CELLS_HORIZONTAL / 2, 0, 0);
-		this.camera.rotation.order = "YZX";
 
 		this.camera.position.set(( x - 8 )/ 30 , 13, z / 2);
 		this.camera.lookAt(new THREE.Vector3(/*( x - 10) /20*/0,0,0));
@@ -514,6 +515,8 @@ class ThreejsRenderer {
 		var eye = function() {
 			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .25, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
 			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .08, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
+			// apple_eye.scale.z = .1;
+			// pupil.scale.z = .1;
 	 		scope.setCoordinates(pupil, 0, -.18, -.16 );	
 			apple_eye.add(pupil);
 			return apple_eye;
