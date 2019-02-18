@@ -160,7 +160,8 @@ class ThreejsRenderer {
 
 		this.ground_texture = textureLoader.load( this.PATH + "ground.jpg");
 		this.wall_texture = textureLoader.load( this.PATH + "wall.jpg");
-		this.snake_texture = textureLoader.load( this.PATH + "snake.jpg");
+		this.snake_map_texture = textureLoader.load( this.PATH + "snake_map.jpg");
+		this.snake_normalmap_texture = textureLoader.load( this.PATH + "snake_normalmap.jpg");
 	}
 
 	initScene() {
@@ -169,7 +170,7 @@ class ThreejsRenderer {
 
 		var ZERO = new THREE.Vector3(0,0,0);
 		const VIEW_ANGLE = 90;
-		const ASPECT = this.FIELD_WIDTH / this.FIELD_HEIGHT;
+		const ASPECT = window.innerWidth / window.innerHeight;
 		const NEAR = .01;
 		const FAR = 500;
 
@@ -181,7 +182,6 @@ class ThreejsRenderer {
 		        NEAR,
 		        FAR
 		    );
-		camera.rotation.order = 'YXZ'
     camera.position.set( 0, 13, 0 );
 		camera.lookAt( this.ZERO );
 
@@ -195,7 +195,7 @@ class ThreejsRenderer {
 		scene.add( gridHelper );
 		// !!!
 
-		this.renderer.setSize(this.FIELD_WIDTH, this.FIELD_HEIGHT);
+		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.container.appendChild(this.renderer.domElement);
 
 		var textureLoader = new THREE.TextureLoader();
@@ -490,7 +490,8 @@ class ThreejsRenderer {
 
 	createAssets() {
 		var scope = this;
-		var snake_material = new THREE.MeshBasicMaterial( { map: this.snake_texture } );
+
+		var snake_material = new THREE.MeshPhongMaterial({map: this.snake_map_texture, normalMap: this.snake_normalmap_texture});
 
 		//HEAD
 		var upper_head_geometry = new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI);

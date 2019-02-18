@@ -1,6 +1,6 @@
 var smoke = { particleCount: 750,
                 maxAge: {
-                    value: 1,
+                    value: .8,
                 },
                 position: {
                     value: new THREE.Vector3( 0,0,0 ),
