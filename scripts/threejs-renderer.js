@@ -182,7 +182,7 @@ class ThreejsRenderer {
 		        NEAR,
 		        FAR
 		    );
-    camera.position.set( 0, 13, 0 );
+    camera.position.set( 0, 15, 0 );
 		camera.lookAt( this.ZERO );
 
 		var scene = this.scene = new THREE.Scene();
@@ -220,6 +220,8 @@ class ThreejsRenderer {
 
 		this.snake_container = new THREE.Group();
 		this.game_field.add(this.snake_container);
+		// this.game_field.add(this.camera);
+
 
 		this.GO_container = new THREE.Group();
 		this.game_field.add(this.GO_container);
@@ -457,14 +459,12 @@ class ThreejsRenderer {
 	}
 
 	moveCamera(x, z) {
-		// this.camera_container.position.set(x - this.CELLS_HORIZONTAL / 2, 0, 0);
-
-		this.camera.position.set(( x - 8 )/ 30 , 13, z / 2);
-		this.camera.lookAt(new THREE.Vector3(/*( x - 10) /20*/0,0,0));
+		this.camera.position.set(x / 2, 14, z / 3);
+		this.camera.lookAt(new THREE.Vector3( x / 2, 0, z / 3));
 	}
 
 	resetCameraPosition(camera) {
-		camera.position.set( 0, 13, 0 );
+		camera.position.set( 0, 14, 0 );
 		camera.lookAt( this.ZERO );
 	}
 
