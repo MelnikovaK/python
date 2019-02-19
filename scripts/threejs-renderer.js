@@ -137,12 +137,7 @@ class ThreejsRenderer {
 			scope.bonus_eating = true;
 			setTimeout( function() {
 				scope.bonus_eating = false;
-			}, interval);
-			//открывается рот при приближении к бонусу
-			//закрывается в любом случае
-			//в точке бонуса: если рот не открыт -> стандартное съедение
-			//иначе ничего не делать
-			
+			}, interval);			
 		});
 
 		window.addEventListener( python.PYTHON_GET_ACCELERATION , function (e) {
@@ -318,11 +313,14 @@ class ThreejsRenderer {
 
 			//frog moving
 			if( scope.frog_moving ){
-				scope.changePythonPartPosition(scope.frog, scope.logic_frog.x, scope.frog.position.x, scope.logic_frog.y, scope.frog.position.z, delta);
-				// scope.frog.position.x += ( scope.frog_x - scope.frog.position.x ) * delta; 
-				// scope.frog.position.z += ( scope.frog_z - scope.frog.position.z ) * delta;
-				// console.log('X: ', scope.frog_x, scope.frog.position.x, ( scope.frog_x - scope.frog.position.x ));
-				// console.log('Z: ',scope.frog_z, scope.frog.position.z, ( scope.frog_z - scope.frog.position.z ));
+				var copyx = JSON.parse(JSON.stringify(scope.logic_frog.x));
+
+				var copyz = JSON.parse(JSON.stringify(scope.logic_frog.y));
+
+				scope.frog.position.x += ( scope.logic_frog.x - scope.frog.position.x ) * delta; 
+				scope.frog.position.z += ( scope.logic_frog.y - scope.frog.position.z ) * delta;
+				// console.log('X: ', copyx, scope.frog.position.x, ( copyx - scope.frog.position.x ) * delta);
+				// console.log('Z: ', copyz, scope.frog.position.z, ( copyz - scope.frog.position.z ) * delta);
 				if ( delta < .5 ) scope.frog.position.y = Math.cos(.4) * delta;
 				else scope.frog.position.y = Math.cos(.4) * ( 1 - delta );
 			}
@@ -375,7 +373,7 @@ class ThreejsRenderer {
 	}
 
 	updateSnakeBody(points) {
-		var snake_geometry = new THREE.TubeBufferGeometry( points,  points.length * 2 + 30, .5, 16, false );
+		var snake_geometry = new THREE.TubeBufferGeometry( points,  points.length * 2 + 60, .5, 16, false );
 		this.snake_body.geometry = snake_geometry;
 	}
 

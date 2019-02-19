@@ -239,6 +239,11 @@ class Python {
 				// move python
 				scope.movePython();
 
+				if( scope.python_moved ){
+					scope.python_moved = false;
+					Utils.triggerCustomEvent(window, scope.FROG_MOVING, {frog: scope.moving_frog, logic_step_interval: scope.logic_step_interval});
+				}
+
 				// check game end
 				if ( scope.isGameOver()) {
 					scope.gameOver();
@@ -430,12 +435,13 @@ class Python {
 		var diap = [0,1, -1];
 		this.frog_interval = setInterval(function() {
 			var copy = Object.assign({}, frog);
-			var x = copy.x + diap[~~( Math.random() * (4 - 1))] ;
-			var y = copy.y + diap[~~( Math.random() * (4 - 1))];
+			var x = copy.x + diap[~~( Math.random() * 3)] ;
+			var y = copy.y + diap[~~( Math.random() * 3)];
 			if ( scope.checkBonusCoordinatesCorrect(x, y, frog) ) {
 				frog.x = x;
 				frog.y = y;
-				Utils.triggerCustomEvent(window, scope.FROG_MOVING, {frog: frog, logic_step_interval: scope.logic_step_interval});
+				scope.python_moved = true;
+				// Utils.triggerCustomEvent(window, scope.FROG_MOVING, {frog: frog, logic_step_interval: scope.logic_step_interval});
 			}
 		}, 2000);
 	}
