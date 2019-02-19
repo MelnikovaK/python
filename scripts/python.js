@@ -317,7 +317,6 @@ class Python {
 			var bonus = this.bonuses[i];
 			var supposed_x = head.x + this.python_direction.x;
 			var supposed_y = head.y + this.python_direction.y;
-			console.log(supposed_x, supposed_y)
 			if ( supposed_x == bonus.x && supposed_y == bonus.y )	Utils.triggerCustomEvent(window, this.BONUS_IS_EATEN, {logic_step_interval: scope.logic_step_interval});
 
 			if ( head.x == bonus.x && head.y == bonus.y ) {

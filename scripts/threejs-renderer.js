@@ -535,26 +535,24 @@ class ThreejsRenderer {
 
 
 		//HEAD
-		var internal_side_material = new THREE.MeshPhongMaterial({ color: '#FFFFFF', side: THREE.BackSide});
+		var internal_side_material = new THREE.MeshPhongMaterial({ color: '#800000', side: THREE.BackSide});
 		var head_materials = [snake_material, internal_side_material];
 		var material = new THREE.MeshFaceMaterial(head_materials);
 
 
 		var upper_head_geometry = new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI);
-		var lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
-		// upper_head_geometry.translate( 0, -.5, 0 );
-		// lower_head_geometry.translate( 0, -.5, 0 );
+		var inrenal_lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
+		var external_lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
 		var upper_head = function(){ 
 			var head_mesh = new THREE.Mesh(upper_head_geometry, material);
-			for ( var face in head_mesh.geometry.faces ) {
-				if (head_mesh.geometry.faces[ face ].normal.z == 1) head_mesh.geometry.faces[ face ].materialIndex = 2;
-			}
-			return head_mesh;};
+			return head_mesh;}
+
+
 		var lower_head = function() {
-			var head_mesh = new THREE.Mesh(lower_head_geometry, material);
-			for ( var face in head_mesh.geometry.faces ) {
-				if (head_mesh.geometry.faces[ face ].normal.z == 1) head_mesh.geometry.faces[ face ].materialIndex = 2;
-			}
+			var external_head_mesh = new THREE.Mesh(external_lower_head_geometry, snake_material);
+			var internal_head_mesh = new THREE.Mesh(inrenal_lower_head_geometry, internal_side_material);
+			var head_mesh = new THREE.Group();
+			head_mesh.add(external_head_mesh, internal_head_mesh)
 			return head_mesh;
 		};
 
