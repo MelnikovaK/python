@@ -24,7 +24,7 @@ class ThreejsRenderer {
 		this.CELLS_HORIZONTAL = config.cells_horizontal;
 		this.CELLS_VERTICAL = config.cells_vertical;
 
-		this.MOUTH_OPENING_ANGLE = 300 * window.Utils.DEG2RAD;
+		this.MOUTH_OPENING_ANGLE = 250 * window.Utils.DEG2RAD;
 
 		this.BONUS_RADIUS = .45;
 		this.BONUS_SEGMENTS = 16;
@@ -269,27 +269,25 @@ class ThreejsRenderer {
 					}
 				}
 				//body
-				scope.body_parts.points[i * 2] = new THREE.Vector3(
+				scope.body_parts.points[i* 2] = new THREE.Vector3(
 					scope.getPositionValue( python_body[i].x, python_body[i].prev_x, delta),
 					0,
 					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta)
 				)
 				if ( i < python_body.length - 1){
-						var x = python_body[i].x + (python_body[i + 1].x - python_body[i].x) / 2;
-						var y = python_body[i].y + (python_body[i + 1].y - python_body[i].y) / 2;
-						var prev_x = python_body[i].prev_x + (python_body[i + 1].prev_x - python_body[i].prev_x) / 2;
-						var prev_y = python_body[i].prev_y + (python_body[i + 1].prev_y - python_body[i].prev_y) / 2;
+					var x = python_body[i].x + (python_body[i + 1].x - python_body[i].x) / 2;
+					var y = python_body[i].y + (python_body[i + 1].y - python_body[i].y) / 2;
+					var prev_x = python_body[i].prev_x + (python_body[i + 1].prev_x - python_body[i].prev_x) / 2;
+					var prev_y = python_body[i].prev_y + (python_body[i + 1].prev_y - python_body[i].prev_y) / 2;
 
-						scope.body_parts.points[i * 2 + 1] = new THREE.Vector3(
-							scope.getPositionValue( x, prev_x, delta),
-							0,
-							scope.getPositionValue( y, prev_y, delta)
-						);
-					}
+					scope.body_parts.points[i * 2 + 1] = new THREE.Vector3(
+						scope.getPositionValue( x, prev_x, delta),
+						0,
+						scope.getPositionValue( y, prev_y, delta)
+					);
+				}	
 			}
 			var copy = JSON.parse(JSON.stringify(scope.body_parts.points));
-
-			// console.log(copy)
 
 			if (scope.snake_body) {
 				scope.updateSnakeBody(scope.body_parts);
@@ -316,7 +314,7 @@ class ThreejsRenderer {
 		scope.game_container.add( ground_plane );
 		
 		var cube_material = new THREE.MeshLambertMaterial( { map: this.wall_texture } );
-		var geometry = new THREE.BoxBufferGeometry( 1, .5, 1 );	
+		var geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );	
 		for ( var i = 0; i < scope.CELLS_HORIZONTAL; i++ )
 			for ( var j = 0; j < scope.CELLS_VERTICAL; j++ ) {
 				if ( i == 0 || j == 0 || i == scope.CELLS_HORIZONTAL - 1 || j == scope.CELLS_VERTICAL - 1)  {
@@ -331,7 +329,7 @@ class ThreejsRenderer {
 	}
 
 	updateSnakeBody(points) {
-		var snake_geometry = new THREE.TubeBufferGeometry( points,  points.length * 2 + 46, .5, 16, false );
+		var snake_geometry = new THREE.TubeBufferGeometry( points,  points.length * 2 + 30, .5, 16, false );
 		this.snake_body.geometry = snake_geometry;
 	}
 
@@ -343,12 +341,11 @@ class ThreejsRenderer {
 		
 		for ( var i = 0; i < python_body.length; i++ ) {
 			if ( !python_body[i]._model ) {
-				if ( i < python_body.length ) {
+				if (i < python_body.length ) {
 					this.body_parts.points.push( new THREE.Vector3( python_body[i].x, 0, python_body[i].y) )
 					if ( i < python_body.length - 1){
 						var x = python_body[i].x + (python_body[i + 1].x - python_body[i].x) / 2;
 						var y = python_body[i].y + (python_body[i + 1].y - python_body[i].y) / 2;
-						console.log(python_body[i + 1].x, python_body[i].x, x,y)
 						this.body_parts.points.push( new THREE.Vector3(x, 0, y) )
 					}
 				}
@@ -361,18 +358,11 @@ class ThreejsRenderer {
 						var head = new THREE.Group();
 						var lower_head = this.AM.pullAsset( 'python_lower_head' );
 						var upper_head = this.AM.pullAsset( 'python_upper_head' );
+						// var neck = this.AM.pullAsset( 'python_neck' );
 						head.add(upper_head,lower_head);
-						// head.matrix.makeTranslation(0, -.5, 0);
-						// head.matrixWorldNeedsUpdate = true;
-						// head.translate( 0, -.5, 0 )
-						// var m = new THREE.Matrix4();
-						// head.rotateZ = -1;
-					  // m.makeTranslation(0, 0, 1);
-
-					  // head.applyMatrix(m);
 						var python_part = head;
-					 	this.initEyes(upper_head);
-					}
+					 	this.initEyes(head);					 	
+					} 
 					python_part.rotation.x = python_body[i].angle;
 					python_part.position.x = python_body[i].x;
 					python_part.position.z = python_body[i].y;
@@ -409,8 +399,8 @@ class ThreejsRenderer {
 		this.eyes = [first_eye,second_eye];
 
 		head.add(first_eye, second_eye);
-	 	this.setCoordinates(first_eye, -.2, -.3);
-	 	this.setCoordinates(second_eye, .2, -.3);
+	 	this.setCoordinates(first_eye, -.2, -.3, .1);
+	 	this.setCoordinates(second_eye, .2, -.3, .1);
 	}
 
 	moveEyes(head, observed_object) {
@@ -517,6 +507,7 @@ class ThreejsRenderer {
 
 	createAssets() {
 		var scope = this;
+		var m = new THREE.Matrix4();
 
 		var snake_material = new THREE.MeshPhongMaterial({map: this.snake_map_texture, normalMap: this.snake_normalmap_texture, side: THREE.DoubleSide});
 
@@ -536,7 +527,6 @@ class ThreejsRenderer {
 				if (head_mesh.geometry.faces[ face ].normal.z == 1) head_mesh.geometry.faces[ face ].materialIndex = 2;
 			}
 			return head_mesh;};
-			// return new THREE.SceneUtils.createMultiMaterialObject( upper_head_geometry, head_material);};
 		var lower_head = function() {
 			var head_mesh = new THREE.Mesh(lower_head_geometry, material);
 			for ( var face in head_mesh.geometry.faces ) {
@@ -544,17 +534,26 @@ class ThreejsRenderer {
 			}
 			return head_mesh;
 		};
-			// return new THREE.SceneUtils.createMultiMaterialObject( upper_head_geometry, head_materials);}; 
+
 		this.AM.addAsset('python_upper_head', upper_head, 3);
 		this.AM.addAsset('python_lower_head', lower_head, 3);
+
+		//NECK 
+		var geometry = new THREE.CylinderGeometry( .5, .3, 1, 16, 1, false );
+		m.makeTranslation(0, 1/2, 0);
+    geometry.applyMatrix(m);
+
+		var neck = function() {return	new THREE.Mesh( geometry, snake_material )};
+		this.AM.addAsset('python_neck', neck, 3);
+
 
 		//EYES
 		var eye = function() {
 			var apple_eye = new THREE.Mesh( new THREE.SphereGeometry( .25, 16, 16), new THREE.MeshLambertMaterial({ color: 'white'}));
 			var pupil = new THREE.Mesh( new THREE.SphereGeometry( .08, 16), new THREE.MeshLambertMaterial({ color: 'black'}));
-			// apple_eye.scale.z = .1;
-			// pupil.scale.z = .1;
 	 		scope.setCoordinates(pupil, 0, -.18, -.16 );	
+	 		// apple_eye.scale.z = 0.1;
+	 		// pupil.scale.z = 0.1;
 			apple_eye.add(pupil);
 			return apple_eye;
 		};
@@ -562,7 +561,6 @@ class ThreejsRenderer {
 
 		//TAIL
 		var geometry = new THREE.CylinderGeometry( 0, .5, 1.5, 16, 1, false );
-		var m = new THREE.Matrix4();
     m.makeTranslation(0, 1.5/2, 0);
     geometry.applyMatrix(m);
 
