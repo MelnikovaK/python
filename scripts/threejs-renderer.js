@@ -101,6 +101,11 @@ class ThreejsRenderer {
 			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
 		});
 
+		window.addEventListener(python.FROG_MOVING, function(e) {
+			scope.frog_x = e.detail.x;
+			scope.frog_z = e.detail.y;
+		});
+
 		window.addEventListener( python.PYTHON_GET_POINT , function (e) {
 			var bonus = e.detail.bonus;
 			scope.updateBonusPosition(bonus._model, bonus.x, bonus.y );
@@ -166,6 +171,9 @@ class ThreejsRenderer {
 		this.wall_texture = textureLoader.load( this.PATH + "wall.jpg");
 		this.snake_map_texture = textureLoader.load( this.PATH + "snake_map.jpg");
 		this.snake_normalmap_texture = textureLoader.load( this.PATH + "snake_normalmap.jpg");
+
+		this.snake_map_texture.repeat.set( 1, 1 ); 
+		this.snake_normalmap_texture.repeat.set( 1, 1 ); 
 	}
 
 	initScene() {
@@ -287,7 +295,10 @@ class ThreejsRenderer {
 					);
 				}	
 			}
-			var copy = JSON.parse(JSON.stringify(scope.body_parts.points));
+			if(scope.frog_x && scope.frog_z) {
+				scope.frog.position.x = scope.frog.position.x + ( scope.frog_x - scope.frog.position.x ) * delta; 
+				scope.frog.position.z = scope.frog.position.z + ( scope.frog_z - scope.frog.position.z ) * delta; 
+			}
 
 			if (scope.snake_body) {
 				scope.updateSnakeBody(scope.body_parts);
@@ -448,6 +459,7 @@ class ThreejsRenderer {
 				bonus.position.z = bonuses[i].y;
 				bonuses[i]._model = bonus;
 				if ( bonuses[i].type == 'apple') this.apple = bonus;
+				if ( bonuses[i].type == 'frog') this.frog = bonus;
 				scope.GO_container.add(bonus);
 			}
 		}		

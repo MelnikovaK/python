@@ -18,6 +18,7 @@ class Python {
 		this.PYTHON_SHOW_FULL_SCREEN = "renderer:show_full_screen";
 		this.PYTHON_HIDE_FULL_SCREEN = "renderer:hide_full_screen";
 		this.BONUS_IS_EATEN = "renderer:bonus_is_eaten";
+		this.FROG_MOVING = "renderer:frog_moving";
 
 
 		//
@@ -435,7 +436,7 @@ class Python {
 			if ( scope.checkBonusCoordinatesCorrect(x, y, frog) ) {
 				frog.x = x;
 				frog.y = y;
-				Utils.triggerCustomEvent(window, scope.REDRAW_BONUS, {bonus: frog})
+				Utils.triggerCustomEvent(window, scope.FROG_MOVING, {x: x, y: y})
 			}
 		}, 2000);
 	}
