@@ -106,8 +106,7 @@ class ThreejsRenderer {
 
 		window.addEventListener(python.FROG_MOVING, function(e) {
 			var interval = e.detail.logic_step_interval; 
-			scope.frog_x = e.detail.x;
-			scope.frog_z = e.detail.y;
+			scope.logic_frog = e.detail.frog;
 			scope.frog_moving = true;
 			setTimeout(function() {
 				scope.frog_moving = false;
@@ -196,7 +195,7 @@ class ThreejsRenderer {
 		this.snake_normalmap_texture = textureLoader.load( this.PATH + "snake_normalmap.jpg");
 
 		this.snake_map_texture.wrapS = this.snake_map_texture.wrapT = THREE.RepeatWrapping;
-		// this.snake_normalmap_texture.repeat.set(0.5, 0.5);
+		// this.snake_map_texture.repeat.set(0.5, 0.5);
 		// this.snake_normalmap_texture.needsUpdate = true;
 		// this.snake_map_texture.needsUpdate = true;
 	}
@@ -319,8 +318,11 @@ class ThreejsRenderer {
 
 			//frog moving
 			if( scope.frog_moving ){
-				scope.frog.position.x = scope.frog.position.x + ( scope.frog_x - scope.frog.position.x ) * delta; 
-				scope.frog.position.z = scope.frog.position.z + ( scope.frog_z - scope.frog.position.z ) * delta; 
+				scope.changePythonPartPosition(scope.frog, scope.logic_frog.x, scope.frog.position.x, scope.logic_frog.y, scope.frog.position.z, delta);
+				// scope.frog.position.x += ( scope.frog_x - scope.frog.position.x ) * delta; 
+				// scope.frog.position.z += ( scope.frog_z - scope.frog.position.z ) * delta;
+				// console.log('X: ', scope.frog_x, scope.frog.position.x, ( scope.frog_x - scope.frog.position.x ));
+				// console.log('Z: ',scope.frog_z, scope.frog.position.z, ( scope.frog_z - scope.frog.position.z ));
 				if ( delta < .5 ) scope.frog.position.y = Math.cos(.4) * delta;
 				else scope.frog.position.y = Math.cos(.4) * ( 1 - delta );
 			}
@@ -402,7 +404,6 @@ class ThreejsRenderer {
 						var head = new THREE.Group();
 						var lower_head = this.AM.pullAsset( 'python_lower_head' );
 						var upper_head = this.AM.pullAsset( 'python_upper_head' );
-						// var neck = this.AM.pullAsset( 'python_neck' );
 						head.add(upper_head,lower_head);
 						var python_part = head;
 					 	this.initEyes(head);					 	

@@ -435,7 +435,7 @@ class Python {
 			if ( scope.checkBonusCoordinatesCorrect(x, y, frog) ) {
 				frog.x = x;
 				frog.y = y;
-				Utils.triggerCustomEvent(window, scope.FROG_MOVING, {x: x, y: y, logic_step_interval: scope.logic_step_interval});
+				Utils.triggerCustomEvent(window, scope.FROG_MOVING, {frog: frog, logic_step_interval: scope.logic_step_interval});
 			}
 		}, 2000);
 	}
