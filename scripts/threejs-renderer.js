@@ -24,7 +24,7 @@ class ThreejsRenderer {
 		this.CELLS_HORIZONTAL = config.cells_horizontal;
 		this.CELLS_VERTICAL = config.cells_vertical;
 
-		this.MOUTH_OPENING_ANGLE = 250 * window.Utils.DEG2RAD;
+		this.MOUTH_OPENING_ANGLE = 120 * window.Utils.DEG2RAD;
 
 		this.BONUS_RADIUS = .45;
 		this.BONUS_SEGMENTS = 16;
@@ -105,21 +105,13 @@ class ThreejsRenderer {
 		});
 
 		window.addEventListener(python.FROG_MOVING, function(e) {
-			var timestamp = Date.now();
+			var interval = e.detail.logic_step_interval; 
 			scope.frog_x = e.detail.x;
 			scope.frog_z = e.detail.y;
-
-			var frog_moving_interval = setInterval(function() {
-				var time_current = Date.now();
-				var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
-				scope.frog.position.x = scope.frog.position.x + ( scope.frog_x - scope.frog.position.x ) * delta; 
-				scope.frog.position.z = scope.frog.position.z + ( scope.frog_z - scope.frog.position.z ) * delta; 
-				// console.log(scope.frog.position.x, scope.frog.position.z)
-				if ( delta < .5 ) scope.frog.position.y = Math.cos(.4) * delta;
-				else scope.frog.position.y = Math.cos(.4) * ( 1 - delta );
-			}, 1000 / 60);
-
-			setTimeout(function() {clearInterval( frog_moving_interval )}, scope.logic_step_interval);
+			scope.frog_moving = true;
+			setTimeout(function() {
+				scope.frog_moving = false;
+			}, interval);
 		});
 
 		window.addEventListener( python.PYTHON_GET_POINT , function (e) {
@@ -128,12 +120,30 @@ class ThreejsRenderer {
 			scope.updateSnake();
 		});
 
-		window.addEventListener( python.BONUS_IS_EATEN , function (e) {
+		window.addEventListener( python.OPEN_PYTHON_MOUTH , function (e) {
 			var interval = e.detail.logic_step_interval;
-			scope.bonus_is_eaten = true;	
+			scope.mouth_opening = true;	
 			setTimeout( function() {
-				scope.bonus_is_eaten = false;
-			}, interval * 2);
+				scope.mouth_opening = false;
+				scope.mouth_closing = true;
+				setTimeout( function() {
+					scope.mouth_closing = false;
+				}, interval)
+			}, interval);
+		});
+
+		window.addEventListener( python.BONUS_IS_EATEN , function (e) {
+			if ( scope.mouth_opening ) return;
+			var interval = e.detail.logic_step_interval;
+			scope.bonus_eating = true;
+			setTimeout( function() {
+				scope.bonus_eating = false;
+			}, interval);
+			//открывается рот при приближении к бонусу
+			//закрывается в любом случае
+			//в точке бонуса: если рот не открыт -> стандартное съедение
+			//иначе ничего не делать
+			
 		});
 
 		window.addEventListener( python.PYTHON_GET_ACCELERATION , function (e) {
@@ -184,9 +194,10 @@ class ThreejsRenderer {
 		this.wall_texture = textureLoader.load( this.PATH + "wall.jpg");
 		this.snake_map_texture = textureLoader.load( this.PATH + "snake_map.jpg");
 		this.snake_normalmap_texture = textureLoader.load( this.PATH + "snake_normalmap.jpg");
+
+		this.snake_map_texture.wrapS = this.snake_map_texture.wrapT = THREE.RepeatWrapping;
 		// this.snake_normalmap_texture.repeat.set(0.5, 0.5);
 		// this.snake_normalmap_texture.needsUpdate = true;
-		// this.snake_map_texture.repeat.set(0.5, 0.5);
 		// this.snake_map_texture.needsUpdate = true;
 	}
 
@@ -246,8 +257,6 @@ class ThreejsRenderer {
 
 		this.snake_container = new THREE.Group();
 		this.game_field.add(this.snake_container);
-		// this.game_field.add(this.camera);
-
 
 		this.GO_container = new THREE.Group();
 		this.game_field.add(this.GO_container);
@@ -281,12 +290,10 @@ class ThreejsRenderer {
 
 					if ( i == 0) { //head
 						var upper_head = python_part.children[0];
-						if ( scope.bonus_is_eaten ) {
-							if ( delta < .5) upper_head.rotation.x = upper_head.rotation.z + (scope.MOUTH_OPENING_ANGLE - upper_head.rotation.z) * delta;
-							else upper_head.rotation.x = upper_head.rotation.y + (scope.MOUTH_OPENING_ANGLE - upper_head.rotation.z) * (1 - delta);
-						}
-						else upper_head.rotation.x = 0;
+						if ( scope.bonus_eating ) scope.openPythonMouth(upper_head, delta, delta < .5, delta >= .5);
+						else scope.openPythonMouth(upper_head, delta, scope.mouth_opening, scope.mouth_closing);
 
+						if ( !(scope.mouth_opening || scope.mouth_closing || scope.bonus_eating) ) upper_head.rotation.x = 0;
 						scope.moveEyes(python_part, scope.apple);
 					}
 				}
@@ -297,10 +304,10 @@ class ThreejsRenderer {
 					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta)
 				)
 				if ( i < python_body.length - 1){
-					var x = python_body[i].x + (python_body[i + 1].x - python_body[i].x) / 2;
-					var y = python_body[i].y + (python_body[i + 1].y - python_body[i].y) / 2;
-					var prev_x = python_body[i].prev_x + (python_body[i + 1].prev_x - python_body[i].prev_x) / 2;
-					var prev_y = python_body[i].prev_y + (python_body[i + 1].prev_y - python_body[i].prev_y) / 2;
+					var x = scope.getMiddlePoint(python_body[i].x, python_body[i + 1].x);
+					var y = scope.getMiddlePoint(python_body[i].y, python_body[i + 1].y);
+					var prev_x = scope.getMiddlePoint(python_body[i].prev_x, python_body[i + 1].prev_x);
+					var prev_y = scope.getMiddlePoint(python_body[i].prev_y, python_body[i + 1].prev_y);
 
 					scope.body_parts.points[i * 2 + 1] = new THREE.Vector3(
 						scope.getPositionValue( x, prev_x, delta),
@@ -308,6 +315,14 @@ class ThreejsRenderer {
 						scope.getPositionValue( y, prev_y, delta)
 					);
 				}	
+			}
+
+			//frog moving
+			if( scope.frog_moving ){
+				scope.frog.position.x = scope.frog.position.x + ( scope.frog_x - scope.frog.position.x ) * delta; 
+				scope.frog.position.z = scope.frog.position.z + ( scope.frog_z - scope.frog.position.z ) * delta; 
+				if ( delta < .5 ) scope.frog.position.y = Math.cos(.4) * delta;
+				else scope.frog.position.y = Math.cos(.4) * ( 1 - delta );
 			}
 
 			if (scope.snake_body) {
@@ -324,6 +339,14 @@ class ThreejsRenderer {
 		animate();
 	}
 
+	openPythonMouth(head, delta, first_condition, sec_condition) {
+		if (first_condition) head.rotation.x = this.MOUTH_OPENING_ANGLE * delta;
+		else if (sec_condition) head.rotation.x = this.MOUTH_OPENING_ANGLE * ( 1 - delta);
+	}
+
+	getMiddlePoint( first_value, sec_value ){
+		return first_value + (sec_value - first_value) / 2;
+	}
 
 	initGameField() {
 		var scope = this;
@@ -545,8 +568,8 @@ class ThreejsRenderer {
 		var external_lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
 		var upper_head = function(){ 
 			var head_mesh = new THREE.Mesh(upper_head_geometry, material);
-			return head_mesh;}
-
+			return head_mesh;
+		}
 
 		var lower_head = function() {
 			var external_head_mesh = new THREE.Mesh(external_lower_head_geometry, snake_material);

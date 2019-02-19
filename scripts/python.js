@@ -317,30 +317,25 @@ class Python {
 			var bonus = this.bonuses[i];
 			var supposed_x = head.x + this.python_direction.x;
 			var supposed_y = head.y + this.python_direction.y;
-			if ( supposed_x == bonus.x && supposed_y == bonus.y )	Utils.triggerCustomEvent(window, this.BONUS_IS_EATEN, {logic_step_interval: scope.logic_step_interval});
+			if ( supposed_x == bonus.x && supposed_y == bonus.y )	Utils.triggerCustomEvent(window, this.OPEN_PYTHON_MOUTH, {logic_step_interval: scope.logic_step_interval});
 
 			if ( head.x == bonus.x && head.y == bonus.y ) {
 
 				if( bonus.sound ) Utils.triggerCustomEvent( window, this.PLAY_SOUND, bonus.sound );
 				this.points += bonus.point;
-				
+				Utils.triggerCustomEvent(window, this.BONUS_IS_EATEN, {logic_step_interval: scope.logic_step_interval});
 
 				if( this.points < 0 ) { // game over
 					this.points = 0;
 					this.is_game_over = true;
 					Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: true});
-
 					return;
 				}
-
 				// trigger event
 				if( bonus.trigger_action_name ) Utils.triggerCustomEvent(window, bonus.trigger_action_name, {bonus: bonus, game_over: false});
 						//action
 				if ( bonus.action) bonus.action(this, prev_prev_x, prev_prev_y, bonus.point );
-
-
 			}
-
 
 			if (head.prev_x == bonus.x && head.prev_y == bonus.y) {
 				this.resetBonus(bonus);
@@ -440,7 +435,7 @@ class Python {
 			if ( scope.checkBonusCoordinatesCorrect(x, y, frog) ) {
 				frog.x = x;
 				frog.y = y;
-				Utils.triggerCustomEvent(window, scope.FROG_MOVING, {x: x, y: y})
+				Utils.triggerCustomEvent(window, scope.FROG_MOVING, {x: x, y: y, logic_step_interval: scope.logic_step_interval});
 			}
 		}, 2000);
 	}
