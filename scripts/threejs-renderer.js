@@ -59,6 +59,9 @@ class ThreejsRenderer {
 
 		this.preloadTextures();
 		
+		window.onscroll = function(e) {
+			e.preventDefault();
+		}
 		
 		window.addEventListener( "screens: start game" , function () {
 			scope.camera_on_head = false;
@@ -102,8 +105,21 @@ class ThreejsRenderer {
 		});
 
 		window.addEventListener(python.FROG_MOVING, function(e) {
+			var timestamp = Date.now();
 			scope.frog_x = e.detail.x;
 			scope.frog_z = e.detail.y;
+
+			var frog_moving_interval = setInterval(function() {
+				var time_current = Date.now();
+				var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
+				scope.frog.position.x = scope.frog.position.x + ( scope.frog_x - scope.frog.position.x ) * delta; 
+				scope.frog.position.z = scope.frog.position.z + ( scope.frog_z - scope.frog.position.z ) * delta; 
+				// console.log(scope.frog.position.x, scope.frog.position.z)
+				if ( delta < .5 ) scope.frog.position.y = Math.cos(.4) * delta;
+				else scope.frog.position.y = Math.cos(.4) * ( 1 - delta );
+			}, 1000 / 60);
+
+			setTimeout(function() {clearInterval( frog_moving_interval )}, scope.logic_step_interval);
 		});
 
 		window.addEventListener( python.PYTHON_GET_POINT , function (e) {
@@ -117,7 +133,7 @@ class ThreejsRenderer {
 			scope.bonus_is_eaten = true;	
 			setTimeout( function() {
 				scope.bonus_is_eaten = false;
-			}, interval);
+			}, interval * 2);
 		});
 
 		window.addEventListener( python.PYTHON_GET_ACCELERATION , function (e) {
@@ -141,9 +157,6 @@ class ThreejsRenderer {
 			}, 2000);
 		});
 
-		window.onscroll = function(e) {
-			e.preventDefault();
-		}
 	}
 	
 	preloadTextures() {
@@ -171,9 +184,10 @@ class ThreejsRenderer {
 		this.wall_texture = textureLoader.load( this.PATH + "wall.jpg");
 		this.snake_map_texture = textureLoader.load( this.PATH + "snake_map.jpg");
 		this.snake_normalmap_texture = textureLoader.load( this.PATH + "snake_normalmap.jpg");
-
-		this.snake_map_texture.repeat.set( 1, 1 ); 
-		this.snake_normalmap_texture.repeat.set( 1, 1 ); 
+		// this.snake_normalmap_texture.repeat.set(0.5, 0.5);
+		// this.snake_normalmap_texture.needsUpdate = true;
+		// this.snake_map_texture.repeat.set(0.5, 0.5);
+		// this.snake_map_texture.needsUpdate = true;
 	}
 
 	initScene() {
@@ -294,10 +308,6 @@ class ThreejsRenderer {
 						scope.getPositionValue( y, prev_y, delta)
 					);
 				}	
-			}
-			if(scope.frog_x && scope.frog_z) {
-				scope.frog.position.x = scope.frog.position.x + ( scope.frog_x - scope.frog.position.x ) * delta; 
-				scope.frog.position.z = scope.frog.position.z + ( scope.frog_z - scope.frog.position.z ) * delta; 
 			}
 
 			if (scope.snake_body) {
@@ -522,6 +532,7 @@ class ThreejsRenderer {
 		var m = new THREE.Matrix4();
 
 		var snake_material = new THREE.MeshPhongMaterial({map: this.snake_map_texture, normalMap: this.snake_normalmap_texture, side: THREE.DoubleSide});
+
 
 		//HEAD
 		var internal_side_material = new THREE.MeshPhongMaterial({ color: '#FFFFFF', side: THREE.BackSide});
