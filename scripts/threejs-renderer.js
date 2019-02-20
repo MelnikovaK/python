@@ -190,9 +190,12 @@ class ThreejsRenderer {
 		this.snake_normalmap_texture = textureLoader.load( this.PATH + "snake_normalmap.jpg");
 
 		this.snake_map_texture.wrapS = this.snake_map_texture.wrapT = THREE.RepeatWrapping;
-		// this.snake_map_texture.repeat.set(0.5, 0.5);
-		// this.snake_normalmap_texture.needsUpdate = true;
+		// this.snake_map_texture.offset.set(0, 0);
+		// this.snake_map_texture.repeat.set(1, 1);
+		// this.snake_normalmap_texture.offset.set(0, 0);
+		// this.snake_normalmap_texture.repeat.set(1, 1);
 		// this.snake_map_texture.needsUpdate = true;
+		// this.snake_normalmap_texture.needsUpdate = true;
 	}
 
 	initScene() {
@@ -229,7 +232,7 @@ class ThreejsRenderer {
 		this.renderer.setSize(window.innerWidth, window.innerHeight);
 		this.container.appendChild(this.renderer.domElement);
 		var textureLoader = new THREE.TextureLoader();
-		
+
 		var spotLight = new THREE.SpotLight( 0xffffff, 1, 0, 30 / 180 * Math.PI );
 		spotLight.position.set( 10/2, 100/2, 50/2 );
 		this.scene.add( spotLight );
@@ -264,15 +267,19 @@ class ThreejsRenderer {
 	startRendering() {
 		
 		var scope = this;
-
    	function animate() {
 			
 			scope.requestAnimationFrame_id = requestAnimationFrame( animate );
 			var python_body =  scope.python.python_body;
 			if ( !python_body.length ) return;
+			var move_coef = 1;
+			var direction = scope.python.python_direction;
 
 			var time_current = Date.now();
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
+
+			if ( delta < .5 ) var coef = delta;
+			else coef = 1 - delta; 
 
 			for ( var i = 0; i < python_body.length; i++ ) {
 				var python_part = python_body[i]._model;
@@ -293,34 +300,29 @@ class ThreejsRenderer {
 				}
 				//body
 				scope.body_parts.points[i* 2] = new THREE.Vector3(
-					scope.getPositionValue( python_body[i].x, python_body[i].prev_x, delta),
+					scope.getPositionValue( python_body[i].x, python_body[i].prev_x, delta) + +!direction.x * Math.sin(move_coef * coef / 6),
 					0,
-					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta)
+					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta) + +!direction.y *  Math.sin(move_coef * coef / 6)
 				)
 				if ( i < python_body.length - 1){
 					var x = scope.getMiddlePoint(python_body[i].x, python_body[i + 1].x);
 					var y = scope.getMiddlePoint(python_body[i].y, python_body[i + 1].y);
 					var prev_x = scope.getMiddlePoint(python_body[i].prev_x, python_body[i + 1].prev_x);
 					var prev_y = scope.getMiddlePoint(python_body[i].prev_y, python_body[i + 1].prev_y);
-
 					scope.body_parts.points[i * 2 + 1] = new THREE.Vector3(
 						scope.getPositionValue( x, prev_x, delta),
 						0,
 						scope.getPositionValue( y, prev_y, delta)
 					);
 				}	
+				if ( move_coef < 0 ) move_coef = 1;
+				else move_coef = -1;
 			}
 
 			//frog moving
 			if( scope.frog_moving ){
-				var copyx = JSON.parse(JSON.stringify(scope.logic_frog.x));
-
-				var copyz = JSON.parse(JSON.stringify(scope.logic_frog.y));
-
 				scope.frog.position.x += ( scope.logic_frog.x - scope.frog.position.x ) * delta; 
 				scope.frog.position.z += ( scope.logic_frog.y - scope.frog.position.z ) * delta;
-				// console.log('X: ', copyx, scope.frog.position.x, ( copyx - scope.frog.position.x ) * delta);
-				// console.log('Z: ', copyz, scope.frog.position.z, ( copyz - scope.frog.position.z ) * delta);
 				if ( delta < .5 ) scope.frog.position.y = Math.cos(.4) * delta;
 				else scope.frog.position.y = Math.cos(.4) * ( 1 - delta );
 			}
@@ -554,13 +556,11 @@ class ThreejsRenderer {
 		var m = new THREE.Matrix4();
 
 		var snake_material = new THREE.MeshPhongMaterial({map: this.snake_map_texture, normalMap: this.snake_normalmap_texture, side: THREE.DoubleSide});
-
+		var internal_side_material = new THREE.MeshPhongMaterial({ color: '#3D0101', side: THREE.BackSide});
 
 		//HEAD
-		var internal_side_material = new THREE.MeshPhongMaterial({ color: '#800000', side: THREE.BackSide});
 		var head_materials = [snake_material, internal_side_material];
 		var material = new THREE.MeshFaceMaterial(head_materials);
-
 
 		var upper_head_geometry = new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI);
 		var inrenal_lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
