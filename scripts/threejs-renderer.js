@@ -189,18 +189,31 @@ class ThreejsRenderer {
 		this.wall_normalmap_texture = textureLoader.load( this.PATH + "wall_normal.jpg");
 		this.snake_map_texture = textureLoader.load( this.PATH + "snake_map.jpg");
 		this.snake_normalmap_texture = textureLoader.load( this.PATH + "snake_normalmap.jpg");
-
-		this.snake_map_texture.wrapS = this.snake_map_texture.wrapT = THREE.RepeatWrapping;
-		this.snake_normalmap_texture.wrapS = this.snake_normalmap_texture.wrapT = THREE.RepeatWrapping;
-		// this.snake_map_texture.offset.set(0, 0);
-		this.snake_map_texture.repeat.set(1.5, 1.5);
+		this.frog_texture = textureLoader.load( this.PATH + "frog_diff.jpg");
 
 		this.ground_texture.wrapS = this.ground_texture.wrapT = THREE.RepeatWrapping;
 		this.ground_texture.repeat.set(5,5);
-		// this.snake_normalmap_texture.offset.set(0, 0);
+
+		this.snake_map_texture.wrapS = this.snake_map_texture.wrapT = THREE.RepeatWrapping;
+		this.snake_normalmap_texture.wrapS = this.snake_normalmap_texture.wrapT = THREE.RepeatWrapping;
+		this.snake_map_texture.repeat.set(1.5, 1.5);
 		this.snake_normalmap_texture.repeat.set(1.5, 1.5);
 		this.snake_map_texture.needsUpdate = true;
 		this.snake_normalmap_texture.needsUpdate = true;
+
+
+		var loader = new THREE.OBJLoader( manager );
+		loader.load( this.PATH + 'frog1.obj', function ( obj ) {
+			this.frog = obj;
+			 obj.traverse( function ( child ) {
+
+        if ( child instanceof THREE.Mesh ) {
+
+            child.material = new THREE.MeshPhongMaterial({map: scope.frog_texture});
+        }
+
+    } );
+		}.bind(this));
 	}
 
 	initScene() {
@@ -384,7 +397,7 @@ class ThreejsRenderer {
 	}
 
 	updateSnakeBody(points) {
-		var snake_geometry = new THREE.TubeBufferGeometry( points,  points.length * 2 + 60, .5, 16, false );
+		var snake_geometry = new THREE.TubeBufferGeometry( points,  points.length * 2 + 60, .5, 80, false );
 		this.snake_body.geometry = snake_geometry;
 	}
 
@@ -494,10 +507,12 @@ class ThreejsRenderer {
 		var bonuses = this.python.bonuses;
 
 		for ( var i = 0; i < bonuses.length; i++ ) {
-			if ( !bonuses[i]._model ) {
+			if ( !bonuses[i]._model ) {				
+				console.log(bonuses[i].type)
 				var bonus = this.AM.pullAsset( bonuses[i].type );
 				bonus.position.x = bonuses[i].x;
 				bonus.position.z = bonuses[i].y;
+				bonus.position.y = 0;
 				bonuses[i]._model = bonus;
 				if ( bonuses[i].type == 'apple') this.apple = bonus;
 				if ( bonuses[i].type == 'frog') this.frog = bonus;
@@ -623,7 +638,14 @@ class ThreejsRenderer {
 		this.addBonusToAssetManager('apple');
 		this.addBonusToAssetManager('rotten_apple');
 		this.addBonusToAssetManager('stone');
-		this.addBonusToAssetManager('frog');
+		// this.addBonusToAssetManager('frog');
+		this.frog.scale.x = .15;
+		this.frog.scale.y = .15;
+		this.frog.scale.z = .15;
+		this.frog.rotation.x = 270 * Utils.DEG2RAD;
+		var frog = function() {return scope.frog};
+		this.AM.addAsset('frog', frog, 3);
+
 		this.addBonusToAssetManager('accelerator');
 	}
 
