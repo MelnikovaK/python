@@ -186,16 +186,21 @@ class ThreejsRenderer {
 
 		this.ground_texture = textureLoader.load( this.PATH + "ground.jpg");
 		this.wall_texture = textureLoader.load( this.PATH + "wall.jpg");
+		this.wall_normalmap_texture = textureLoader.load( this.PATH + "wall_normal.jpg");
 		this.snake_map_texture = textureLoader.load( this.PATH + "snake_map.jpg");
 		this.snake_normalmap_texture = textureLoader.load( this.PATH + "snake_normalmap.jpg");
 
 		this.snake_map_texture.wrapS = this.snake_map_texture.wrapT = THREE.RepeatWrapping;
+		this.snake_normalmap_texture.wrapS = this.snake_normalmap_texture.wrapT = THREE.RepeatWrapping;
 		// this.snake_map_texture.offset.set(0, 0);
-		// this.snake_map_texture.repeat.set(1, 1);
+		this.snake_map_texture.repeat.set(1.5, 1.5);
+
+		this.ground_texture.wrapS = this.ground_texture.wrapT = THREE.RepeatWrapping;
+		this.ground_texture.repeat.set(5,5);
 		// this.snake_normalmap_texture.offset.set(0, 0);
-		// this.snake_normalmap_texture.repeat.set(1, 1);
-		// this.snake_map_texture.needsUpdate = true;
-		// this.snake_normalmap_texture.needsUpdate = true;
+		this.snake_normalmap_texture.repeat.set(1.5, 1.5);
+		this.snake_map_texture.needsUpdate = true;
+		this.snake_normalmap_texture.needsUpdate = true;
 	}
 
 	initScene() {
@@ -300,9 +305,9 @@ class ThreejsRenderer {
 				}
 				//body
 				scope.body_parts.points[i* 2] = new THREE.Vector3(
-					scope.getPositionValue( python_body[i].x, python_body[i].prev_x, delta) + +!direction.x * Math.sin(move_coef * coef / 6),
+					scope.getPositionValue( python_body[i].x, python_body[i].prev_x, delta),// + +!direction.x * Math.sin(move_coef * coef / 6),
 					0,
-					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta) + +!direction.y *  Math.sin(move_coef * coef / 6)
+					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta)// + +!direction.y *  Math.sin(move_coef * coef / 6)
 				)
 				if ( i < python_body.length - 1){
 					var x = scope.getMiddlePoint(python_body[i].x, python_body[i + 1].x);
@@ -359,7 +364,7 @@ class ThreejsRenderer {
 		ground_plane.receiveShadow = true;
 		scope.game_container.add( ground_plane );
 		
-		var cube_material = new THREE.MeshLambertMaterial( { map: this.wall_texture } );
+		var cube_material = new THREE.MeshPhongMaterial( { map: this.wall_texture, normalMap: this.wall_normalmap_texture } );
 		var geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );	
 		for ( var i = 0; i < scope.CELLS_HORIZONTAL; i++ )
 			for ( var j = 0; j < scope.CELLS_VERTICAL; j++ ) {
@@ -425,8 +430,6 @@ class ThreejsRenderer {
 		} else {
 			this.updateSnakeBody(this.body_parts);	
 		}
-		
-
 	}
 
 	changePythonPartPosition(python_part, x, prev_x, z, prev_z, delta) {
@@ -559,14 +562,11 @@ class ThreejsRenderer {
 		var internal_side_material = new THREE.MeshPhongMaterial({ color: '#3D0101', side: THREE.BackSide});
 
 		//HEAD
-		var head_materials = [snake_material, internal_side_material];
-		var material = new THREE.MeshFaceMaterial(head_materials);
-
 		var upper_head_geometry = new THREE.SphereGeometry( .5, 16, 16, Math.PI, Math.PI);
 		var inrenal_lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
 		var external_lower_head_geometry = new THREE.SphereGeometry( .5, 16, 16, 0, Math.PI);
 		var upper_head = function(){ 
-			var head_mesh = new THREE.Mesh(upper_head_geometry, material);
+			var head_mesh = new THREE.Mesh(upper_head_geometry, snake_material);
 			return head_mesh;
 		}
 

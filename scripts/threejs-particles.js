@@ -72,9 +72,10 @@ class ThreejsParticles {
 	}
 
 	createGroup( texture_name ) {
+		var textureLoader = new THREE.TextureLoader();
 		return new SPE.Group({
 			texture: {
-				value: THREE.ImageUtils.loadTexture( this.ASSETS_PATH + texture_name ),
+				value: textureLoader.load( this.ASSETS_PATH + texture_name ),
 				frames: new THREE.Vector2( 5, 5 ),
 				loop: 1
 			},
