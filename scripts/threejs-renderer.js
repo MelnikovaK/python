@@ -278,13 +278,17 @@ class ThreejsRenderer {
 			var python_body =  scope.python.python_body;
 			if ( !python_body.length ) return;
 			var move_coef = 1;
-			var direction = scope.python.python_direction;
 
 			var time_current = Date.now();
 			var delta = (time_current - scope.logic_step_timestamp) / scope.logic_step_interval;
 
 			if ( delta < .5 ) var coef = delta;
 			else coef = 1 - delta; 
+
+			var direction = scope.python.python_direction;
+
+			var coef_x = +!direction.x * Math.sin(move_coef * coef / 7);
+			var coef_y = +!direction.y * Math.sin(move_coef * coef / 7);
 
 			for ( var i = 0; i < python_body.length; i++ ) {
 				var python_part = python_body[i]._model;
@@ -305,9 +309,9 @@ class ThreejsRenderer {
 				}
 				//body
 				scope.body_parts.points[i* 2] = new THREE.Vector3(
-					scope.getPositionValue( python_body[i].x, python_body[i].prev_x, delta),// + +!direction.x * Math.sin(move_coef * coef / 6),
+					scope.getPositionValue( python_body[i].x, python_body[i].prev_x, delta),// + coef_x,
 					0,
-					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta)// + +!direction.y *  Math.sin(move_coef * coef / 6)
+					scope.getPositionValue( python_body[i].y, python_body[i].prev_y, delta)// + coef_y
 				)
 				if ( i < python_body.length - 1){
 					var x = scope.getMiddlePoint(python_body[i].x, python_body[i + 1].x);
