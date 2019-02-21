@@ -205,6 +205,9 @@ class ThreejsRenderer {
 	preload3DModels(manager) {
 		var scope = this;
 		var loader = new THREE.OBJLoader( manager );
+
+		// scope.frog = scope.load3DModel(loader, scope.PATH + scope.MODELS_PATH + 'frog1.obj');
+		// console.log(scope.frog)
 		loader.load( scope.PATH + scope.MODELS_PATH + 'frog1.obj', function ( obj ) {
 			scope.frog = obj;
 			obj.traverse( function ( child ) {
@@ -251,18 +254,19 @@ class ThreejsRenderer {
 		});
 	} 
 
-	load3DModel(loader, path) {
+	load3DModel(loader, path, material,x,y,z,position_y, rotation_x) {
 		var scope = this;
 		var model;
 		loader.load( path, function ( obj ) {
   	  model = obj;
 			obj.traverse( function ( child ) {
         if ( child instanceof THREE.Mesh ) {
-        	scope.setModelParameters(child, new THREE.MeshPhongMaterial({map: scope.apple_texture}),.005,.005,.005, -.5, 270);
+        	scope.setModelParameters(child, material, x, y, z, position_y, rotation_x);
         }
   	  });
 		});
-		return model;
+
+		// return model;
 	}
 
 	setModelParameters(child, material,x,y,z,position_y, rotation_x) {

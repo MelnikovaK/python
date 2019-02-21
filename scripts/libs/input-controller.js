@@ -167,6 +167,7 @@ class InputController {
   attachKeyboard( target ){
   	if( !this.onKeyDown ){
 		  this.onKeyDown = function(event){
+		  	event.preventDefault();
 		  	var key_code = event.keyCode;
 		  	var action = this.actions_by_keycode[key_code];
 		  	this._setActionActive(action, true);
@@ -174,6 +175,7 @@ class InputController {
 		  }.bind(this);
 
 		  this.onKeyUp = function(event){
+		  	event.preventDefault();
 		  	var key_code = event.keyCode;
 		  	var action = this.actions_by_keycode[key_code];
 		  	this._setActionActive(action, false);
