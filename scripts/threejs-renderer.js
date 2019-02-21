@@ -194,7 +194,7 @@ class ThreejsRenderer {
 		this.apple_texture = textureLoader.load( this.PATH + "Apple.jpg");
 		this.rock_texture = textureLoader.load( this.PATH + "rock_texture.jpg");
 		this.rotten_apple_texture = textureLoader.load( this.PATH + "rotten_apple.jpg");
-		this.accelerator_texture = textureLoader.load( this.PATH + "cola_texture.jpg");
+		this.accelerator_texture = textureLoader.load( this.PATH + "bottle_mana.jpg");
 
 		this.ground_texture.wrapS = this.ground_texture.wrapT = THREE.RepeatWrapping;
 		this.ground_texture.repeat.set(5,5);
@@ -235,11 +235,11 @@ class ThreejsRenderer {
   	  });
 		});
 
-		loader.load( scope.PATH + scope.MODELS_PATH + 'coca-cola.obj', function ( obj ) {
+		loader.load( scope.PATH + scope.MODELS_PATH + 'bottle.obj', function ( obj ) {
 			scope.accelerator_model = obj;
 			obj.traverse( function ( child ) {
         if ( child instanceof THREE.Mesh ) {
-        	scope.setModelParameters(child, new THREE.MeshPhongMaterial({map: scope.accelerator_texture}),.3,.2,.3, 0, 0);
+        	scope.setModelParameters(child, new THREE.MeshPhongMaterial({map: scope.accelerator_texture}),.01,.01,.01, 0, 270);
         }
   	  });
 		});
@@ -265,7 +265,6 @@ class ThreejsRenderer {
         }
   	  });
 		});
-
 		// return model;
 	}
 
