@@ -1,10 +1,12 @@
 var $game_container = $('.game_container');
 
 var ASSETS_PATH = 'assets/';
+var MODELS_PATH = 'models/';
 
 var config = {
 	
 	ASSETS_PATH: ASSETS_PATH,
+	MODELS_PATH: MODELS_PATH,
 	
 	cells_horizontal: 20,
 	cells_vertical: 20,

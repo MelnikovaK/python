@@ -14,6 +14,7 @@ class ThreejsRenderer {
 		this.bonus_is_eaten = false;
 
 		this.PATH = config.ASSETS_PATH;
+		this.MODELS_PATH = config.MODELS_PATH;
 		//FIELD
 		this.FIELD_WIDTH = config.field_width;
 		this.FIELD_HEIGHT = config.field_height;
@@ -190,30 +191,85 @@ class ThreejsRenderer {
 		this.snake_map_texture = textureLoader.load( this.PATH + "snake_map.jpg");
 		this.snake_normalmap_texture = textureLoader.load( this.PATH + "snake_normalmap.jpg");
 		this.frog_texture = textureLoader.load( this.PATH + "frog_diff.jpg");
+		this.apple_texture = textureLoader.load( this.PATH + "Apple.jpg");
+		this.rock_texture = textureLoader.load( this.PATH + "rock_texture.jpg");
+		this.rotten_apple_texture = textureLoader.load( this.PATH + "rotten_apple.jpg");
+		this.accelerator_texture = textureLoader.load( this.PATH + "cola_texture.jpg");
 
 		this.ground_texture.wrapS = this.ground_texture.wrapT = THREE.RepeatWrapping;
 		this.ground_texture.repeat.set(5,5);
 
-		this.snake_map_texture.wrapS = this.snake_map_texture.wrapT = THREE.RepeatWrapping;
-		this.snake_normalmap_texture.wrapS = this.snake_normalmap_texture.wrapT = THREE.RepeatWrapping;
-		this.snake_map_texture.repeat.set(1.5, 1.5);
-		this.snake_normalmap_texture.repeat.set(1.5, 1.5);
-		this.snake_map_texture.needsUpdate = true;
-		this.snake_normalmap_texture.needsUpdate = true;
+		scope.preload3DModels(manager);		
+	}
 
-
+	preload3DModels(manager) {
+		var scope = this;
 		var loader = new THREE.OBJLoader( manager );
-		loader.load( this.PATH + 'frog1.obj', function ( obj ) {
-			this.frog = obj;
-			 obj.traverse( function ( child ) {
-
+		loader.load( scope.PATH + scope.MODELS_PATH + 'frog1.obj', function ( obj ) {
+			scope.frog = obj;
+			obj.traverse( function ( child ) {
         if ( child instanceof THREE.Mesh ) {
-
-            child.material = new THREE.MeshPhongMaterial({map: scope.frog_texture});
+        	scope.setModelParameters(child, new THREE.MeshPhongMaterial({map: scope.frog_texture}),.13,.13,.13, -.5, 270);
         }
+  	  });
+		});
 
-    } );
-		}.bind(this));
+		loader.load( scope.PATH + scope.MODELS_PATH + 'apple1.obj', function ( obj ) {
+			scope.apple_model = obj;
+			obj.traverse( function ( child ) {
+        if ( child instanceof THREE.Mesh ) {
+        	scope.setModelParameters(child, new THREE.MeshPhongMaterial({map: scope.apple_texture}),.005,.005,.005, -.5, 270);
+        }
+  	  });
+		});
+
+		loader.load( scope.PATH + scope.MODELS_PATH + 'apple1.obj', function ( obj ) {
+			scope.rotten_apple_model = obj;
+			obj.traverse( function ( child ) {
+        if ( child instanceof THREE.Mesh ) {
+        	scope.setModelParameters(child, new THREE.MeshPhongMaterial({map: scope.rotten_apple_texture}),.005,.005,.005, -.5, 270);
+        }
+  	  });
+		});
+
+		loader.load( scope.PATH + scope.MODELS_PATH + 'coca-cola.obj', function ( obj ) {
+			scope.accelerator_model = obj;
+			obj.traverse( function ( child ) {
+        if ( child instanceof THREE.Mesh ) {
+        	scope.setModelParameters(child, new THREE.MeshPhongMaterial({map: scope.accelerator_texture}),.3,.2,.3, 0, 0);
+        }
+  	  });
+		});
+
+		loader.load( scope.PATH + scope.MODELS_PATH + 'Rock.obj', function ( obj ) {
+			scope.rock_model = obj;
+			obj.traverse( function ( child ) {
+        if ( child instanceof THREE.Mesh ) {
+        	scope.setModelParameters(child, new THREE.MeshPhongMaterial({map: scope.rock_texture}),.8,.8,.8, -.5, 0);
+        }
+  	  });
+		});
+	} 
+
+	load3DModel(loader, path) {
+		var scope = this;
+		var model;
+		loader.load( path, function ( obj ) {
+  	  model = obj;
+			obj.traverse( function ( child ) {
+        if ( child instanceof THREE.Mesh ) {
+        	scope.setModelParameters(child, new THREE.MeshPhongMaterial({map: scope.apple_texture}),.005,.005,.005, -.5, 270);
+        }
+  	  });
+		});
+		return model;
+	}
+
+	setModelParameters(child, material,x,y,z,position_y, rotation_x) {
+		child.material = material;
+    child.scale.set(x, y, z);
+    child.position.y = position_y;
+		child.rotation.x = rotation_x * Utils.DEG2RAD;
 	}
 
 	initScene() {
@@ -635,18 +691,28 @@ class ThreejsRenderer {
 		this.AM.addAsset('python_body', body, 3);
 
 		//BONUSES
-		this.addBonusToAssetManager('apple');
-		this.addBonusToAssetManager('rotten_apple');
+		// this.addBonusToAssetManager('apple');
+		// this.addBonusToAssetManager('rotten_apple');
 		this.addBonusToAssetManager('stone');
 		// this.addBonusToAssetManager('frog');
-		this.frog.scale.x = .15;
-		this.frog.scale.y = .15;
-		this.frog.scale.z = .15;
-		this.frog.rotation.x = 270 * Utils.DEG2RAD;
+
+
 		var frog = function() {return scope.frog};
 		this.AM.addAsset('frog', frog, 3);
 
-		this.addBonusToAssetManager('accelerator');
+		var apple = function() {return scope.apple_model};
+		this.AM.addAsset('apple', apple, 3);
+
+		var rotten_apple = function() {return scope.rotten_apple_model};
+		this.AM.addAsset('rotten_apple', rotten_apple, 3);
+
+		var accelerator = function() {return scope.accelerator_model};
+		this.AM.addAsset('accelerator', accelerator, 3);
+
+		var rock = function() {return scope.rock_model};
+		this.AM.addAsset('stone', rock, 3);
+
+		// this.addBonusToAssetManager('accelerator');
 	}
 
 
