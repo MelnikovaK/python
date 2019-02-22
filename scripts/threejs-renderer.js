@@ -199,7 +199,7 @@ class ThreejsRenderer {
 		this.apple_texture = textureLoader.load( this.PATH + "Apple.jpg");
 		this.rock_texture = textureLoader.load( this.PATH + "rock_texture.jpg");
 		this.rotten_apple_texture = textureLoader.load( this.PATH + "rotten_apple.jpg");
-		this.accelerator_texture = textureLoader.load( this.PATH + "bottle_mana.jpg");
+		this.accelerator_texture = textureLoader.load( this.PATH + "bottle_health.jpg");
 
 		this.ground_texture.wrapS = this.ground_texture.wrapT = THREE.RepeatWrapping;
 		this.ground_texture.repeat.set(5,5);
