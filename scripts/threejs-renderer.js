@@ -108,9 +108,14 @@ class ThreejsRenderer {
 		window.addEventListener(python.FROG_MOVING, function(e) {
 			var interval = e.detail.logic_step_interval; 
 			scope.logic_frog = e.detail.frog;
-			scope.frog_moving = true;
+			// scope.frog_moving = true;
+			scope.frog_rotate = true;
 			setTimeout(function() {
-				scope.frog_moving = false;
+				scope.frog_moving = true;
+				scope.frog_rotate = false;
+				setTimeout(function() {
+					scope.frog_moving = false;
+				}, interval)
 			}, interval);
 		});
 
@@ -254,19 +259,19 @@ class ThreejsRenderer {
 		});
 	} 
 
-	load3DModel(loader, path, material,x,y,z,position_y, rotation_x) {
-		var scope = this;
-		var model;
-		loader.load( path, function ( obj ) {
-  	  model = obj;
-			obj.traverse( function ( child ) {
-        if ( child instanceof THREE.Mesh ) {
-        	scope.setModelParameters(child, material, x, y, z, position_y, rotation_x);
-        }
-  	  });
-		});
-		// return model;
-	}
+	// load3DModel(loader, path, material,x,y,z,position_y, rotation_x) {
+	// 	var scope = this;
+	// 	var model;
+	// 	loader.load( path, function ( obj ) {
+ //  	  model = obj;
+	// 		obj.traverse( function ( child ) {
+ //        if ( child instanceof THREE.Mesh ) {
+ //        	scope.setModelParameters(child, material, x, y, z, position_y, rotation_x);
+ //        }
+ //  	  });
+	// 	});
+	// 	// return model;
+	// }
 
 	setModelParameters(child, material,x,y,z,position_y, rotation_x) {
 		child.material = material;
@@ -399,13 +404,17 @@ class ThreejsRenderer {
 				if ( move_coef < 0 ) move_coef = 1;
 				else move_coef = -1;
 			}
-
 			//frog moving
 			if( scope.frog_moving ){
 				scope.frog.position.x += ( scope.logic_frog.x - scope.frog.position.x ) * delta; 
 				scope.frog.position.z += ( scope.logic_frog.y - scope.frog.position.z ) * delta;
 				if ( delta < .5 ) scope.frog.position.y = Math.cos(.4) * delta;
-				else scope.frog.position.y = Math.cos(.4) * ( 1 - delta );
+				else scope.frog.position.y = Math.cos(.4) * ( 1 - delta );			
+			}
+
+			if ( scope.frog_rotate ) {
+				var prev_angle = scope.getSmallestAngle( scope.logic_frog.angle, scope.logic_frog.prev_angle, Math.PI );
+				scope.frog.rotation.y = prev_angle + (scope.logic_frog.angle - prev_angle) * delta;
 			}
 
 			if (scope.snake_body) {

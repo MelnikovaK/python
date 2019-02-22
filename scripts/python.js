@@ -36,12 +36,21 @@ class Python {
 		this.LEFT = 'left';
 		this.UP = 'up';
 		this.DOWN = 'down';
+		this.RIGHT_UP = 'right_up';
+		this.LEFT_UP = 'left_up';
+		this.LEFT_DOWN = 'left_down';
+		this.RIGHT_DOWN = 'right_down';
 
 		this.direction_indexes = {
 			'10': this.RIGHT,
 			'-10': this.LEFT,
 			'0-1': this.UP,
-			'01': this.DOWN
+			'01': this.DOWN,
+			'00': this.UP,
+			'11': this.RIGHT_UP,
+			'-1-1': this.LEFT_UP,
+			'1-1': this.RIGHT_DOWN,
+			'-11': this.LEFT_DOWN,
 		};
 
 		this.directions = {};
@@ -49,6 +58,20 @@ class Python {
 		this.directions[this.LEFT] = this.directions['swipe-left'] = {x:-1, y:0, rotation: 270 * window.Utils.DEG2RAD};
 		this.directions[this.UP] = this.directions['swipe-up'] = {x:0, y:-1, rotation: 0};
 		this.directions[this.DOWN] = this.directions['swipe-down'] = {x:0, y:1, rotation: 180 * window.Utils.DEG2RAD};
+		this.directions[this.RIGHT_DOWN] = {x:1, y:1, rotation: 135 * window.Utils.DEG2RAD};
+		this.directions[this.LEFT_UP] = {x:-1, y:-1, rotation: 305 * window.Utils.DEG2RAD};
+		this.directions[this.RIGHT_UP] = {x:1, y:-1, rotation: 45 * window.Utils.DEG2RAD};
+		this.directions[this.LEFT_DOWN] = {x:-1, y:1, rotation: 215 * window.Utils.DEG2RAD};
+
+		this.frog_directions = {};
+		this.frog_directions[this.RIGHT] = { rotation: 0};
+		this.frog_directions[this.LEFT] = { rotation: 180 * window.Utils.DEG2RAD};
+		this.frog_directions[this.DOWN] = {rotation: 270 * window.Utils.DEG2RAD};
+		this.frog_directions[this.UP] = {rotation: 90 * window.Utils.DEG2RAD};
+		this.frog_directions[this.RIGHT_DOWN] = {rotation: 45 * window.Utils.DEG2RAD};
+		this.frog_directions[this.LEFT_DOWN] = {rotation: 215 * window.Utils.DEG2RAD};
+		this.frog_directions[this.RIGHT_UP] = { rotation: 305 * window.Utils.DEG2RAD};
+		this.frog_directions[this.LEFT_UP] = {rotation: 125 * window.Utils.DEG2RAD};
 
 		this.third_person_directions = {};
 		this.third_person_directions[this.RIGHT] ={ 'left': this.directions[this.UP], 'right': this.directions[this.DOWN]};
@@ -179,6 +202,7 @@ class Python {
 	}
 
 	getDirectionByIndex(x, y) {
+		console.log(x,y)
 		return this.direction_indexes[x.toString() + y.toString()];
 	}
 
@@ -290,7 +314,7 @@ class Python {
 		
 		var is_tail = true;
 
-		for( var i = this.python_body.length-1; i>0; i-- ){
+		for( var i = this.python_body.length - 1; i > 0; i-- ){
 			// if ( is_tail && python_grow ) continue;
 			var part = this.python_body[i];
 			var prev_part = this.python_body[i-1];
@@ -435,15 +459,23 @@ class Python {
 		var diap = [0,1, -1];
 		this.frog_interval = setInterval(function() {
 			var copy = Object.assign({}, frog);
-			var x = copy.x + diap[~~( Math.random() * 3)] ;
-			var y = copy.y + diap[~~( Math.random() * 3)];
+			var step_x = diap[~~( Math.random() * 3)];
+			var step_y = diap[~~( Math.random() * 3)];
+			var x = copy.x + step_x;
+			var y = copy.y + step_y;
 			if ( scope.checkBonusCoordinatesCorrect(x, y, frog) ) {
+				frog.prev_x = frog.x;
+				frog.prev_y = frog.y;
 				frog.x = x;
 				frog.y = y;
 				scope.python_moved = true;
-				// Utils.triggerCustomEvent(window, scope.FROG_MOVING, {frog: frog, logic_step_interval: scope.logic_step_interval});
+				if ( frog.angle ) frog.prev_angle = frog.angle;
+				else frog.prev_angle = 0;
+				var _id = ( frog.x - frog.prev_x ).toString() + ( frog.y - frog.prev_y ).toString();
+				console.log(_id);
+				frog.angle = scope.frog_directions[scope.direction_indexes[_id]].rotation;
 			}
-		}, 2000);
+		}, 3000);
 	}
 
 
@@ -453,6 +485,8 @@ class Python {
 		bonus_data.type = bonus_name;
 		bonus_data.x = ~~( Math.random() * (this.cells_horizontal - offset*2) + offset );
 		bonus_data.y = ~~( Math.random() * (this.cells_vertical - offset*2) + offset );
+		bonus_data.prev_x = 0;
+		bonus_data.prev_y = 0;
 		if ( !this.checkBonusCoordinatesCorrect(bonus_data.x, bonus_data.y, bonus_data) ) this.addBonus( bonus_name );
 		this.bonuses.push( bonus_data );
 		return bonus_data;
